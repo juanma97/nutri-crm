@@ -10,18 +10,24 @@ import {
 import type { Client } from '../types'
 
 interface TMBStepProps {
-  onNext: (client: Client, tmb: number) => void
+  onComplete?: (name: string, tmb: number) => void
+  onNext?: () => void
+  onUpdate?: (tmb: number, clientName: string) => void
+  initialClientName?: string
+  initialTMB?: number
+  clientName?: string
+  tmb?: number
 }
 
-const TMBStep = ({ onNext }: TMBStepProps) => {
+const TMBStep = ({ onComplete, onNext, onUpdate, initialClientName = '', initialTMB = 0, clientName, tmb: propTmb }: TMBStepProps) => {
   const [client, setClient] = useState<Omit<Client, 'age' | 'weight' | 'height'> & { age: string, weight: string, height: string }>({
-    name: '',
+    name: initialClientName,
     age: '',
     weight: '',
     height: '',
     gender: 'male'
   })
-  const [tmb, setTmb] = useState<number | null>(null)
+  const [tmb, setTmb] = useState<number | null>(initialTMB || null)
   const [errors, setErrors] = useState<string[]>([])
 
   const calculateTMB = (clientData: Client): number => {
@@ -68,7 +74,16 @@ const TMBStep = ({ onNext }: TMBStepProps) => {
     
     const calculatedTMB = calculateTMB(clientData)
     setTmb(calculatedTMB)
-    onNext(clientData, calculatedTMB)
+    
+    if (onComplete) {
+      onComplete(client.name, calculatedTMB)
+    } else if (onUpdate) {
+      onUpdate(calculatedTMB, client.name)
+    }
+    
+    if (onNext) {
+      onNext()
+    }
   }
 
   useEffect(() => {

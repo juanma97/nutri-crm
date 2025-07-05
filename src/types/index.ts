@@ -65,6 +65,7 @@ export interface Diet {
     sunday: DayMeals
   }
   createdAt: Date
+  shareId?: string
 }
 
 export type DayOfWeek = 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday' | 'sunday'

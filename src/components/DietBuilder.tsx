@@ -30,9 +30,13 @@ import type { DayOfWeek, MealType, DietMeal, Food } from '../types'
 import DietCharts from './DietCharts'
 
 interface DietBuilderProps {
-  clientName: string
+  clientName?: string
   tmb: number
   onSave: (meals: Record<DayOfWeek, Record<MealType, DietMeal[]>>) => void
+  onBack?: () => void
+  meals?: Record<DayOfWeek, Record<MealType, DietMeal[]>>
+  onMealsUpdate?: (meals: Record<DayOfWeek, Record<MealType, DietMeal[]>>) => void
+  isEditing?: boolean
 }
 
 const daysOfWeek: { key: DayOfWeek; label: string }[] = [
@@ -60,8 +64,8 @@ const mockFoods: Food[] = [
   { id: 4, name: 'Salmon', group: 'Proteins', portion: '100g', calories: 208, proteins: 25, fats: 12, carbs: 0, fiber: 0, link: '' }
 ]
 
-const DietBuilder = ({ clientName, tmb, onSave }: DietBuilderProps) => {
-  const [meals, setMeals] = useState<Record<DayOfWeek, Record<MealType, DietMeal[]>>>({
+const DietBuilder = ({ clientName, tmb, onSave, onBack, meals: initialMeals, onMealsUpdate, isEditing }: DietBuilderProps) => {
+  const [meals, setMeals] = useState<Record<DayOfWeek, Record<MealType, DietMeal[]>>>(initialMeals || {
     monday: { breakfast: [], morningSnack: [], lunch: [], afternoonSnack: [], dinner: [] },
     tuesday: { breakfast: [], morningSnack: [], lunch: [], afternoonSnack: [], dinner: [] },
     wednesday: { breakfast: [], morningSnack: [], lunch: [], afternoonSnack: [], dinner: [] },
