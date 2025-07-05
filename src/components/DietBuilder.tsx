@@ -20,16 +20,19 @@ import {
   Select,
   MenuItem,
   FormControl,
-  InputLabel
+  InputLabel,
+  Tabs,
+  Tab,
+  LinearProgress
 } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
-import DeleteIcon from '@mui/icons-material/Delete'
 import type { DayOfWeek, MealType, DietMeal, Food } from '../types'
+import DietCharts from './DietCharts'
 
 interface DietBuilderProps {
   clientName: string
   tmb: number
-  onSave: (meals: any) => void
+  onSave: (meals: Record<DayOfWeek, Record<MealType, DietMeal[]>>) => void
 }
 
 const daysOfWeek: { key: DayOfWeek; label: string }[] = [
@@ -73,6 +76,36 @@ const DietBuilder = ({ clientName, tmb, onSave }: DietBuilderProps) => {
   const [selectedMeal, setSelectedMeal] = useState<MealType>('breakfast')
   const [selectedFood, setSelectedFood] = useState<number>(0)
   const [quantity, setQuantity] = useState<string>('')
+  const [activeTab, setActiveTab] = useState(0)
+
+  const calculateDailyTotals = (day: DayOfWeek) => {
+    const dayMeals = meals[day]
+    let totalCalories = 0
+    let totalProteins = 0
+    let totalFats = 0
+    let totalCarbs = 0
+    let totalFiber = 0
+
+    Object.values(dayMeals).forEach(mealList => {
+      mealList.forEach(meal => {
+        totalCalories += meal.calories
+        totalProteins += meal.proteins
+        totalFats += meal.fats
+        totalCarbs += meal.carbs
+        totalFiber += meal.fiber
+      })
+    })
+
+    return { totalCalories, totalProteins, totalFats, totalCarbs, totalFiber }
+  }
+
+  const getCaloriesStatus = (calories: number) => {
+    const percentage = (calories / tmb) * 100
+    if (percentage < 70) return { color: 'error', status: 'Necesita más alimentos' }
+    if (percentage < 90) return { color: 'warning', status: 'Casi completo' }
+    if (percentage <= 110) return { color: 'success', status: 'Óptimo' }
+    return { color: 'error', status: 'Excede TMB' }
+  }
 
   const handleAddMeal = () => {
     if (selectedFood && quantity) {
@@ -115,27 +148,6 @@ const DietBuilder = ({ clientName, tmb, onSave }: DietBuilderProps) => {
     }))
   }
 
-  const calculateDailyTotals = (day: DayOfWeek) => {
-    const dayMeals = meals[day]
-    let totalCalories = 0
-    let totalProteins = 0
-    let totalFats = 0
-    let totalCarbs = 0
-    let totalFiber = 0
-
-    Object.values(dayMeals).forEach(mealList => {
-      mealList.forEach(meal => {
-        totalCalories += meal.calories
-        totalProteins += meal.proteins
-        totalFats += meal.fats
-        totalCarbs += meal.carbs
-        totalFiber += meal.fiber
-      })
-    })
-
-    return { totalCalories, totalProteins, totalFats, totalCarbs, totalFiber }
-  }
-
   const handleSave = () => {
     onSave(meals)
   }
@@ -149,96 +161,129 @@ const DietBuilder = ({ clientName, tmb, onSave }: DietBuilderProps) => {
         Client: {clientName} | TMB: {Math.round(tmb)} calories
       </Typography>
 
-      <Paper elevation={3} sx={{ mb: 3 }}>
-        <TableContainer>
-          <Table sx={{ tableLayout: 'fixed', width: '100%' }}>
-            <TableHead>
-              <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
-                <TableCell sx={{ width: '120px' }}>Meal</TableCell>
-                {daysOfWeek.map(day => (
-                  <TableCell key={day.key} align="center" sx={{ minWidth: '140px' }}>
-                    {day.label}
-                  </TableCell>
-                ))}
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {mealTypes.map(meal => (
-                <TableRow key={meal.key}>
-                  <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f9f9f9' }}>
-                    {meal.label}
-                  </TableCell>
-                  {daysOfWeek.map(day => (
-                    <TableCell key={`${day.key}-${meal.key}`} align="center">
-                      <Box sx={{ minHeight: '60px', display: 'flex', flexDirection: 'column', gap: 1 }}>
-                        {meals[day.key][meal.key].map((dietMeal, index) => (
-                          <Chip
-                            key={index}
-                            label={`${dietMeal.foodName} (${dietMeal.quantity}${dietMeal.unit})`}
-                            size="small"
-                            onDelete={() => handleRemoveMeal(day.key, meal.key, index)}
-                            sx={{ fontSize: '0.7rem' }}
-                          />
-                        ))}
-                        <IconButton
-                          size="small"
-                          onClick={() => {
-                            setSelectedDay(day.key)
-                            setSelectedMeal(meal.key)
-                            setDialogOpen(true)
-                          }}
-                          sx={{ alignSelf: 'center' }}
-                        >
-                          <AddIcon fontSize="small" />
-                        </IconButton>
-                      </Box>
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Paper>
-
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h6">Daily Totals vs TMB</Typography>
-        <Button
-          variant="contained"
-          onClick={handleSave}
-          sx={{ backgroundColor: '#2e7d32' }}
-        >
-          Save Diet
-        </Button>
+      <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
+        <Tabs value={activeTab} onChange={(_, newValue) => setActiveTab(newValue)}>
+          <Tab label="Meal Builder" />
+          <Tab label="Analytics" />
+        </Tabs>
       </Box>
 
-      <Paper elevation={3} sx={{ p: 2 }}>
-        <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-          {daysOfWeek.map(day => {
-            const totals = calculateDailyTotals(day.key)
-            const caloriesPercentage = (totals.totalCalories / tmb) * 100
-            return (
-              <Box key={day.key} sx={{ flex: '1 1 200px', p: 2, border: '1px solid #e0e0e0', borderRadius: 1 }}>
-                <Typography variant="subtitle2" gutterBottom>
-                  {day.label}
-                </Typography>
-                <Typography variant="body2" color={caloriesPercentage > 100 ? 'error' : 'primary'}>
-                  Calories: {Math.round(totals.totalCalories)} / {Math.round(tmb)} ({Math.round(caloriesPercentage)}%)
-                </Typography>
-                <Typography variant="body2">
-                  Proteins: {Math.round(totals.totalProteins)}g
-                </Typography>
-                <Typography variant="body2">
-                  Fats: {Math.round(totals.totalFats)}g
-                </Typography>
-                <Typography variant="body2">
-                  Carbs: {Math.round(totals.totalCarbs)}g
-                </Typography>
-              </Box>
-            )
-          })}
-        </Box>
-      </Paper>
+      {activeTab === 0 && (
+        <>
+          <Paper elevation={3} sx={{ mb: 3 }}>
+            <TableContainer>
+              <Table sx={{ tableLayout: 'fixed', width: '100%' }}>
+                <TableHead>
+                  <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
+                    <TableCell sx={{ width: '120px' }}>Meal</TableCell>
+                    {daysOfWeek.map(day => (
+                      <TableCell key={day.key} align="center" sx={{ minWidth: '140px' }}>
+                        {day.label}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {mealTypes.map(meal => (
+                    <TableRow key={meal.key}>
+                      <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f9f9f9' }}>
+                        {meal.label}
+                      </TableCell>
+                      {daysOfWeek.map(day => (
+                        <TableCell key={`${day.key}-${meal.key}`} align="center">
+                          <Box sx={{ minHeight: '60px', display: 'flex', flexDirection: 'column', gap: 1 }}>
+                            {meals[day.key][meal.key].map((dietMeal, index) => (
+                              <Chip
+                                key={index}
+                                label={`${dietMeal.foodName} (${dietMeal.quantity}${dietMeal.unit})`}
+                                size="small"
+                                onDelete={() => handleRemoveMeal(day.key, meal.key, index)}
+                                sx={{ fontSize: '0.7rem' }}
+                              />
+                            ))}
+                            <IconButton
+                              size="small"
+                              onClick={() => {
+                                setSelectedDay(day.key)
+                                setSelectedMeal(meal.key)
+                                setDialogOpen(true)
+                              }}
+                              sx={{ alignSelf: 'center' }}
+                            >
+                              <AddIcon fontSize="small" />
+                            </IconButton>
+                          </Box>
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))}
+                  
+                  {/* Progress Summary Row */}
+                  <TableRow sx={{ backgroundColor: '#f8f9fa' }}>
+                    <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f0f0f0' }}>
+                      Progress
+                    </TableCell>
+                  </TableRow>
+                  
+                  {/* Daily Progress Row */}
+                  <TableRow>
+                    <TableCell sx={{ backgroundColor: '#f0f0f0' }}></TableCell>
+                    {daysOfWeek.map(day => {
+                      const totals = calculateDailyTotals(day.key)
+                      const caloriesStatus = getCaloriesStatus(totals.totalCalories)
+                      const percentage = Math.min((totals.totalCalories / tmb) * 100, 120)
+                      
+                      return (
+                        <TableCell key={`progress-${day.key}`} align="center">
+                          <Box sx={{ p: 1, border: '1px solid #e0e0e0', borderRadius: 1, backgroundColor: 'white' }}>
+                            <Typography variant="caption" display="block" gutterBottom>
+                              {Math.round(totals.totalCalories)} / {Math.round(tmb)} cal
+                            </Typography>
+                            <LinearProgress 
+                              variant="determinate" 
+                              value={percentage} 
+                              color={caloriesStatus.color as 'error' | 'warning' | 'success'}
+                              sx={{ height: 6, borderRadius: 3, mb: 1 }}
+                            />
+                            <Typography variant="caption" color={caloriesStatus.color} display="block">
+                              {caloriesStatus.status}
+                            </Typography>
+                            <Box sx={{ mt: 0.5 }}>
+                              <Typography variant="caption" display="block" sx={{ fontSize: '0.65rem' }}>
+                                P: {Math.round(totals.totalProteins)}g
+                              </Typography>
+                              <Typography variant="caption" display="block" sx={{ fontSize: '0.65rem' }}>
+                                F: {Math.round(totals.totalFats)}g
+                              </Typography>
+                              <Typography variant="caption" display="block" sx={{ fontSize: '0.65rem' }}>
+                                C: {Math.round(totals.totalCarbs)}g
+                              </Typography>
+                            </Box>
+                          </Box>
+                        </TableCell>
+                      )
+                    })}
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Paper>
+
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 3 }}>
+            <Button
+              variant="contained"
+              onClick={handleSave}
+              sx={{ backgroundColor: '#2e7d32' }}
+            >
+              Save Diet
+            </Button>
+          </Box>
+        </>
+      )}
+
+      {activeTab === 1 && (
+        <DietCharts meals={meals} tmb={tmb} />
+      )}
 
       <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="sm" fullWidth>
         <DialogTitle>Add Food to {selectedMeal}</DialogTitle>
