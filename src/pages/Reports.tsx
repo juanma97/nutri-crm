@@ -3,445 +3,367 @@ import {
   Box,
   Paper,
   Typography,
-  Grid,
-  Card,
-  CardContent,
-  Button,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
+  Button,
   Chip,
-  Alert,
-  Divider
+  Grid,
+  Card,
+  CardContent,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  TextField,
+  InputAdornment
 } from '@mui/material'
 import {
-  Download as DownloadIcon,
-  Print as PrintIcon,
-  Assessment as AssessmentIcon,
-  People as PeopleIcon,
-  Restaurant as DietIcon,
-  TrendingUp as TrendingIcon
-} from '@mui/icons-material'
-import { useDietContext } from '../contexts/DietContext'
-import type { DayOfWeek } from '../types'
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  PieChart,
+  Pie,
+  Cell
+} from 'recharts'
+import DownloadIcon from '@mui/icons-material/Download'
+import PrintIcon from '@mui/icons-material/Print'
+import EmailIcon from '@mui/icons-material/Email'
+import SearchIcon from '@mui/icons-material/Search'
+import { useFirebase } from '../contexts/FirebaseContext'
+
+const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D']
 
 const Reports = () => {
-  const { diets } = useDietContext()
-  const [selectedReport, setSelectedReport] = useState('clients')
-  const [dateRange, setDateRange] = useState('all')
+  const { diets, foods } = useFirebase()
+  const [reportType, setReportType] = useState('clients')
+  const [dateRange, setDateRange] = useState('30')
+  const [searchTerm, setSearchTerm] = useState('')
+
+  // Filtrar dietas por fecha
+  const filteredDiets = diets.filter(diet => {
+    const dietDate = new Date(diet.createdAt)
+    const daysAgo = new Date()
+    daysAgo.setDate(daysAgo.getDate() - parseInt(dateRange))
+    return dietDate >= daysAgo
+  })
+
+  // Filtrar por búsqueda
+  const searchedDiets = filteredDiets.filter(diet =>
+    diet.clientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    diet.name.toLowerCase().includes(searchTerm.toLowerCase())
+  )
 
   // Calcular estadísticas
-  const totalClients = diets.length
-  const totalDiets = diets.length
-  const averageTMB = diets.length > 0 ? Math.round(diets.reduce((sum, diet) => sum + diet.tmb, 0) / diets.length) : 0
+  const totalClients = searchedDiets.length
+  const averageTMB = searchedDiets.length > 0 
+    ? Math.round(searchedDiets.reduce((sum, diet) => sum + diet.tmb, 0) / searchedDiets.length)
+    : 0
 
-  // Distribución por género
-  const genderDistribution = diets.reduce((acc, diet) => {
-    const isMale = diet.clientName.toLowerCase().includes('juan') || 
-                   diet.clientName.toLowerCase().includes('carlos') ||
-                   diet.clientName.toLowerCase().includes('pedro')
-    acc[isMale ? 'male' : 'female']++
+  // Datos para gráficos
+  const clientData = searchedDiets.map(diet => ({
+    name: diet.clientName,
+    tmb: diet.tmb,
+    date: new Date(diet.createdAt).toLocaleDateString()
+  }))
+
+  const tmbDistribution = [
+    { range: '1500-1800', count: searchedDiets.filter(d => d.tmb >= 1500 && d.tmb < 1800).length },
+    { range: '1800-2100', count: searchedDiets.filter(d => d.tmb >= 1800 && d.tmb < 2100).length },
+    { range: '2100-2400', count: searchedDiets.filter(d => d.tmb >= 2100 && d.tmb < 2400).length },
+    { range: '2400+', count: searchedDiets.filter(d => d.tmb >= 2400).length }
+  ]
+
+  const foodGroupStats = foods.reduce((acc, food) => {
+    acc[food.group] = (acc[food.group] || 0) + 1
     return acc
-  }, { male: 0, female: 0 })
+  }, {} as Record<string, number>)
 
-  // Dietas por mes
-  const currentDate = new Date()
-  const monthlyData = Array.from({ length: 6 }, (_, i) => {
-    const date = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1)
-    const monthName = date.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })
-    const count = diets.filter(diet => {
-      const dietDate = new Date(diet.createdAt)
-      return dietDate.getMonth() === date.getMonth() && dietDate.getFullYear() === date.getFullYear()
-    }).length
-    return { month: monthName, diets: count }
-  }).reverse()
+  const foodGroupData = Object.entries(foodGroupStats).map(([group, count]) => ({
+    name: group,
+    value: count
+  }))
 
-  // Calcular total de comidas
-  const calculateTotalMeals = () => {
-    const daysOfWeek: DayOfWeek[] = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
-    let totalMeals = 0
-    
-    diets.forEach(diet => {
-      daysOfWeek.forEach(day => {
-        Object.values(diet.meals[day]).forEach(mealList => {
-          totalMeals += mealList.length
-        })
-      })
-    })
-    
-    return totalMeals
-  }
-
-  const totalMeals = calculateTotalMeals()
-
-  // Generar reporte de clientes
-  const generateClientReport = () => {
-    return diets.map(diet => ({
-      id: diet.id,
-      name: diet.clientName,
-      tmb: diet.tmb,
-      createdAt: diet.createdAt.toLocaleDateString(),
-      hasMeals: (() => {
-        const daysOfWeek: DayOfWeek[] = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
-        let hasMeals = false
-        daysOfWeek.forEach(day => {
-          Object.values(diet.meals[day]).forEach(mealList => {
-            if (mealList.length > 0) hasMeals = true
-          })
-        })
-        return hasMeals
-      })(),
-      shareId: diet.shareId ? 'Sí' : 'No'
-    }))
-  }
-
-  // Generar reporte de dietas
-  const generateDietReport = () => {
-    return diets.map(diet => {
-      const daysOfWeek: DayOfWeek[] = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
-      let totalMealsInDiet = 0
-      daysOfWeek.forEach(day => {
-        Object.values(diet.meals[day]).forEach(mealList => {
-          totalMealsInDiet += mealList.length
-        })
-      })
-
-      return {
-        id: diet.id,
-        clientName: diet.clientName,
-        tmb: diet.tmb,
-        totalMeals: totalMealsInDiet,
-        createdAt: diet.createdAt.toLocaleDateString(),
-        isShared: diet.shareId ? 'Sí' : 'No'
-      }
-    })
-  }
-
-  const handleExport = (format: 'pdf' | 'excel') => {
+  const handleExport = (format: string) => {
     // Simular exportación
-    console.log(`Exportando reporte ${selectedReport} en formato ${format}`)
-    alert(`Reporte exportado en formato ${format.toUpperCase()}`)
-  }
-
-  const handlePrint = () => {
-    window.print()
+    console.log(`Exporting ${reportType} report in ${format} format`)
+    alert(`Report exported as ${format.toUpperCase()}`)
   }
 
   return (
     <Box sx={{ width: '100%', px: 3, py: 3 }}>
       <Typography variant="h4" gutterBottom>
-        Reportes
+        Reports & Analytics
       </Typography>
-      
-      <Alert severity="info" sx={{ mb: 3 }}>
-        Genera y exporta reportes detallados de tu práctica nutricional.
-      </Alert>
 
-      {/* Controles de Reporte */}
-      <Paper elevation={3} sx={{ p: 3, mb: 3 }}>
+      {/* Controles */}
+      <Paper elevation={2} sx={{ p: 3, mb: 3 }}>
         <Grid container spacing={3} alignItems="center">
-          <Grid item xs={12} md={4}>
+          <Grid item xs={12} sm={6} md={3}>
             <FormControl fullWidth>
-              <InputLabel>Tipo de Reporte</InputLabel>
+              <InputLabel>Report Type</InputLabel>
               <Select
-                value={selectedReport}
-                onChange={(e) => setSelectedReport(e.target.value)}
-                label="Tipo de Reporte"
+                value={reportType}
+                onChange={(e) => setReportType(e.target.value)}
+                label="Report Type"
               >
-                <MenuItem value="clients">Reporte de Clientes</MenuItem>
-                <MenuItem value="diets">Reporte de Dietas</MenuItem>
-                <MenuItem value="analytics">Análisis General</MenuItem>
+                <MenuItem value="clients">Client Reports</MenuItem>
+                <MenuItem value="diets">Diet Analysis</MenuItem>
+                <MenuItem value="foods">Food Inventory</MenuItem>
+                <MenuItem value="general">General Overview</MenuItem>
               </Select>
             </FormControl>
           </Grid>
-          <Grid item xs={12} md={4}>
+          
+          <Grid item xs={12} sm={6} md={3}>
             <FormControl fullWidth>
-              <InputLabel>Rango de Fechas</InputLabel>
+              <InputLabel>Date Range</InputLabel>
               <Select
                 value={dateRange}
                 onChange={(e) => setDateRange(e.target.value)}
-                label="Rango de Fechas"
+                label="Date Range"
               >
-                <MenuItem value="all">Todos los datos</MenuItem>
-                <MenuItem value="month">Último mes</MenuItem>
-                <MenuItem value="quarter">Último trimestre</MenuItem>
-                <MenuItem value="year">Último año</MenuItem>
+                <MenuItem value="7">Last 7 days</MenuItem>
+                <MenuItem value="30">Last 30 days</MenuItem>
+                <MenuItem value="90">Last 90 days</MenuItem>
+                <MenuItem value="365">Last year</MenuItem>
               </Select>
             </FormControl>
           </Grid>
-          <Grid item xs={12} md={4}>
+          
+          <Grid item xs={12} sm={6} md={3}>
+            <TextField
+              fullWidth
+              placeholder="Search clients..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon />
+                  </InputAdornment>
+                ),
+              }}
+            />
+          </Grid>
+          
+          <Grid item xs={12} sm={6} md={3}>
             <Box sx={{ display: 'flex', gap: 1 }}>
               <Button
                 variant="outlined"
                 startIcon={<DownloadIcon />}
-                onClick={() => handleExport('excel')}
+                onClick={() => handleExport('csv')}
               >
-                Excel
+                CSV
               </Button>
               <Button
                 variant="outlined"
-                startIcon={<DownloadIcon />}
+                startIcon={<PrintIcon />}
                 onClick={() => handleExport('pdf')}
               >
                 PDF
               </Button>
               <Button
                 variant="outlined"
-                startIcon={<PrintIcon />}
-                onClick={handlePrint}
+                startIcon={<EmailIcon />}
+                onClick={() => handleExport('email')}
               >
-                Imprimir
+                Email
               </Button>
             </Box>
           </Grid>
         </Grid>
       </Paper>
 
-      {/* Métricas Resumen */}
+      {/* Métricas */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
         <Grid item xs={12} sm={6} md={3}>
           <Card elevation={3}>
             <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <PeopleIcon sx={{ fontSize: 40, color: '#2e7d32', mr: 2 }} />
-                <Box>
-                  <Typography variant="h4" color="primary">
-                    {totalClients}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Total Clientes
-                  </Typography>
-                </Box>
-              </Box>
+              <Typography color="textSecondary" gutterBottom>
+                Total Clients
+              </Typography>
+              <Typography variant="h4" component="div">
+                {totalClients}
+              </Typography>
+              <Chip 
+                label={`${dateRange} days`} 
+                size="small" 
+                color="primary" 
+                sx={{ mt: 1 }}
+              />
             </CardContent>
           </Card>
         </Grid>
-
+        
         <Grid item xs={12} sm={6} md={3}>
           <Card elevation={3}>
             <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <DietIcon sx={{ fontSize: 40, color: '#1976d2', mr: 2 }} />
-                <Box>
-                  <Typography variant="h4" color="primary">
-                    {totalDiets}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Total Dietas
-                  </Typography>
-                </Box>
-              </Box>
+              <Typography color="textSecondary" gutterBottom>
+                Average TMB
+              </Typography>
+              <Typography variant="h4" component="div">
+                {averageTMB}
+              </Typography>
+              <Typography variant="caption" color="textSecondary">
+                calories
+              </Typography>
             </CardContent>
           </Card>
         </Grid>
-
+        
         <Grid item xs={12} sm={6} md={3}>
           <Card elevation={3}>
             <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <TrendingIcon sx={{ fontSize: 40, color: '#ed6c02', mr: 2 }} />
-                <Box>
-                  <Typography variant="h4" color="primary">
-                    {averageTMB}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    TMB Promedio
-                  </Typography>
-                </Box>
-              </Box>
+              <Typography color="textSecondary" gutterBottom>
+                Total Foods
+              </Typography>
+              <Typography variant="h4" component="div">
+                {foods.length}
+              </Typography>
+              <Typography variant="caption" color="textSecondary">
+                in database
+              </Typography>
             </CardContent>
           </Card>
         </Grid>
-
+        
         <Grid item xs={12} sm={6} md={3}>
           <Card elevation={3}>
             <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <AssessmentIcon sx={{ fontSize: 40, color: '#9c27b0', mr: 2 }} />
-                <Box>
-                  <Typography variant="h4" color="primary">
-                    {totalMeals}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Total Comidas
-                  </Typography>
-                </Box>
-              </Box>
+              <Typography color="textSecondary" gutterBottom>
+                Food Groups
+              </Typography>
+              <Typography variant="h4" component="div">
+                {Object.keys(foodGroupStats).length}
+              </Typography>
+              <Typography variant="caption" color="textSecondary">
+                categories
+              </Typography>
             </CardContent>
           </Card>
         </Grid>
       </Grid>
 
-      {/* Contenido del Reporte */}
-      {selectedReport === 'clients' && (
-        <Paper elevation={3} sx={{ p: 3 }}>
-          <Typography variant="h5" gutterBottom>
-            Reporte de Clientes
+      {/* Gráficos */}
+      <Grid container spacing={3} sx={{ mb: 4 }}>
+        {/* Gráfico de Barras - TMB por Cliente */}
+        <Grid item xs={12} md={6}>
+          <Paper elevation={3} sx={{ p: 3 }}>
+            <Typography variant="h6" gutterBottom>
+              TMB by Client
+            </Typography>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={clientData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Bar dataKey="tmb" fill="#2e7d32" />
+              </BarChart>
+            </ResponsiveContainer>
+          </Paper>
+        </Grid>
+
+        {/* Gráfico de Líneas - Distribución TMB */}
+        <Grid item xs={12} md={6}>
+          <Paper elevation={3} sx={{ p: 3 }}>
+            <Typography variant="h6" gutterBottom>
+              TMB Distribution
+            </Typography>
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={tmbDistribution}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="range" />
+                <YAxis />
+                <Tooltip />
+                <Line type="monotone" dataKey="count" stroke="#1976d2" strokeWidth={2} />
+              </LineChart>
+            </ResponsiveContainer>
+          </Paper>
+        </Grid>
+
+        {/* Gráfico de Dona - Grupos de Alimentos */}
+        <Grid item xs={12} md={6}>
+          <Paper elevation={3} sx={{ p: 3 }}>
+            <Typography variant="h6" gutterBottom>
+              Food Groups Distribution
+            </Typography>
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={foodGroupData}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                  outerRadius={80}
+                  fill="#8884d8"
+                  dataKey="value"
+                >
+                  {foodGroupData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip />
+              </PieChart>
+            </ResponsiveContainer>
+          </Paper>
+        </Grid>
+      </Grid>
+
+      {/* Tabla de Clientes */}
+      <Paper elevation={3}>
+        <Box sx={{ p: 3, borderBottom: 1, borderColor: 'divider' }}>
+          <Typography variant="h6">
+            Client Details ({searchedDiets.length} clients)
           </Typography>
-          <TableContainer>
-            <Table>
-              <TableHead>
-                <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
-                  <TableCell>ID</TableCell>
-                  <TableCell>Nombre</TableCell>
-                  <TableCell>TMB</TableCell>
-                  <TableCell>Fecha Creación</TableCell>
-                  <TableCell>Dieta Completa</TableCell>
-                  <TableCell>Compartida</TableCell>
+        </Box>
+        
+        <TableContainer>
+          <Table>
+            <TableHead>
+              <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
+                <TableCell>Client Name</TableCell>
+                <TableCell>Diet Name</TableCell>
+                <TableCell>TMB (cal)</TableCell>
+                <TableCell>Created</TableCell>
+                <TableCell>Status</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {searchedDiets.map((diet) => (
+                <TableRow key={diet.id} hover>
+                  <TableCell>
+                    <Typography variant="subtitle2">{diet.clientName}</Typography>
+                  </TableCell>
+                  <TableCell>{diet.name}</TableCell>
+                  <TableCell>{diet.tmb.toLocaleString()}</TableCell>
+                  <TableCell>
+                    {new Date(diet.createdAt).toLocaleDateString()}
+                  </TableCell>
+                  <TableCell>
+                    <Chip 
+                      label="Active" 
+                      color="success" 
+                      size="small" 
+                    />
+                  </TableCell>
                 </TableRow>
-              </TableHead>
-              <TableBody>
-                {generateClientReport().map((client) => (
-                  <TableRow key={client.id}>
-                    <TableCell>{client.id}</TableCell>
-                    <TableCell>{client.name}</TableCell>
-                    <TableCell>{client.tmb.toLocaleString()} cal</TableCell>
-                    <TableCell>{client.createdAt}</TableCell>
-                    <TableCell>
-                      <Chip 
-                        label={client.hasMeals ? 'Sí' : 'No'} 
-                        color={client.hasMeals ? 'success' : 'warning'} 
-                        size="small" 
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Chip 
-                        label={client.shareId} 
-                        color={client.shareId === 'Sí' ? 'primary' : 'default'} 
-                        size="small" 
-                      />
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </Paper>
-      )}
-
-      {selectedReport === 'diets' && (
-        <Paper elevation={3} sx={{ p: 3 }}>
-          <Typography variant="h5" gutterBottom>
-            Reporte de Dietas
-          </Typography>
-          <TableContainer>
-            <Table>
-              <TableHead>
-                <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
-                  <TableCell>ID</TableCell>
-                  <TableCell>Cliente</TableCell>
-                  <TableCell>TMB</TableCell>
-                  <TableCell>Total Comidas</TableCell>
-                  <TableCell>Fecha Creación</TableCell>
-                  <TableCell>Compartida</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {generateDietReport().map((diet) => (
-                  <TableRow key={diet.id}>
-                    <TableCell>{diet.id}</TableCell>
-                    <TableCell>{diet.clientName}</TableCell>
-                    <TableCell>{diet.tmb.toLocaleString()} cal</TableCell>
-                    <TableCell>{diet.totalMeals}</TableCell>
-                    <TableCell>{diet.createdAt}</TableCell>
-                    <TableCell>
-                      <Chip 
-                        label={diet.isShared} 
-                        color={diet.isShared === 'Sí' ? 'primary' : 'default'} 
-                        size="small" 
-                      />
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </Paper>
-      )}
-
-      {selectedReport === 'analytics' && (
-        <Paper elevation={3} sx={{ p: 3 }}>
-          <Typography variant="h5" gutterBottom>
-            Análisis General
-          </Typography>
-          
-          <Grid container spacing={3}>
-            <Grid item xs={12} md={6}>
-              <Typography variant="h6" gutterBottom>
-                Distribución por Género
-              </Typography>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Typography>Hombres:</Typography>
-                  <Chip label={`${genderDistribution.male} (${Math.round((genderDistribution.male / totalClients) * 100)}%)`} color="primary" />
-                </Box>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Typography>Mujeres:</Typography>
-                  <Chip label={`${genderDistribution.female} (${Math.round((genderDistribution.female / totalClients) * 100)}%)`} color="secondary" />
-                </Box>
-              </Box>
-            </Grid>
-
-            <Grid item xs={12} md={6}>
-              <Typography variant="h6" gutterBottom>
-                Dietas por Mes
-              </Typography>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                {monthlyData.map((month, index) => (
-                  <Box key={index} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Typography variant="body2">{month.month}:</Typography>
-                    <Chip label={month.diets} size="small" />
-                  </Box>
-                ))}
-              </Box>
-            </Grid>
-          </Grid>
-
-          <Divider sx={{ my: 3 }} />
-
-          <Typography variant="h6" gutterBottom>
-            Resumen Estadístico
-          </Typography>
-          <Grid container spacing={2}>
-            <Grid item xs={12} sm={6} md={3}>
-              <Typography variant="body2" color="text.secondary">Promedio de comidas por dieta:</Typography>
-              <Typography variant="h6">{totalDiets > 0 ? Math.round(totalMeals / totalDiets) : 0}</Typography>
-            </Grid>
-            <Grid item xs={12} sm={6} md={3}>
-              <Typography variant="body2" color="text.secondary">Dietas compartidas:</Typography>
-              <Typography variant="h6">{diets.filter(d => d.shareId).length}</Typography>
-            </Grid>
-            <Grid item xs={12} sm={6} md={3}>
-              <Typography variant="body2" color="text.secondary">Última dieta creada:</Typography>
-              <Typography variant="h6">
-                {diets.length > 0 ? new Date(Math.max(...diets.map(d => d.createdAt.getTime()))).toLocaleDateString() : 'N/A'}
-              </Typography>
-            </Grid>
-            <Grid item xs={12} sm={6} md={3}>
-              <Typography variant="body2" color="text.secondary">Tasa de completado:</Typography>
-              <Typography variant="h6">
-                {Math.round((diets.filter(diet => {
-                  const daysOfWeek: DayOfWeek[] = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
-                  let hasMeals = false
-                  daysOfWeek.forEach(day => {
-                    Object.values(diet.meals[day]).forEach(mealList => {
-                      if (mealList.length > 0) hasMeals = true
-                    })
-                  })
-                  return hasMeals
-                }).length / totalDiets) * 100) || 0}%
-              </Typography>
-            </Grid>
-          </Grid>
-        </Paper>
-      )}
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Paper>
     </Box>
   )
 }

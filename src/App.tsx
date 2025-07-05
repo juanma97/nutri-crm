@@ -13,7 +13,7 @@ import EditDiet from './pages/EditDiet'
 import DietViewer from './pages/DietViewer'
 import Reports from './pages/Reports'
 import { AuthProvider } from './contexts/AuthContext'
-import { DietProvider } from './contexts/DietContext'
+import { FirebaseProvider } from './contexts/FirebaseContext'
 
 const theme = createTheme({
   palette: {
@@ -28,7 +28,7 @@ const App = () => {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <AuthProvider>
-        <DietProvider>
+        <FirebaseProvider>
           <Router>
             <Routes>
               {/* Rutas públicas */}
@@ -114,7 +114,7 @@ const App = () => {
               } />
             </Routes>
           </Router>
-        </DietProvider>
+        </FirebaseProvider>
       </AuthProvider>
     </ThemeProvider>
   )

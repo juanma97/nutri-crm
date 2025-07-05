@@ -7,16 +7,21 @@ import {
   Typography,
   Alert,
   CircularProgress,
-  Container
+  Container,
+  Tabs,
+  Tab,
+  Divider
 } from '@mui/material'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 
 const Login = () => {
+  const [activeTab, setActiveTab] = useState(0)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [name, setName] = useState('')
   const [error, setError] = useState('')
-  const { login, loading } = useAuth()
+  const { login, register, loading } = useAuth()
   const navigate = useNavigate()
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -28,13 +33,35 @@ const Login = () => {
       return
     }
 
-    const success = await login(email, password)
+    if (activeTab === 1 && !name) {
+      setError('Por favor ingresa tu nombre')
+      return
+    }
+
+    let success = false
+    
+    if (activeTab === 0) {
+      // Login
+      success = await login(email, password)
+      if (!success) {
+        setError('Credenciales incorrectas. Verifica tu email y contraseña.')
+      }
+    } else {
+      // Register
+      success = await register(email, password, name)
+      if (!success) {
+        setError('Error al crear la cuenta. El email ya podría estar en uso.')
+      }
+    }
     
     if (success) {
       navigate('/dashboard')
-    } else {
-      setError('Credenciales incorrectas. Usa test/test para acceder.')
     }
+  }
+
+  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+    setActiveTab(newValue)
+    setError('')
   }
 
   return (
@@ -54,9 +81,14 @@ const Login = () => {
               NutriCRM
             </Typography>
             <Typography variant="h6" color="text.secondary">
-              Iniciar Sesión
+              Sistema de gestión nutricional
             </Typography>
           </Box>
+
+          <Tabs value={activeTab} onChange={handleTabChange} centered sx={{ mb: 3 }}>
+            <Tab label="Iniciar Sesión" />
+            <Tab label="Registrarse" />
+          </Tabs>
 
           {error && (
             <Alert severity="error" sx={{ mb: 3 }}>
@@ -64,18 +96,24 @@ const Login = () => {
             </Alert>
           )}
 
-          <Alert severity="info" sx={{ mb: 3 }}>
-            <Typography variant="body2">
-              <strong>Credenciales de prueba:</strong><br />
-              Usuario: <code>test</code><br />
-              Contraseña: <code>test</code>
-            </Typography>
-          </Alert>
-
           <form onSubmit={handleSubmit}>
+            {activeTab === 1 && (
+              <TextField
+                fullWidth
+                label="Nombre completo"
+                variant="outlined"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                margin="normal"
+                required
+                disabled={loading}
+              />
+            )}
+            
             <TextField
               fullWidth
-              label="Usuario"
+              label="Email"
+              type="email"
               variant="outlined"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -94,6 +132,7 @@ const Login = () => {
               margin="normal"
               required
               disabled={loading}
+              helperText={activeTab === 1 ? "Mínimo 6 caracteres" : ""}
             />
 
             <Button
@@ -114,14 +153,26 @@ const Login = () => {
               {loading ? (
                 <CircularProgress size={24} color="inherit" />
               ) : (
-                'Iniciar Sesión'
+                activeTab === 0 ? 'Iniciar Sesión' : 'Crear Cuenta'
               )}
             </Button>
           </form>
 
+          <Divider sx={{ my: 2 }}>
+            <Typography variant="body2" color="text.secondary">
+              o
+            </Typography>
+          </Divider>
+
+          <Alert severity="info" sx={{ mb: 2 }}>
+            <Typography variant="body2">
+              <strong>Nota:</strong> Para probar el sistema, puedes crear una cuenta nueva o usar credenciales existentes.
+            </Typography>
+          </Alert>
+
           <Box sx={{ textAlign: 'center', mt: 2 }}>
             <Typography variant="body2" color="text.secondary">
-              Sistema de gestión nutricional
+              Sistema de gestión nutricional con Firebase
             </Typography>
           </Box>
         </Paper>

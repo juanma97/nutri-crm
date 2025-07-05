@@ -26,7 +26,8 @@ import {
   Card,
   CardContent,
   Tooltip,
-  Alert
+  Alert,
+  Snackbar
 } from '@mui/material'
 import { useNavigate } from 'react-router-dom'
 import AddIcon from '@mui/icons-material/Add'
@@ -38,11 +39,13 @@ import ShareIcon from '@mui/icons-material/Share'
 import SearchIcon from '@mui/icons-material/Search'
 import FilterListIcon from '@mui/icons-material/FilterList'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
+import ViewListIcon from '@mui/icons-material/ViewList'
+import ViewModuleIcon from '@mui/icons-material/ViewModule'
 import type { Diet, DayOfWeek } from '../types'
-import { useDietContext } from '../contexts/DietContext'
+import { useFirebase } from '../contexts/FirebaseContext'
 
 const DietList = () => {
-  const { diets, deleteDiet, updateDiet, generateShareId } = useDietContext()
+  const { diets, deleteDiet, loadingDiets } = useFirebase()
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
   const [dateFilter, setDateFilter] = useState('all')
@@ -53,6 +56,8 @@ const DietList = () => {
   const [dietToDelete, setDietToDelete] = useState<Diet | null>(null)
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const [selectedDietForMenu, setSelectedDietForMenu] = useState<Diet | null>(null)
+  const [snackbarOpen, setSnackbarOpen] = useState(false)
+  const [snackbarMessage, setSnackbarMessage] = useState('')
   
   const navigate = useNavigate()
 
@@ -75,7 +80,8 @@ const DietList = () => {
   }
 
   const filteredDiets = diets.filter(diet => {
-    const matchesSearch = diet.clientName.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesSearch = diet.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      diet.clientName.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesStatus = statusFilter === 'all' || statusFilter === 'active'
     const matchesDate = dateFilter === 'all' || 
       (dateFilter === 'recent' && (new Date().getTime() - diet.createdAt.getTime()) < 7 * 24 * 60 * 60 * 1000) ||
@@ -89,11 +95,15 @@ const DietList = () => {
     setDeleteDialogOpen(true)
   }
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (dietToDelete) {
-      deleteDiet(dietToDelete.id)
-      setDeleteDialogOpen(false)
-      setDietToDelete(null)
+      const success = await deleteDiet(dietToDelete.id.toString())
+      if (success) {
+        setDeleteDialogOpen(false)
+        setDietToDelete(null)
+        setSnackbarMessage('Dieta eliminada correctamente')
+        setSnackbarOpen(true)
+      }
     }
   }
 
@@ -122,24 +132,17 @@ const DietList = () => {
     console.log('Duplicating diet:', newDietData)
   }
 
-  const handleShareDiet = (diet: Diet) => {
-    // Generar shareId si no existe
-    if (!diet.shareId) {
-      const newShareId = generateShareId()
-      updateDiet(diet.id, { shareId: newShareId })
-      diet = { ...diet, shareId: newShareId }
+  const handleShareDiet = async (diet: Diet) => {
+    try {
+      const shareUrl = `${window.location.origin}/diet/${diet.shareId}`
+      await navigator.clipboard.writeText(shareUrl)
+      setSnackbarMessage('Link copiado al portapapeles')
+      setSnackbarOpen(true)
+    } catch (error) {
+      console.error('Error copying to clipboard:', error)
+      setSnackbarMessage('Error al copiar el enlace')
+      setSnackbarOpen(true)
     }
-    
-    // Crear el enlace
-    const shareUrl = `${window.location.origin}/diet/${diet.shareId}`
-    
-    // Copiar al portapapeles
-    navigator.clipboard.writeText(shareUrl).then(() => {
-      alert(`Enlace copiado al portapapeles: ${shareUrl}`)
-    }).catch(() => {
-      // Fallback si clipboard no está disponible
-      prompt('Copy this link:', shareUrl)
-    })
   }
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, diet: Diet) => {
@@ -150,6 +153,14 @@ const DietList = () => {
   const handleMenuClose = () => {
     setAnchorEl(null)
     setSelectedDietForMenu(null)
+  }
+
+  if (loadingDiets) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
+        <CircularProgress size={60} sx={{ color: '#2e7d32' }} />
+      </Box>
+    )
   }
 
   return (
@@ -163,7 +174,7 @@ const DietList = () => {
           onClick={handleCreateDiet}
           sx={{ backgroundColor: '#2e7d32' }}
         >
-          New Diet
+          Create Diet
         </Button>
       </Box>
 
@@ -173,7 +184,7 @@ const DietList = () => {
           <Box sx={{ flex: '1 1 300px', minWidth: '250px' }}>
             <TextField
               fullWidth
-              placeholder="Search by client name..."
+              placeholder="Search diets or clients..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               InputProps={{
@@ -213,14 +224,23 @@ const DietList = () => {
               </Select>
             </FormControl>
           </Box>
-          <Box sx={{ flex: '0 0 auto' }}>
-            <Button
-              variant="outlined"
-              startIcon={<FilterListIcon />}
-              onClick={() => setViewMode(viewMode === 'table' ? 'cards' : 'table')}
-            >
-              {viewMode === 'table' ? 'Cards' : 'Table'}
-            </Button>
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <Tooltip title="Table View">
+              <IconButton
+                onClick={() => setViewMode('table')}
+                color={viewMode === 'table' ? 'primary' : 'default'}
+              >
+                <ViewListIcon />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Card View">
+              <IconButton
+                onClick={() => setViewMode('cards')}
+                color={viewMode === 'cards' ? 'primary' : 'default'}
+              >
+                <ViewModuleIcon />
+              </IconButton>
+            </Tooltip>
           </Box>
         </Box>
       </Paper>
@@ -239,9 +259,10 @@ const DietList = () => {
             <Table sx={{ tableLayout: 'fixed', width: '100%' }}>
               <TableHead>
                 <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
-                  <TableCell>Client Name</TableCell>
-                  <TableCell>TMB (calories)</TableCell>
-                  <TableCell>Total Meals</TableCell>
+                  <TableCell>Name</TableCell>
+                  <TableCell>Client</TableCell>
+                  <TableCell>TMB</TableCell>
+                  <TableCell>Total Calories</TableCell>
                   <TableCell>Created</TableCell>
                   <TableCell>Status</TableCell>
                   <TableCell align="center">Actions</TableCell>
@@ -253,11 +274,12 @@ const DietList = () => {
                   return (
                     <TableRow key={diet.id} hover>
                       <TableCell>
-                        <Typography variant="subtitle2">{diet.clientName}</Typography>
+                        <Typography variant="subtitle2">{diet.name}</Typography>
                       </TableCell>
-                      <TableCell>{diet.tmb.toLocaleString()}</TableCell>
-                      <TableCell>{stats.totalMeals}</TableCell>
-                      <TableCell>{diet.createdAt.toLocaleDateString()}</TableCell>
+                      <TableCell>{diet.clientName}</TableCell>
+                      <TableCell>{diet.tmb.toLocaleString()} cal</TableCell>
+                      <TableCell>{Math.round(stats.totalCalories)} cal</TableCell>
+                      <TableCell>{new Date(diet.createdAt).toLocaleDateString()}</TableCell>
                       <TableCell>
                         <Chip 
                           label="Active" 
@@ -284,12 +306,22 @@ const DietList = () => {
                             <EditIcon />
                           </IconButton>
                         </Tooltip>
-                        <Tooltip title="More options">
+                        <Tooltip title="Share">
                           <IconButton 
-                            size="small"
-                            onClick={(e) => handleMenuOpen(e, diet)}
+                            size="small" 
+                            color="secondary"
+                            onClick={() => handleShareDiet(diet)}
                           >
-                            <MoreVertIcon />
+                            <ShareIcon />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Delete">
+                          <IconButton 
+                            size="small" 
+                            color="error"
+                            onClick={() => handleDeleteDiet(diet)}
+                          >
+                            <DeleteIcon />
                           </IconButton>
                         </Tooltip>
                       </TableCell>
@@ -313,20 +345,20 @@ const DietList = () => {
                   <CardContent>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
                       <Typography variant="h6" component="div">
-                        {diet.clientName}
+                        {diet.name}
                       </Typography>
                       <Chip label="Active" color="success" size="small" />
                     </Box>
                     
                     <Box sx={{ mb: 2 }}>
                       <Typography variant="body2" color="text.secondary">
-                        TMB: {diet.tmb.toLocaleString()} calories
+                        TMB: {diet.tmb.toLocaleString()} cal
                       </Typography>
                       <Typography variant="body2" color="text.secondary">
-                        Total Meals: {stats.totalMeals}
+                        Total: {Math.round(stats.totalCalories)} cal
                       </Typography>
                       <Typography variant="body2" color="text.secondary">
-                        Created: {diet.createdAt.toLocaleDateString()}
+                        Created: {new Date(diet.createdAt).toLocaleDateString()}
                       </Typography>
                     </Box>
 
@@ -395,7 +427,7 @@ const DietList = () => {
         fullWidth
       >
         <DialogTitle>
-          Diet Preview - {selectedDiet?.clientName}
+          Diet Preview - {selectedDiet?.name}
         </DialogTitle>
         <DialogContent>
           {selectedDiet && (
@@ -407,15 +439,15 @@ const DietList = () => {
                 </Box>
                 <Box sx={{ flex: '1 1 200px', minWidth: '200px' }}>
                   <Typography variant="subtitle2">TMB:</Typography>
-                  <Typography variant="body1">{selectedDiet.tmb.toLocaleString()} calories</Typography>
+                  <Typography variant="body1">{selectedDiet.tmb.toLocaleString()} cal</Typography>
                 </Box>
                 <Box sx={{ flex: '1 1 200px', minWidth: '200px' }}>
                   <Typography variant="subtitle2">Created:</Typography>
-                  <Typography variant="body1">{selectedDiet.createdAt.toLocaleDateString()}</Typography>
+                  <Typography variant="body1">{new Date(selectedDiet.createdAt).toLocaleDateString()}</Typography>
                 </Box>
                 <Box sx={{ flex: '1 1 200px', minWidth: '200px' }}>
-                  <Typography variant="subtitle2">Total Meals:</Typography>
-                  <Typography variant="body1">{calculateDietStats(selectedDiet).totalMeals}</Typography>
+                  <Typography variant="subtitle2">Total Calories:</Typography>
+                  <Typography variant="body1">{Math.round(calculateDietStats(selectedDiet).totalCalories)} cal</Typography>
                 </Box>
               </Box>
               
@@ -444,7 +476,7 @@ const DietList = () => {
         <DialogTitle>Delete Diet</DialogTitle>
         <DialogContent>
           <Typography>
-            Are you sure you want to delete the diet for {dietToDelete?.clientName}? This action cannot be undone.
+            Are you sure you want to delete "{dietToDelete?.name}"? This action cannot be undone.
           </Typography>
         </DialogContent>
         <DialogActions>
@@ -483,6 +515,21 @@ const DietList = () => {
           Delete
         </MenuItem>
       </Menu>
+
+      {/* Snackbar for notifications */}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={3000}
+        onClose={() => setSnackbarOpen(false)}
+      >
+        <Alert 
+          onClose={() => setSnackbarOpen(false)} 
+          severity="success" 
+          sx={{ width: '100%' }}
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </Box>
   )
 }

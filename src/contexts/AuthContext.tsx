@@ -1,5 +1,13 @@
-import React, { createContext, useContext, useState } from 'react'
+import React, { createContext, useContext, useState, useEffect } from 'react'
 import type { ReactNode } from 'react'
+import { 
+  signInWithEmailAndPassword, 
+  createUserWithEmailAndPassword,
+  signOut, 
+  onAuthStateChanged,
+  type User as FirebaseUser 
+} from 'firebase/auth'
+import { auth } from '../firebase/config'
 
 interface User {
   id: string
@@ -12,49 +20,80 @@ interface AuthContextType {
   user: User | null
   isAuthenticated: boolean
   login: (email: string, password: string) => Promise<boolean>
+  register: (email: string, password: string, name: string) => Promise<boolean>
   logout: () => void
   loading: boolean
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
-// Usuario de prueba
-const testUser: User = {
-  id: '1',
-  name: 'Nutricionista Test',
-  email: 'test@nutricrm.com',
-  role: 'nutritionist'
-}
-
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null)
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser: FirebaseUser | null) => {
+      if (firebaseUser) {
+        // Convertir Firebase User a nuestro formato
+        const userData: User = {
+          id: firebaseUser.uid,
+          name: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'Usuario',
+          email: firebaseUser.email || '',
+          role: 'nutritionist'
+        }
+        setUser(userData)
+      } else {
+        setUser(null)
+      }
+      setLoading(false)
+    })
+
+    return () => unsubscribe()
+  }, [])
 
   const login = async (email: string, password: string): Promise<boolean> => {
-    setLoading(true)
-    
-    // Simular delay de red
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    
-    // Verificar credenciales de prueba
-    if (email === 'test' && password === 'test') {
-      setUser(testUser)
-      setLoading(false)
+    try {
+      setLoading(true)
+      await signInWithEmailAndPassword(auth, email, password)
       return true
+    } catch (error: any) {
+      console.error('Error en login:', error)
+      return false
+    } finally {
+      setLoading(false)
     }
-    
-    setLoading(false)
-    return false
   }
 
-  const logout = () => {
-    setUser(null)
+  const register = async (email: string, password: string, name: string): Promise<boolean> => {
+    try {
+      setLoading(true)
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password)
+      
+      // Aquí podrías actualizar el displayName del usuario si es necesario
+      // await updateProfile(userCredential.user, { displayName: name })
+      
+      return true
+    } catch (error: any) {
+      console.error('Error en registro:', error)
+      return false
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const logout = async () => {
+    try {
+      await signOut(auth)
+    } catch (error) {
+      console.error('Error en logout:', error)
+    }
   }
 
   const value: AuthContextType = {
     user,
     isAuthenticated: !!user,
     login,
+    register,
     logout,
     loading
   }

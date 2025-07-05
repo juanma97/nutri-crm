@@ -1,5 +1,5 @@
 export interface Food {
-  id: number
+  id: string
   name: string
   group: string
   portion: string
@@ -53,6 +53,7 @@ export interface DayMeals {
 
 export interface Diet {
   id: number
+  name: string
   clientName: string
   tmb: number
   meals: {

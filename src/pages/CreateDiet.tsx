@@ -1,64 +1,82 @@
 import React, { useState } from 'react'
+import { Box, Stepper, Step, StepLabel, Button, Typography, Paper } from '@mui/material'
 import { useNavigate } from 'react-router-dom'
-import { Box, Stepper, Step, StepLabel, Typography, Paper } from '@mui/material'
 import TMBStep from '../components/TMBStep'
 import DietBuilder from '../components/DietBuilder'
-import { useDietContext } from '../contexts/DietContext'
+import { useFirebase } from '../contexts/FirebaseContext'
 import type { Diet } from '../types'
 
 const steps = ['Calculate TMB', 'Build Diet']
 
 const CreateDiet = () => {
-  const navigate = useNavigate()
-  const { addDiet } = useDietContext()
-  
   const [activeStep, setActiveStep] = useState(0)
-  const [clientName, setClientName] = useState('')
-  const [tmb, setTmb] = useState(0)
-  const [meals, setMeals] = useState<Diet['meals']>({
-    monday: { breakfast: [], morningSnack: [], lunch: [], afternoonSnack: [], dinner: [] },
-    tuesday: { breakfast: [], morningSnack: [], lunch: [], afternoonSnack: [], dinner: [] },
-    wednesday: { breakfast: [], morningSnack: [], lunch: [], afternoonSnack: [], dinner: [] },
-    thursday: { breakfast: [], morningSnack: [], lunch: [], afternoonSnack: [], dinner: [] },
-    friday: { breakfast: [], morningSnack: [], lunch: [], afternoonSnack: [], dinner: [] },
-    saturday: { breakfast: [], morningSnack: [], lunch: [], afternoonSnack: [], dinner: [] },
-    sunday: { breakfast: [], morningSnack: [], lunch: [], afternoonSnack: [], dinner: [] }
+  const [tmbData, setTmbData] = useState({ tmb: 0, clientName: '' })
+  const [dietData, setDietData] = useState<Omit<Diet, 'id' | 'createdAt' | 'shareId'>>({
+    name: '',
+    clientName: '',
+    tmb: 0,
+    meals: Array(7).fill(null).map(() => Array(5).fill(null).map(() => ({ foods: [] })))
   })
+  
+  const { addDiet } = useFirebase()
+  const navigate = useNavigate()
 
-  const handleNext = () => {
-    setActiveStep((prevActiveStep) => prevActiveStep + 1)
+  const handleTMBComplete = (data: { tmb: number; clientName: string }) => {
+    setTmbData(data)
+    setDietData(prev => ({
+      ...prev,
+      tmb: data.tmb,
+      clientName: data.clientName,
+      name: `Diet for ${data.clientName}`
+    }))
+    setActiveStep(1)
+  }
+
+  const handleDietComplete = async (meals: Diet['meals']) => {
+    const finalDietData = {
+      ...dietData,
+      meals
+    }
+
+    const success = await addDiet(finalDietData)
+    if (success) {
+      navigate('/diets')
+    }
   }
 
   const handleBack = () => {
     setActiveStep((prevActiveStep) => prevActiveStep - 1)
   }
 
-  const handleTMBComplete = (name: string, calculatedTMB: number) => {
-    setClientName(name)
-    setTmb(calculatedTMB)
-    handleNext()
-  }
-
-  const handleDietSave = (savedMeals: Diet['meals']) => {
-    setMeals(savedMeals)
-    
-    // Crear la nueva dieta usando el contexto
-    addDiet({
-      clientName,
-      tmb,
-      meals: savedMeals
-    })
-    
-    navigate('/diets')
+  const renderStepContent = (step: number) => {
+    switch (step) {
+      case 0:
+        return (
+          <TMBStep 
+            onComplete={handleTMBComplete}
+            initialValues={tmbData}
+          />
+        )
+      case 1:
+        return (
+          <DietBuilder
+            tmb={tmbData.tmb}
+            onComplete={handleDietComplete}
+            initialMeals={dietData.meals}
+          />
+        )
+      default:
+        return 'Unknown step'
+    }
   }
 
   return (
     <Box sx={{ width: '100%', px: 3, py: 3 }}>
-      <Typography variant="h4" gutterBottom>
-        Create New Diet
-      </Typography>
-      
-      <Paper elevation={3} sx={{ p: 3, mb: 3 }}>
+      <Paper elevation={3} sx={{ p: 4 }}>
+        <Typography variant="h4" gutterBottom>
+          Create New Diet
+        </Typography>
+        
         <Stepper activeStep={activeStep} sx={{ mb: 4 }}>
           {steps.map((label) => (
             <Step key={label}>
@@ -67,16 +85,28 @@ const CreateDiet = () => {
           ))}
         </Stepper>
 
-        {activeStep === 0 && (
-          <TMBStep onComplete={handleTMBComplete} />
-        )}
-
-        {activeStep === 1 && (
-          <DietBuilder
-            clientName={clientName}
-            tmb={tmb}
-            onSave={handleDietSave}
-          />
+        {activeStep === steps.length ? (
+          <Box sx={{ textAlign: 'center' }}>
+            <Typography variant="h6" gutterBottom>
+              All steps completed
+            </Typography>
+            <Button onClick={() => navigate('/diets')}>
+              Go to Diets
+            </Button>
+          </Box>
+        ) : (
+          <Box>
+            {renderStepContent(activeStep)}
+            
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
+              <Button
+                disabled={activeStep === 0}
+                onClick={handleBack}
+              >
+                Back
+              </Button>
+            </Box>
+          </Box>
         )}
       </Paper>
     </Box>
