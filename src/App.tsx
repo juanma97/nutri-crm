@@ -1,13 +1,15 @@
 import React from 'react'
 import { ThemeProvider, createTheme } from '@mui/material/styles'
 import CssBaseline from '@mui/material/CssBaseline'
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import TopNav from './components/TopNav'
+import Dashboard from './pages/Dashboard'
 import FoodList from './pages/FoodList'
 import DietList from './pages/DietList'
 import CreateDiet from './pages/CreateDiet'
 import EditDiet from './pages/EditDiet'
 import DietViewer from './pages/DietViewer'
+import Reports from './pages/Reports'
 import { DietProvider } from './contexts/DietContext'
 
 const theme = createTheme({
@@ -28,12 +30,14 @@ const App = () => {
             <TopNav />
             <div style={{ flex: 1, width: '100%' }}>
               <Routes>
-                <Route path="/" element={<FoodList />} />
+                <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/foods" element={<FoodList />} />
                 <Route path="/diets" element={<DietList />} />
                 <Route path="/diets/create" element={<CreateDiet />} />
                 <Route path="/diets/edit/:id" element={<EditDiet />} />
                 <Route path="/diet/:shareId" element={<DietViewer />} />
+                <Route path="/reports" element={<Reports />} />
               </Routes>
             </div>
           </div>
