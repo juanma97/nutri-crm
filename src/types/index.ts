@@ -22,3 +22,50 @@ export interface FoodFormData {
   fiber: string
   link: string
 }
+
+export interface Client {
+  name: string
+  age: number
+  weight: number
+  height: number
+  gender: 'male' | 'female'
+}
+
+export interface DietMeal {
+  foodId: number
+  foodName: string
+  quantity: number
+  unit: string
+  calories: number
+  proteins: number
+  fats: number
+  carbs: number
+  fiber: number
+}
+
+export interface DayMeals {
+  breakfast: DietMeal[]
+  morningSnack: DietMeal[]
+  lunch: DietMeal[]
+  afternoonSnack: DietMeal[]
+  dinner: DietMeal[]
+}
+
+export interface Diet {
+  id: number
+  clientName: string
+  tmb: number
+  meals: {
+    monday: DayMeals
+    tuesday: DayMeals
+    wednesday: DayMeals
+    thursday: DayMeals
+    friday: DayMeals
+    saturday: DayMeals
+    sunday: DayMeals
+  }
+  createdAt: Date
+}
+
+export type DayOfWeek = 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday' | 'sunday'
+export type MealType = 'breakfast' | 'morningSnack' | 'lunch' | 'afternoonSnack' | 'dinner'
