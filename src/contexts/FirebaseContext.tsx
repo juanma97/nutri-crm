@@ -14,7 +14,7 @@ import {
 import { db } from '../firebase/config'
 import { useAuth } from './AuthContext'
 import { useNotifications } from '../hooks/useNotifications'
-import type { Diet, Food } from '../types'
+import type { Diet, Food, Client, ClientFormData } from '../types'
 
 interface FirebaseContextType {
   // Foods
@@ -32,6 +32,15 @@ interface FirebaseContextType {
   getDietByShareId: (shareId: string) => Diet | undefined
   loadDietByShareId: (shareId: string) => Promise<Diet | null>
   loadingDiets: boolean
+  
+  // Clients
+  clients: Client[]
+  addClient: (client: Omit<Client, 'id' | 'createdAt' | 'updatedAt'>) => Promise<boolean>
+  updateClient: (id: string, updates: Partial<Client>) => Promise<boolean>
+  deleteClient: (id: string) => Promise<boolean>
+  getClientById: (id: string) => Client | undefined
+  getClientDiets: (clientId: string) => Diet[]
+  loadingClients: boolean
 }
 
 const FirebaseContext = createContext<FirebaseContextType | undefined>(undefined)
@@ -42,8 +51,10 @@ export const FirebaseProvider: React.FC<{ children: ReactNode }> = ({ children }
   
   const [foods, setFoods] = useState<Food[]>([])
   const [diets, setDiets] = useState<Diet[]>([])
+  const [clients, setClients] = useState<Client[]>([])
   const [loadingFoods, setLoadingFoods] = useState(false)
   const [loadingDiets, setLoadingDiets] = useState(false)
+  const [loadingClients, setLoadingClients] = useState(false)
 
   // Generar shareId único
   const generateShareId = (): string => {
@@ -109,14 +120,50 @@ export const FirebaseProvider: React.FC<{ children: ReactNode }> = ({ children }
     }
   }
 
+  // Cargar clientes del usuario
+  const loadClients = async () => {
+    if (!user) return
+    
+    try {
+      setLoadingClients(true)
+      const clientsRef = collection(db, 'clients')
+      const q = query(
+        clientsRef, 
+        where('userId', '==', user.id)
+      )
+      const querySnapshot = await getDocs(q)
+      
+      const clientsData: Client[] = []
+      querySnapshot.forEach((doc) => {
+        const data = doc.data()
+        clientsData.push({
+          id: doc.id,
+          ...data,
+          createdAt: data.createdAt?.toDate() || new Date(),
+          updatedAt: data.updatedAt?.toDate() || new Date(),
+          lastVisit: data.lastVisit?.toDate(),
+          nextVisit: data.nextVisit?.toDate()
+        } as Client)
+      })
+      
+      setClients(clientsData)
+    } catch (error) {
+      console.error('Error loading clients:', error)
+    } finally {
+      setLoadingClients(false)
+    }
+  }
+
   // Cargar datos cuando el usuario cambie
   useEffect(() => {
     if (user) {
       loadFoods()
       loadDiets()
+      loadClients()
     } else {
       setFoods([])
       setDiets([])
+      setClients([])
     }
   }, [user])
 
@@ -267,6 +314,80 @@ export const FirebaseProvider: React.FC<{ children: ReactNode }> = ({ children }
     }
   }
 
+  // Funciones para clientes
+  const addClient = async (clientData: Omit<Client, 'id' | 'createdAt' | 'updatedAt'>): Promise<boolean> => {
+    if (!user) return false
+    
+    try {
+      const clientsRef = collection(db, 'clients')
+      const newClient = {
+        ...clientData,
+        userId: user.id,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      }
+      
+      const docRef = await addDoc(clientsRef, newClient)
+      const addedClient: Client = { 
+        id: docRef.id,
+        ...clientData,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }
+      setClients(prev => [addedClient, ...prev])
+      showSuccess('Cliente agregado correctamente')
+      return true
+    } catch (error) {
+      console.error('Error adding client:', error)
+      showError('Error al agregar cliente')
+      return false
+    }
+  }
+
+  const updateClient = async (id: string, updates: Partial<Client>): Promise<boolean> => {
+    try {
+      const clientRef = doc(db, 'clients', id)
+      const updateData = {
+        ...updates,
+        updatedAt: serverTimestamp()
+      }
+      await updateDoc(clientRef, updateData)
+      
+      setClients(prev => prev.map(client => 
+        client.id === id ? { ...client, ...updates, updatedAt: new Date() } : client
+      ))
+      showSuccess('Cliente actualizado correctamente')
+      return true
+    } catch (error) {
+      console.error('Error updating client:', error)
+      showError('Error al actualizar cliente')
+      return false
+    }
+  }
+
+  const deleteClient = async (id: string): Promise<boolean> => {
+    try {
+      const clientRef = doc(db, 'clients', id)
+      await deleteDoc(clientRef)
+      
+      setClients(prev => prev.filter(client => client.id !== id))
+      showSuccess('Cliente eliminado correctamente')
+      return true
+    } catch (error) {
+      console.error('Error deleting client:', error)
+      showError('Error al eliminar cliente')
+      return false
+    }
+  }
+
+  const getClientById = (id: string): Client | undefined => {
+    return clients.find(client => client.id === id)
+  }
+
+  const getClientDiets = (clientId: string): Diet[] => {
+    return diets.filter(diet => diet.clientName === getClientById(clientId)?.name)
+  }
+
   const value: FirebaseContextType = {
     // Foods
     foods,
@@ -282,7 +403,16 @@ export const FirebaseProvider: React.FC<{ children: ReactNode }> = ({ children }
     deleteDiet,
     getDietByShareId,
     loadDietByShareId,
-    loadingDiets
+    loadingDiets,
+    
+    // Clients
+    clients,
+    addClient,
+    updateClient,
+    deleteClient,
+    getClientById,
+    getClientDiets,
+    loadingClients
   }
 
   return (

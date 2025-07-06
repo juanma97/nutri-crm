@@ -88,7 +88,7 @@ const CreateDiet = () => {
   }
 
   return (
-    <Box sx={{ width: '100%', px: 3, py: 3 }}>
+    <Box sx={{ width: '100%', px: 3 }}>
       <Paper elevation={3} sx={{ p: 4 }}>
         <Typography variant="h4" gutterBottom>
           Create New Diet

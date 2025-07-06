@@ -11,6 +11,8 @@ import DietList from './pages/DietList'
 import CreateDiet from './pages/CreateDiet'
 import EditDiet from './pages/EditDiet'
 import DietViewer from './pages/DietViewer'
+import ClientList from './pages/ClientList'
+import ClientForm from './pages/ClientForm'
 import Reports from './pages/Reports'
 import { AuthProvider } from './contexts/AuthContext'
 import { FirebaseProvider } from './contexts/FirebaseContext'
@@ -114,6 +116,39 @@ const App = () => {
                         <TopNav />
                         <div style={{ flex: 1, width: '100%' }}>
                           <EditDiet />
+                        </div>
+                      </div>
+                    </ProtectedRoute>
+                  } />
+                  
+                  <Route path="/clients" element={
+                    <ProtectedRoute>
+                      <div style={{ minHeight: '100vh', width: '100vw', maxWidth: '100vw', display: 'flex', flexDirection: 'column', margin: 0, padding: 0 }}>
+                        <TopNav />
+                        <div style={{ flex: 1, width: '100%' }}>
+                          <ClientList />
+                        </div>
+                      </div>
+                    </ProtectedRoute>
+                  } />
+                  
+                  <Route path="/clients/create" element={
+                    <ProtectedRoute>
+                      <div style={{ minHeight: '100vh', width: '100vw', maxWidth: '100vw', display: 'flex', flexDirection: 'column', margin: 0, padding: 0 }}>
+                        <TopNav />
+                        <div style={{ flex: 1, width: '100%' }}>
+                          <ClientForm />
+                        </div>
+                      </div>
+                    </ProtectedRoute>
+                  } />
+                  
+                  <Route path="/clients/edit/:id" element={
+                    <ProtectedRoute>
+                      <div style={{ minHeight: '100vh', width: '100vw', maxWidth: '100vw', display: 'flex', flexDirection: 'column', margin: 0, padding: 0 }}>
+                        <TopNav />
+                        <div style={{ flex: 1, width: '100%' }}>
+                          <ClientForm />
                         </div>
                       </div>
                     </ProtectedRoute>

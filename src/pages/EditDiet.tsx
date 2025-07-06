@@ -99,7 +99,7 @@ const EditDiet = () => {
 
   if (!diet) {
     return (
-      <Box sx={{ width: '100%', px: 3, py: 3 }}>
+      <Box sx={{ width: '100%', px: 3 }}>
         <Paper elevation={3} sx={{ p: 4, textAlign: 'center' }}>
           <Typography variant="h6" color="error" gutterBottom>
             Diet not found
@@ -113,7 +113,7 @@ const EditDiet = () => {
   }
 
   return (
-    <Box sx={{ width: '100%', px: 3, py: 3 }}>
+    <Box sx={{ width: '100%', px: 3 }}>
       <Paper elevation={3} sx={{ p: 4 }}>
         <Typography variant="h4" gutterBottom>
           Edit Diet - {diet.clientName}

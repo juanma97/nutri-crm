@@ -24,11 +24,51 @@ export interface FoodFormData {
 }
 
 export interface Client {
+  id: string
   name: string
-  age: number
-  weight: number
-  height: number
-  gender: 'male' | 'female'
+  email: string
+  phone: string
+  birthDate?: Date
+  age?: number
+  weight?: number
+  height?: number
+  gender: 'male' | 'female' | ''
+  activityLevel: 'sedentary' | 'lightly_active' | 'moderately_active' | 'very_active' | 'extremely_active'
+  goal: 'lose_weight' | 'maintain' | 'gain_weight' | 'muscle_gain' | 'health'
+  medicalConditions: string
+  allergies: string
+  notes: string
+  status: 'active' | 'inactive' | 'completed'
+  emergencyContact: {
+    name: string
+    phone: string
+    relationship: string
+  }
+  createdAt: Date
+  updatedAt: Date
+  lastVisit?: Date
+  nextVisit?: Date
+}
+
+export interface ClientFormData {
+  name: string
+  email: string
+  phone: string
+  birthDate: string
+  gender: string
+  weight: string
+  height: string
+  activityLevel: 'sedentary' | 'lightly_active' | 'moderately_active' | 'very_active' | 'extremely_active'
+  goal: 'lose_weight' | 'maintain' | 'gain_weight' | 'muscle_gain' | 'health'
+  medicalConditions: string
+  allergies: string
+  notes: string
+  status: 'active' | 'inactive' | 'completed'
+  emergencyContact: {
+    name: string
+    phone: string
+    relationship: string
+  }
 }
 
 export interface DietMeal {

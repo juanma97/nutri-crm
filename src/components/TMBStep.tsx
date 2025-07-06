@@ -5,8 +5,15 @@ import {
   Typography, 
   MenuItem,
   Alert,
-  Box
+  Box,
+  FormControl,
+  InputLabel,
+  Select,
+  Tabs,
+  Tab,
+  Paper
 } from '@mui/material'
+import { useFirebase } from '../contexts/FirebaseContext'
 import type { Client } from '../types'
 
 interface TMBStepProps {
@@ -19,9 +26,12 @@ interface TMBStepProps {
 }
 
 const TMBStep = ({ onComplete, onNext, onUpdate, initialClientName = '', initialTMB = 0, initialClientData }: TMBStepProps) => {
-  const [client, setClient] = useState<Omit<Client, 'age' | 'weight' | 'height'> & { age: string, weight: string, height: string }>({
+  const { clients } = useFirebase()
+  const [tabValue, setTabValue] = useState(0) // 0: Select client, 1: Create new
+  const [selectedClientId, setSelectedClientId] = useState<string>('')
+  const [client, setClient] = useState({
     name: initialClientName || initialClientData?.name || '',
-    age: initialClientData?.age?.toString() || '',
+    birthDate: initialClientData?.birthDate ? new Date(initialClientData.birthDate).toISOString().split('T')[0] : '',
     weight: initialClientData?.weight?.toString() || '',
     height: initialClientData?.height?.toString() || '',
     gender: initialClientData?.gender || 'male'
@@ -29,13 +39,29 @@ const TMBStep = ({ onComplete, onNext, onUpdate, initialClientName = '', initial
   const [tmb, setTmb] = useState<number | null>(initialTMB || null)
   const [errors, setErrors] = useState<string[]>([])
 
+  const calculateAge = (birthDate: Date): number => {
+    const today = new Date()
+    const birth = new Date(birthDate)
+    let age = today.getFullYear() - birth.getFullYear()
+    const monthDiff = today.getMonth() - birth.getMonth()
+    
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+      age--
+    }
+    
+    return age
+  }
+
   const calculateTMB = (clientData: Client): number => {
-    const { age, weight, height, gender } = clientData
+    const { weight, height, gender, birthDate } = clientData
+    
+    // Calcular edad desde birthDate
+    const age = birthDate ? calculateAge(birthDate) : 0
     
     if (gender === 'male') {
-      return 88.362 + (13.397 * weight) + (4.799 * height) - (5.677 * age)
+      return 88.362 + (13.397 * (weight || 0)) + (4.799 * (height || 0)) - (5.677 * age)
     } else {
-      return 447.593 + (9.247 * weight) + (3.098 * height) - (4.330 * age)
+      return 447.593 + (9.247 * (weight || 0)) + (3.098 * (height || 0)) - (4.330 * age)
     }
   }
 
@@ -48,13 +74,26 @@ const TMBStep = ({ onComplete, onNext, onUpdate, initialClientName = '', initial
     })
   }
 
+  const handleClientSelect = (clientId: string) => {
+    setSelectedClientId(clientId)
+    const selectedClient = clients.find(c => c.id === clientId)
+    if (selectedClient && selectedClient.weight && selectedClient.height && selectedClient.birthDate) {
+      const calculatedTMB = calculateTMB(selectedClient)
+      setTmb(calculatedTMB)
+    }
+  }
+
   const validateForm = (): boolean => {
     const newErrors: string[] = []
     
-    if (!client.name.trim()) newErrors.push('Name is required')
-    if (!client.age || Number(client.age) <= 0) newErrors.push('Valid age is required')
-    if (!client.weight || Number(client.weight) <= 0) newErrors.push('Valid weight is required')
-    if (!client.height || Number(client.height) <= 0) newErrors.push('Valid height is required')
+    if (tabValue === 0) {
+      if (!selectedClientId) newErrors.push('Please select a client')
+    } else {
+      if (!client.name.trim()) newErrors.push('Name is required')
+      if (!client.birthDate) newErrors.push('Birth date is required')
+      if (!client.weight || Number(client.weight) <= 0) newErrors.push('Valid weight is required')
+      if (!client.height || Number(client.height) <= 0) newErrors.push('Valid height is required')
+    }
     
     setErrors(newErrors)
     return newErrors.length === 0
@@ -63,21 +102,36 @@ const TMBStep = ({ onComplete, onNext, onUpdate, initialClientName = '', initial
   const handleNext = () => {
     if (!validateForm()) return
     
-    const clientData: Client = {
-      name: client.name,
-      age: Number(client.age),
-      weight: Number(client.weight),
-      height: Number(client.height),
-      gender: client.gender
+    let clientData: Client | undefined
+    let clientName = ''
+    
+    if (tabValue === 0) {
+      // Usar cliente existente
+      const selectedClient = clients.find(c => c.id === selectedClientId)
+      if (selectedClient) {
+        clientData = selectedClient
+        clientName = selectedClient.name
+        const calculatedTMB = calculateTMB(selectedClient)
+        setTmb(calculatedTMB)
+      }
+    } else {
+      // Crear nuevo cliente
+      clientData = {
+        name: client.name,
+        birthDate: client.birthDate ? new Date(client.birthDate) : undefined,
+        weight: Number(client.weight),
+        height: Number(client.height),
+        gender: client.gender
+      } as Client
+      clientName = client.name
+      const calculatedTMB = calculateTMB(clientData)
+      setTmb(calculatedTMB)
     }
     
-    const calculatedTMB = calculateTMB(clientData)
-    setTmb(calculatedTMB)
-    
-    if (onComplete) {
-      onComplete(client.name, calculatedTMB, clientData)
-    } else if (onUpdate) {
-      onUpdate(calculatedTMB, client.name)
+    if (onComplete && tmb && clientName) {
+      onComplete(clientName, tmb, clientData)
+    } else if (onUpdate && tmb && clientName) {
+      onUpdate(tmb, clientName)
     }
     
     if (onNext) {
@@ -86,23 +140,23 @@ const TMBStep = ({ onComplete, onNext, onUpdate, initialClientName = '', initial
   }
 
   useEffect(() => {
-    if (client.age && client.weight && client.height) {
+    if (tabValue === 1 && client.birthDate && client.weight && client.height) {
       const clientData: Client = {
         name: client.name,
-        age: Number(client.age),
+        birthDate: new Date(client.birthDate),
         weight: Number(client.weight),
         height: Number(client.height),
         gender: client.gender
-      }
+      } as Client
       const calculatedTMB = calculateTMB(clientData)
       setTmb(calculatedTMB)
     }
-  }, [client.age, client.weight, client.height, client.gender])
+  }, [client.birthDate, client.weight, client.height, client.gender, tabValue])
 
   return (
-    <Box sx={{ width: '100%', maxWidth: '100%', overflow: 'hidden' }}>
+    <Box sx={{ width: '100%', maxWidth: '100%', height: '100vw', overflow: 'hidden' }}>
       <Typography variant="h5" gutterBottom>
-        Step 1: Calculate Basal Metabolic Rate (TMB)
+        Step 1: Select Client and Calculate TMB
       </Typography>
       
       {errors.length > 0 && (
@@ -113,86 +167,100 @@ const TMBStep = ({ onComplete, onNext, onUpdate, initialClientName = '', initial
         </Alert>
       )}
       
-      <Box sx={{ width: '100%', maxWidth: '100%', display: 'flex', flexDirection: 'column', gap: 3 }}>
-        <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
-          <TextField
-            fullWidth
-            label="Client Name"
-            variant="outlined"
-            value={client.name}
-            onChange={handleInputChange('name')}
-            required
-            sx={{ flex: '1 1 300px' }}
-          />
-          <TextField
-            fullWidth
-            select
-            label="Gender"
-            variant="outlined"
-            value={client.gender}
-            onChange={handleInputChange('gender')}
-            sx={{ flex: '1 1 200px' }}
-          >
-            <MenuItem value="male">Male</MenuItem>
-            <MenuItem value="female">Female</MenuItem>
-          </TextField>
-        </Box>
+      <Paper elevation={1} sx={{ mb: 3 }}>
+        <Tabs 
+          value={tabValue} 
+          onChange={(e, newValue) => setTabValue(newValue)}
+          sx={{ borderBottom: 1, borderColor: 'divider' }}
+        >
+          <Tab label="Select Client" />
+        </Tabs>
+      </Paper>
 
-        <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
-          <TextField
-            fullWidth
-            label="Age (years)"
-            variant="outlined"
-            type="number"
-            value={client.age}
-            onChange={handleInputChange('age')}
-            required
-            sx={{ flex: '1 1 200px' }}
-          />
-          <TextField
-            fullWidth
-            label="Weight (kg)"
-            variant="outlined"
-            type="number"
-            value={client.weight}
-            onChange={handleInputChange('weight')}
-            required
-            sx={{ flex: '1 1 200px' }}
-          />
-          <TextField
-            fullWidth
-            label="Height (cm)"
-            variant="outlined"
-            type="number"
-            value={client.height}
-            onChange={handleInputChange('height')}
-            required
-            sx={{ flex: '1 1 200px' }}
-          />
+      {tabValue === 0 ? (
+        // Seleccionar cliente existente
+        <Box sx={{ width: '100%', maxWidth: '100%', display: 'flex', flexDirection: 'column', gap: 3 }}>
+          <FormControl fullWidth>
+            <InputLabel>Select Client</InputLabel>
+            <Select
+              value={selectedClientId}
+              onChange={(e) => handleClientSelect(e.target.value)}
+              label="Select Client"
+            >
+              {clients.map((client) => {
+                const age = client.birthDate ? calculateAge(client.birthDate) : 'N/A'
+                return (
+                  <MenuItem key={client.id} value={client.id}>
+                    {client.name} - {age} años, {client.weight}kg, {client.height}cm
+                  </MenuItem>
+                )
+              })}
+            </Select>
+          </FormControl>
+
+          {selectedClientId && (
+            <Alert severity="info">
+              <Typography variant="h6">
+                Basal Metabolic Rate (TMB): {tmb ? Math.round(tmb) : 'Calculating...'} calories/day
+              </Typography>
+              <Typography variant="body2">
+                This is the number of calories your body needs at rest to maintain basic life functions.
+              </Typography>
+            </Alert>
+          )}
         </Box>
-        
-        {tmb && (
-          <Alert severity="info">
-            <Typography variant="h6">
-              Basal Metabolic Rate (TMB): {Math.round(tmb)} calories/day
-            </Typography>
-            <Typography variant="body2">
-              This is the number of calories your body needs at rest to maintain basic life functions.
-            </Typography>
-          </Alert>
-        )}
-        
-        <Box>
-          <Button
-            variant="contained"
-            size="large"
-            onClick={handleNext}
-            disabled={!tmb || errors.length > 0}
-            sx={{ backgroundColor: '#2e7d32' }}
-          >
-            Continue to Diet Builder
-          </Button>
+      ) : (
+        // Crear nuevo cliente
+        <Box sx={{ width: '100%', maxWidth: '100%', display: 'flex', flexDirection: 'column', gap: 3 }}>
+          <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
+            <TextField
+              fullWidth
+              label="Client Name"
+              variant="outlined"
+              value={client.name}
+              onChange={handleInputChange('name')}
+              required
+              sx={{ flex: '1 1 300px' }}
+            />
+            <TextField
+              fullWidth
+              select
+              label="Gender"
+              variant="outlined"
+              value={client.gender}
+              onChange={handleInputChange('gender')}
+              sx={{ flex: '1 1 200px' }}
+            >
+              <MenuItem value="male">Male</MenuItem>
+              <MenuItem value="female">Female</MenuItem>
+            </TextField>
+          </Box>
+
+
+          
+          {tmb && (
+            <Alert severity="info">
+              <Typography variant="h6">
+                Basal Metabolic Rate (TMB): {Math.round(tmb)} calories/day
+              </Typography>
+              <Typography variant="body2">
+                This is the number of calories your body needs at rest to maintain basic life functions.
+              </Typography>
+            </Alert>
+          )}
         </Box>
+      )}
+      
+      <Box sx={{ mt: 3 }}>
+        <Button
+          variant="contained"
+          size="large"
+          onClick={handleNext}
+          disabled={!tmb || errors.length > 0}
+          sx={{ backgroundColor: '#2e7d32' }}
+        >
+          Continue to Diet Builder
+        </Button>
       </Box>
     </Box>
   )
