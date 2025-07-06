@@ -22,14 +22,12 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  Alert,
   CircularProgress
 } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
 import DeleteIcon from '@mui/icons-material/Delete'
 import EditIcon from '@mui/icons-material/Edit'
 import SearchIcon from '@mui/icons-material/Search'
-import FilterListIcon from '@mui/icons-material/FilterList'
 import type { Food } from '../types'
 import { useFirebase } from '../contexts/FirebaseContext'
 import FoodForm from '../components/FoodForm'

@@ -17,38 +17,75 @@ import {
 import { useParams, useNavigate } from 'react-router-dom'
 import { useFirebase } from '../contexts/FirebaseContext'
 import DietCharts from '../components/DietCharts'
-import type { Diet } from '../types'
+import type { Diet, DayOfWeek, MealType } from '../types'
 
-const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
-const mealNames = ['Breakfast', 'Morning Snack', 'Lunch', 'Afternoon Snack', 'Dinner']
+const daysOfWeek: { key: DayOfWeek; label: string }[] = [
+  { key: 'monday', label: 'Monday' },
+  { key: 'tuesday', label: 'Tuesday' },
+  { key: 'wednesday', label: 'Wednesday' },
+  { key: 'thursday', label: 'Thursday' },
+  { key: 'friday', label: 'Friday' },
+  { key: 'saturday', label: 'Saturday' },
+  { key: 'sunday', label: 'Sunday' }
+]
+
+const mealTypes: { key: MealType; label: string }[] = [
+  { key: 'breakfast', label: 'Breakfast' },
+  { key: 'morningSnack', label: 'Morning Snack' },
+  { key: 'lunch', label: 'Lunch' },
+  { key: 'afternoonSnack', label: 'Afternoon Snack' },
+  { key: 'dinner', label: 'Dinner' }
+]
 
 const DietViewer = () => {
   const { shareId } = useParams<{ shareId: string }>()
-  const { getDietByShareId, loadingDiets } = useFirebase()
+  const { loadDietByShareId } = useFirebase()
   const navigate = useNavigate()
   const [diet, setDiet] = useState<Diet | null>(null)
   const [notFound, setNotFound] = useState(false)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    if (shareId && !loadingDiets) {
-      const foundDiet = getDietByShareId(shareId)
-      if (foundDiet) {
-        setDiet(foundDiet)
-      } else {
-        setNotFound(true)
+    const loadDiet = async () => {
+      if (shareId) {
+        setLoading(true)
+        const foundDiet = await loadDietByShareId(shareId)
+        if (foundDiet) {
+          setDiet(foundDiet)
+        } else {
+          setNotFound(true)
+        }
+        setLoading(false)
       }
     }
-  }, [shareId, getDietByShareId, loadingDiets])
 
-  const calculateDayCalories = (dayMeals: any[]) => {
-    return dayMeals.reduce((total, meal) => {
-      return total + meal.foods.reduce((mealTotal: number, food: any) => {
-        return mealTotal + (food.calories * food.quantity / 100)
-      }, 0)
-    }, 0)
+    loadDiet()
+  }, [shareId, loadDietByShareId])
+
+  const calculateDayCalories = (day: DayOfWeek) => {
+    if (!diet) return 0
+    const dayMeals = diet.meals[day]
+    let totalCalories = 0
+
+    Object.values(dayMeals).forEach(mealList => {
+      mealList.forEach(meal => {
+        totalCalories += meal.calories
+      })
+    })
+
+    return totalCalories
   }
 
-  if (loadingDiets) {
+  const calculateTotalCalories = () => {
+    if (!diet) return 0
+    let total = 0
+    daysOfWeek.forEach(day => {
+      total += calculateDayCalories(day.key)
+    })
+    return total
+  }
+
+  if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
         <CircularProgress size={60} sx={{ color: '#2e7d32' }} />
@@ -93,7 +130,7 @@ const DietViewer = () => {
         </Typography>
         <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mb: 2 }}>
           <Chip label={`TMB: ${diet.tmb} cal`} color="primary" />
-          <Chip label={`Total Calories: ${Math.round(calculateDayCalories(diet.meals[0]))} cal`} color="secondary" />
+          <Chip label={`Total Calories: ${Math.round(calculateTotalCalories())} cal`} color="secondary" />
         </Box>
         <Typography variant="body1" color="text.secondary">
           This is your personalized nutrition plan. Follow it daily for optimal results.
@@ -105,7 +142,7 @@ const DietViewer = () => {
         <Typography variant="h5" gutterBottom>
           Nutrition Analysis
         </Typography>
-        <DietCharts diet={diet} />
+        <DietCharts meals={diet.meals} tmb={diet.tmb} />
       </Paper>
 
       {/* Weekly Plan */}
@@ -119,33 +156,33 @@ const DietViewer = () => {
             <TableHead>
               <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
                 <TableCell>Day</TableCell>
-                {mealNames.map(meal => (
-                  <TableCell key={meal}>{meal}</TableCell>
+                {mealTypes.map(meal => (
+                  <TableCell key={meal.key}>{meal.label}</TableCell>
                 ))}
               </TableRow>
             </TableHead>
             <TableBody>
-              {diet.meals.map((dayMeals, dayIndex) => (
-                <TableRow key={dayIndex}>
+              {daysOfWeek.map(day => (
+                <TableRow key={day.key}>
                   <TableCell>
                     <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>
-                      {dayNames[dayIndex]}
+                      {day.label}
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
-                      {Math.round(calculateDayCalories(dayMeals))} cal
+                      {Math.round(calculateDayCalories(day.key))} cal
                     </Typography>
                   </TableCell>
-                  {dayMeals.map((meal, mealIndex) => (
-                    <TableCell key={mealIndex}>
-                      {meal.foods.length > 0 ? (
+                  {mealTypes.map(meal => (
+                    <TableCell key={meal.key}>
+                      {diet.meals[day.key][meal.key].length > 0 ? (
                         <Box>
-                          {meal.foods.map((food, foodIndex) => (
-                            <Box key={foodIndex} sx={{ mb: 1 }}>
+                          {diet.meals[day.key][meal.key].map((dietMeal, index) => (
+                            <Box key={index} sx={{ mb: 1 }}>
                               <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
-                                {food.name}
+                                {dietMeal.foodName}
                               </Typography>
                               <Typography variant="caption" color="text.secondary">
-                                {food.quantity}g - {Math.round(food.calories * food.quantity / 100)} cal
+                                {dietMeal.quantity}{dietMeal.unit} - {Math.round(dietMeal.calories)} cal
                               </Typography>
                             </Box>
                           ))}

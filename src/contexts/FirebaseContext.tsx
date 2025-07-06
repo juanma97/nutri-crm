@@ -9,11 +9,11 @@ import {
   getDocs, 
   query, 
   where,
-  orderBy,
   serverTimestamp 
 } from 'firebase/firestore'
 import { db } from '../firebase/config'
 import { useAuth } from './AuthContext'
+import { useNotifications } from '../hooks/useNotifications'
 import type { Diet, Food } from '../types'
 
 interface FirebaseContextType {
@@ -30,6 +30,7 @@ interface FirebaseContextType {
   updateDiet: (id: string, updates: Partial<Diet>) => Promise<boolean>
   deleteDiet: (id: string) => Promise<boolean>
   getDietByShareId: (shareId: string) => Diet | undefined
+  loadDietByShareId: (shareId: string) => Promise<Diet | null>
   loadingDiets: boolean
 }
 
@@ -37,6 +38,8 @@ const FirebaseContext = createContext<FirebaseContextType | undefined>(undefined
 
 export const FirebaseProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const { user } = useAuth()
+  const { showSuccess, showError } = useNotifications()
+  
   const [foods, setFoods] = useState<Food[]>([])
   const [diets, setDiets] = useState<Diet[]>([])
   const [loadingFoods, setLoadingFoods] = useState(false)
@@ -92,7 +95,7 @@ export const FirebaseProvider: React.FC<{ children: ReactNode }> = ({ children }
       querySnapshot.forEach((doc) => {
         const data = doc.data()
         dietsData.push({
-          id: parseInt(doc.id),
+          id: doc.id,
           ...data,
           createdAt: data.createdAt?.toDate() || new Date()
         } as Diet)
@@ -119,7 +122,10 @@ export const FirebaseProvider: React.FC<{ children: ReactNode }> = ({ children }
 
   // Funciones para alimentos
   const addFood = async (foodData: Omit<Food, 'id'>): Promise<boolean> => {
-    if (!user) return false
+    if (!user) {
+      showError('No user authenticated')
+      return false
+    }
     
     try {
       const foodsRef = collection(db, 'foods')
@@ -132,9 +138,11 @@ export const FirebaseProvider: React.FC<{ children: ReactNode }> = ({ children }
       const docRef = await addDoc(foodsRef, newFood)
       const addedFood: Food = { id: docRef.id, ...foodData }
       setFoods(prev => [addedFood, ...prev])
+      showSuccess('Alimento agregado correctamente')
       return true
     } catch (error) {
       console.error('Error adding food:', error)
+      showError('Error al agregar alimento')
       return false
     }
   }
@@ -147,9 +155,11 @@ export const FirebaseProvider: React.FC<{ children: ReactNode }> = ({ children }
       setFoods(prev => prev.map(food => 
         food.id === id ? { ...food, ...updates } : food
       ))
+      showSuccess('Alimento actualizado correctamente')
       return true
     } catch (error) {
       console.error('Error updating food:', error)
+      showError('Error al actualizar alimento')
       return false
     }
   }
@@ -160,9 +170,11 @@ export const FirebaseProvider: React.FC<{ children: ReactNode }> = ({ children }
       await deleteDoc(foodRef)
       
       setFoods(prev => prev.filter(food => food.id !== id))
+      showSuccess('Alimento eliminado correctamente')
       return true
     } catch (error) {
       console.error('Error deleting food:', error)
+      showError('Error al eliminar alimento')
       return false
     }
   }
@@ -182,15 +194,17 @@ export const FirebaseProvider: React.FC<{ children: ReactNode }> = ({ children }
       
       const docRef = await addDoc(dietsRef, newDiet)
       const addedDiet: Diet = { 
-        id: parseInt(docRef.id), 
+        id: docRef.id,
         ...dietData,
         shareId: newDiet.shareId,
         createdAt: new Date()
       }
       setDiets(prev => [addedDiet, ...prev])
+      showSuccess('Dieta creada correctamente')
       return true
     } catch (error) {
       console.error('Error adding diet:', error)
+      showError('Error al crear dieta')
       return false
     }
   }
@@ -201,11 +215,13 @@ export const FirebaseProvider: React.FC<{ children: ReactNode }> = ({ children }
       await updateDoc(dietRef, updates)
       
       setDiets(prev => prev.map(diet => 
-        diet.id === parseInt(id) ? { ...diet, ...updates } : diet
+        diet.id === id ? { ...diet, ...updates } : diet
       ))
+      showSuccess('Dieta actualizada correctamente')
       return true
     } catch (error) {
       console.error('Error updating diet:', error)
+      showError('Error al actualizar dieta')
       return false
     }
   }
@@ -215,16 +231,40 @@ export const FirebaseProvider: React.FC<{ children: ReactNode }> = ({ children }
       const dietRef = doc(db, 'diets', id)
       await deleteDoc(dietRef)
       
-      setDiets(prev => prev.filter(diet => diet.id !== parseInt(id)))
+      setDiets(prev => prev.filter(diet => diet.id !== id))
+      showSuccess('Dieta eliminada correctamente')
       return true
     } catch (error) {
       console.error('Error deleting diet:', error)
+      showError('Error al eliminar dieta')
       return false
     }
   }
 
   const getDietByShareId = (shareId: string): Diet | undefined => {
     return diets.find(diet => diet.shareId === shareId)
+  }
+
+  const loadDietByShareId = async (shareId: string): Promise<Diet | null> => {
+    try {
+      const dietsRef = collection(db, 'diets')
+      const q = query(dietsRef, where('shareId', '==', shareId))
+      const querySnapshot = await getDocs(q)
+      
+      if (!querySnapshot.empty) {
+        const doc = querySnapshot.docs[0]
+        const data = doc.data()
+        return {
+          id: doc.id,
+          ...data,
+          createdAt: data.createdAt?.toDate() || new Date()
+        } as Diet
+      }
+      return null
+    } catch (error) {
+      console.error('Error loading diet by shareId:', error)
+      return null
+    }
   }
 
   const value: FirebaseContextType = {
@@ -241,6 +281,7 @@ export const FirebaseProvider: React.FC<{ children: ReactNode }> = ({ children }
     updateDiet,
     deleteDiet,
     getDietByShareId,
+    loadDietByShareId,
     loadingDiets
   }
 

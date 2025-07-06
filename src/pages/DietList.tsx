@@ -1,51 +1,55 @@
 import React, { useState } from 'react'
-import { 
-  Box, 
-  Paper, 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableContainer, 
-  TableHead, 
-  TableRow, 
-  IconButton, 
-  Typography, 
+import {
+  Box,
+  Typography,
   Button,
   TextField,
   InputAdornment,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  IconButton,
   Chip,
-  Menu,
+  Card,
+  CardContent,
+  FormControl,
+  InputLabel,
+  Select,
   MenuItem,
+  Tooltip,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
-  FormControl,
-  InputLabel,
-  Select,
-  Card,
-  CardContent,
-  Tooltip,
-  Alert,
-  Snackbar
+  Menu,
+  CircularProgress
 } from '@mui/material'
+import {
+  Add as AddIcon,
+  Search as SearchIcon,
+  ViewList as ViewListIcon,
+  ViewModule as ViewModuleIcon,
+  Visibility as VisibilityIcon,
+  Edit as EditIcon,
+  Share as ShareIcon,
+  Delete as DeleteIcon,
+  ContentCopy as ContentCopyIcon,
+  MoreVert as MoreVertIcon
+} from '@mui/icons-material'
 import { useNavigate } from 'react-router-dom'
-import AddIcon from '@mui/icons-material/Add'
-import DeleteIcon from '@mui/icons-material/Delete'
-import VisibilityIcon from '@mui/icons-material/Visibility'
-import EditIcon from '@mui/icons-material/Edit'
-import ContentCopyIcon from '@mui/icons-material/ContentCopy'
-import ShareIcon from '@mui/icons-material/Share'
-import SearchIcon from '@mui/icons-material/Search'
-import FilterListIcon from '@mui/icons-material/FilterList'
-import MoreVertIcon from '@mui/icons-material/MoreVert'
-import ViewListIcon from '@mui/icons-material/ViewList'
-import ViewModuleIcon from '@mui/icons-material/ViewModule'
-import type { Diet, DayOfWeek } from '../types'
 import { useFirebase } from '../contexts/FirebaseContext'
+import { useNotifications } from '../hooks/useNotifications'
+import type { Diet } from '../types'
 
 const DietList = () => {
   const { diets, deleteDiet, loadingDiets } = useFirebase()
+  const navigate = useNavigate()
+  const { showSuccess, showError } = useNotifications()
+  
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
   const [dateFilter, setDateFilter] = useState('all')
@@ -53,57 +57,42 @@ const DietList = () => {
   const [selectedDiet, setSelectedDiet] = useState<Diet | null>(null)
   const [previewDialogOpen, setPreviewDialogOpen] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-  const [dietToDelete, setDietToDelete] = useState<Diet | null>(null)
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const [selectedDietForMenu, setSelectedDietForMenu] = useState<Diet | null>(null)
-  const [snackbarOpen, setSnackbarOpen] = useState(false)
-  const [snackbarMessage, setSnackbarMessage] = useState('')
-  
-  const navigate = useNavigate()
 
   const calculateDietStats = (diet: Diet) => {
-    const daysOfWeek: DayOfWeek[] = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
-    let totalMeals = 0
     let totalCalories = 0
+    let totalProteins = 0
+    let totalFats = 0
+    let totalCarbs = 0
 
-    daysOfWeek.forEach(day => {
-      const dayMeals = diet.meals[day]
-      Object.values(dayMeals).forEach((mealList: any[]) => {
-        totalMeals += mealList.length
-        mealList.forEach((meal: { calories: number }) => {
+    Object.values(diet.meals).forEach(dayMeals => {
+      Object.values(dayMeals).forEach(mealList => {
+        mealList.forEach(meal => {
           totalCalories += meal.calories
+          totalProteins += meal.proteins
+          totalFats += meal.fats
+          totalCarbs += meal.carbs
         })
       })
     })
 
-    return { totalMeals, totalCalories }
+    return { totalCalories, totalProteins, totalFats, totalCarbs }
   }
 
-  const filteredDiets = diets.filter(diet => {
-    const matchesSearch = diet.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      diet.clientName.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesStatus = statusFilter === 'all' || statusFilter === 'active'
-    const matchesDate = dateFilter === 'all' || 
-      (dateFilter === 'recent' && (new Date().getTime() - diet.createdAt.getTime()) < 7 * 24 * 60 * 60 * 1000) ||
-      (dateFilter === 'old' && (new Date().getTime() - diet.createdAt.getTime()) >= 7 * 24 * 60 * 60 * 1000)
-    
-    return matchesSearch && matchesStatus && matchesDate
-  })
-
   const handleDeleteDiet = (diet: Diet) => {
-    setDietToDelete(diet)
+    setSelectedDiet(diet)
     setDeleteDialogOpen(true)
   }
 
   const confirmDelete = async () => {
-    if (dietToDelete) {
-      const success = await deleteDiet(dietToDelete.id.toString())
+    if (selectedDiet) {
+      const success = await deleteDiet(selectedDiet.id)
       if (success) {
-        setDeleteDialogOpen(false)
-        setDietToDelete(null)
-        setSnackbarMessage('Dieta eliminada correctamente')
-        setSnackbarOpen(true)
+        showSuccess('Dieta eliminada correctamente')
       }
+      setDeleteDialogOpen(false)
+      setSelectedDiet(null)
     }
   }
 
@@ -126,9 +115,6 @@ const DietList = () => {
       tmb: diet.tmb,
       meals: diet.meals
     }
-    // La función addDiet del contexto se encargará de generar el ID y shareId
-    // Necesitamos acceder a addDiet del contexto
-    // Por ahora, usaremos una implementación temporal
     console.log('Duplicating diet:', newDietData)
   }
 
@@ -136,12 +122,10 @@ const DietList = () => {
     try {
       const shareUrl = `${window.location.origin}/diet/${diet.shareId}`
       await navigator.clipboard.writeText(shareUrl)
-      setSnackbarMessage('Link copiado al portapapeles')
-      setSnackbarOpen(true)
+      showSuccess('Link copiado al portapapeles')
     } catch (error) {
       console.error('Error copying to clipboard:', error)
-      setSnackbarMessage('Error al copiar el enlace')
-      setSnackbarOpen(true)
+      showError('Error al copiar el enlace')
     }
   }
 
@@ -248,7 +232,7 @@ const DietList = () => {
       {/* Results Count */}
       <Box sx={{ mb: 2 }}>
         <Typography variant="body2" color="text.secondary">
-          {filteredDiets.length} diet{filteredDiets.length !== 1 ? 's' : ''} found
+          {diets.length} diet{diets.length !== 1 ? 's' : ''} found
         </Typography>
       </Box>
 
@@ -269,7 +253,7 @@ const DietList = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {filteredDiets.map((diet) => {
+                {diets.map((diet) => {
                   const stats = calculateDietStats(diet)
                   return (
                     <TableRow key={diet.id} hover>
@@ -337,7 +321,7 @@ const DietList = () => {
       {/* Cards View */}
       {viewMode === 'cards' && (
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
-          {filteredDiets.map((diet) => {
+          {diets.map((diet) => {
             const stats = calculateDietStats(diet)
             return (
               <Box key={diet.id} sx={{ flex: '1 1 350px', minWidth: '300px' }}>
@@ -395,7 +379,7 @@ const DietList = () => {
       )}
 
       {/* Empty State */}
-      {filteredDiets.length === 0 && (
+      {diets.length === 0 && (
         <Paper elevation={3} sx={{ p: 4, textAlign: 'center' }}>
           <Typography variant="h6" color="text.secondary" gutterBottom>
             No diets found
@@ -476,7 +460,7 @@ const DietList = () => {
         <DialogTitle>Delete Diet</DialogTitle>
         <DialogContent>
           <Typography>
-            Are you sure you want to delete "{dietToDelete?.name}"? This action cannot be undone.
+            Are you sure you want to delete "{selectedDiet?.name}"? This action cannot be undone.
           </Typography>
         </DialogContent>
         <DialogActions>
@@ -515,21 +499,6 @@ const DietList = () => {
           Delete
         </MenuItem>
       </Menu>
-
-      {/* Snackbar for notifications */}
-      <Snackbar
-        open={snackbarOpen}
-        autoHideDuration={3000}
-        onClose={() => setSnackbarOpen(false)}
-      >
-        <Alert 
-          onClose={() => setSnackbarOpen(false)} 
-          severity="success" 
-          sx={{ width: '100%' }}
-        >
-          {snackbarMessage}
-        </Alert>
-      </Snackbar>
     </Box>
   )
 }

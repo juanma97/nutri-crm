@@ -4,7 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import TMBStep from '../components/TMBStep'
 import DietBuilder from '../components/DietBuilder'
 import { useFirebase } from '../contexts/FirebaseContext'
-import type { Diet } from '../types'
+import type { Diet, Client } from '../types'
 
 const steps = ['Calculate TMB', 'Build Diet']
 
@@ -20,7 +20,8 @@ const EditDiet = () => {
   // Buscar la dieta por ID
   useEffect(() => {
     if (id && diets.length > 0) {
-      const foundDiet = diets.find(d => d.id === parseInt(id))
+      const foundDiet = diets.find(d => d.id === id)
+      
       if (foundDiet) {
         setDiet(foundDiet)
         setTmbData({
@@ -31,19 +32,20 @@ const EditDiet = () => {
     }
   }, [id, diets])
 
-  const handleTMBComplete = (data: { tmb: number; clientName: string }) => {
-    setTmbData(data)
+  const handleTMBComplete = (clientName: string, tmb: number, clientData?: Client) => {
+    setTmbData({ tmb, clientName })
     if (diet) {
       setDiet(prev => prev ? {
         ...prev,
-        tmb: data.tmb,
-        clientName: data.clientName
+        tmb,
+        clientName,
+        clientData: clientData || prev.clientData
       } : null)
     }
     setActiveStep(1)
   }
 
-  const handleDietComplete = async (meals: Diet['meals']) => {
+  const handleDietSave = async (meals: Diet['meals']) => {
     if (!diet) return
 
     const updatedDiet = {
@@ -51,7 +53,7 @@ const EditDiet = () => {
       meals
     }
 
-    const success = await updateDiet(diet.id.toString(), updatedDiet)
+    const success = await updateDiet(diet.id, updatedDiet)
     if (success) {
       navigate('/diets')
     }
@@ -69,14 +71,16 @@ const EditDiet = () => {
         return (
           <TMBStep 
             onComplete={handleTMBComplete}
-            initialValues={tmbData}
+            initialClientName={tmbData.clientName}
+            initialTMB={tmbData.tmb}
+            initialClientData={diet.clientData || null}
           />
         )
       case 1:
         return (
           <DietBuilder
             tmb={diet.tmb}
-            onSave={handleDietComplete}
+            onSave={handleDietSave}
             initialMeals={diet.meals}
           />
         )

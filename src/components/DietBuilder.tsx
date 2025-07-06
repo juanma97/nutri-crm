@@ -26,17 +26,14 @@ import {
   LinearProgress
 } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
-import type { DayOfWeek, MealType, DietMeal, Food } from '../types'
+import type { DayOfWeek, MealType, DietMeal, Food, Diet } from '../types'
+import { useFirebase } from '../contexts/FirebaseContext'
 import DietCharts from './DietCharts'
 
 interface DietBuilderProps {
-  clientName?: string
   tmb: number
-  onSave: (meals: Record<DayOfWeek, Record<MealType, DietMeal[]>>) => void
-  onBack?: () => void
-  meals?: Record<DayOfWeek, Record<MealType, DietMeal[]>>
-  onMealsUpdate?: (meals: Record<DayOfWeek, Record<MealType, DietMeal[]>>) => void
-  isEditing?: boolean
+  onSave: (meals: Diet['meals']) => Promise<void>
+  initialMeals?: Diet['meals']
 }
 
 const daysOfWeek: { key: DayOfWeek; label: string }[] = [
@@ -57,15 +54,10 @@ const mealTypes: { key: MealType; label: string }[] = [
   { key: 'dinner', label: 'Dinner' }
 ]
 
-const mockFoods: Food[] = [
-  { id: 1, name: 'Chicken Breast', group: 'Proteins', portion: '100g', calories: 165, proteins: 31, fats: 3.6, carbs: 0, fiber: 0, link: '' },
-  { id: 2, name: 'Broccoli', group: 'Vegetables', portion: '100g', calories: 34, proteins: 2.8, fats: 0.4, carbs: 7, fiber: 2.6, link: '' },
-  { id: 3, name: 'Rice', group: 'Grains', portion: '100g', calories: 130, proteins: 2.7, fats: 0.3, carbs: 28, fiber: 0.4, link: '' },
-  { id: 4, name: 'Salmon', group: 'Proteins', portion: '100g', calories: 208, proteins: 25, fats: 12, carbs: 0, fiber: 0, link: '' }
-]
-
-const DietBuilder = ({ clientName, tmb, onSave, onBack, meals: initialMeals, onMealsUpdate, isEditing }: DietBuilderProps) => {
-  const [meals, setMeals] = useState<Record<DayOfWeek, Record<MealType, DietMeal[]>>>(initialMeals || {
+const DietBuilder = ({ tmb, onSave, initialMeals }: DietBuilderProps) => {
+  const { foods } = useFirebase()
+  
+  const [meals, setMeals] = useState<Diet['meals']>(initialMeals || {
     monday: { breakfast: [], morningSnack: [], lunch: [], afternoonSnack: [], dinner: [] },
     tuesday: { breakfast: [], morningSnack: [], lunch: [], afternoonSnack: [], dinner: [] },
     wednesday: { breakfast: [], morningSnack: [], lunch: [], afternoonSnack: [], dinner: [] },
@@ -78,9 +70,10 @@ const DietBuilder = ({ clientName, tmb, onSave, onBack, meals: initialMeals, onM
   const [dialogOpen, setDialogOpen] = useState(false)
   const [selectedDay, setSelectedDay] = useState<DayOfWeek>('monday')
   const [selectedMeal, setSelectedMeal] = useState<MealType>('breakfast')
-  const [selectedFood, setSelectedFood] = useState<number>(0)
+  const [selectedFood, setSelectedFood] = useState<string>('')
   const [quantity, setQuantity] = useState<string>('')
   const [activeTab, setActiveTab] = useState(0)
+  const [saving, setSaving] = useState(false)
 
   const calculateDailyTotals = (day: DayOfWeek) => {
     const dayMeals = meals[day]
@@ -113,10 +106,10 @@ const DietBuilder = ({ clientName, tmb, onSave, onBack, meals: initialMeals, onM
 
   const handleAddMeal = () => {
     if (selectedFood && quantity) {
-      const food = mockFoods.find(f => f.id === selectedFood)
+      const food = foods.find(f => f.id === selectedFood)
       if (food) {
         const newMeal: DietMeal = {
-          foodId: food.id,
+          foodId: parseInt(food.id),
           foodName: food.name,
           quantity: Number(quantity),
           unit: food.portion.includes('g') ? 'g' : food.portion.includes('ml') ? 'ml' : 'unit',
@@ -136,7 +129,7 @@ const DietBuilder = ({ clientName, tmb, onSave, onBack, meals: initialMeals, onM
         }))
 
         setDialogOpen(false)
-        setSelectedFood(0)
+        setSelectedFood('')
         setQuantity('')
       }
     }
@@ -152,8 +145,15 @@ const DietBuilder = ({ clientName, tmb, onSave, onBack, meals: initialMeals, onM
     }))
   }
 
-  const handleSave = () => {
-    onSave(meals)
+  const handleSave = async () => {
+    setSaving(true)
+    try {
+      await onSave(meals)
+    } catch (error) {
+      console.error('Error saving diet:', error)
+    } finally {
+      setSaving(false)
+    }
   }
 
   return (
@@ -162,7 +162,7 @@ const DietBuilder = ({ clientName, tmb, onSave, onBack, meals: initialMeals, onM
         Step 2: Build Weekly Diet
       </Typography>
       <Typography variant="body1" sx={{ mb: 3 }}>
-        Client: {clientName} | TMB: {Math.round(tmb)} calories
+        TMB: {Math.round(tmb)} calories
       </Typography>
 
       <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
@@ -221,65 +221,56 @@ const DietBuilder = ({ clientName, tmb, onSave, onBack, meals: initialMeals, onM
                       ))}
                     </TableRow>
                   ))}
-                  
-                  {/* Progress Summary Row */}
-                  <TableRow sx={{ backgroundColor: '#f8f9fa' }}>
-                    <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f0f0f0' }}>
-                      Progress
-                    </TableCell>
-                  </TableRow>
-                  
-                  {/* Daily Progress Row */}
-                  <TableRow>
-                    <TableCell sx={{ backgroundColor: '#f0f0f0' }}></TableCell>
-                    {daysOfWeek.map(day => {
-                      const totals = calculateDailyTotals(day.key)
-                      const caloriesStatus = getCaloriesStatus(totals.totalCalories)
-                      const percentage = Math.min((totals.totalCalories / tmb) * 100, 120)
-                      
-                      return (
-                        <TableCell key={`progress-${day.key}`} align="center">
-                          <Box sx={{ p: 1, border: '1px solid #e0e0e0', borderRadius: 1, backgroundColor: 'white' }}>
-                            <Typography variant="caption" display="block" gutterBottom>
-                              {Math.round(totals.totalCalories)} / {Math.round(tmb)} cal
-                            </Typography>
-                            <LinearProgress 
-                              variant="determinate" 
-                              value={percentage} 
-                              color={caloriesStatus.color as 'error' | 'warning' | 'success'}
-                              sx={{ height: 6, borderRadius: 3, mb: 1 }}
-                            />
-                            <Typography variant="caption" color={caloriesStatus.color} display="block">
-                              {caloriesStatus.status}
-                            </Typography>
-                            <Box sx={{ mt: 0.5 }}>
-                              <Typography variant="caption" display="block" sx={{ fontSize: '0.65rem' }}>
-                                P: {Math.round(totals.totalProteins)}g
-                              </Typography>
-                              <Typography variant="caption" display="block" sx={{ fontSize: '0.65rem' }}>
-                                F: {Math.round(totals.totalFats)}g
-                              </Typography>
-                              <Typography variant="caption" display="block" sx={{ fontSize: '0.65rem' }}>
-                                C: {Math.round(totals.totalCarbs)}g
-                              </Typography>
-                            </Box>
-                          </Box>
-                        </TableCell>
-                      )
-                    })}
-                  </TableRow>
                 </TableBody>
               </Table>
             </TableContainer>
           </Paper>
 
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 3 }}>
+          {/* Daily Progress Summary */}
+          <Paper elevation={2} sx={{ p: 3, mb: 3 }}>
+            <Typography variant="h6" gutterBottom>
+              Daily Progress Summary
+            </Typography>
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
+              {daysOfWeek.map(day => {
+                const totals = calculateDailyTotals(day.key)
+                const status = getCaloriesStatus(totals.totalCalories)
+                return (
+                  <Box key={day.key} sx={{ flex: '1 1 200px', minWidth: '200px' }}>
+                    <Typography variant="subtitle2" gutterBottom>
+                      {day.label}
+                    </Typography>
+                    <LinearProgress
+                      variant="determinate"
+                      value={Math.min((totals.totalCalories / tmb) * 100, 120)}
+                      color={status.color as any}
+                      sx={{ mb: 1 }}
+                    />
+                    <Typography variant="caption" color={status.color}>
+                      {status.status} - {Math.round(totals.totalCalories)} cal
+                    </Typography>
+                    <Box sx={{ mt: 1 }}>
+                      <Typography variant="caption" display="block">
+                        P: {Math.round(totals.totalProteins)}g | F: {Math.round(totals.totalFats)}g | C: {Math.round(totals.totalCarbs)}g
+                      </Typography>
+                    </Box>
+                  </Box>
+                )
+              })}
+            </Box>
+          </Paper>
+
+          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+            <Button variant="outlined">
+              Back
+            </Button>
             <Button
               variant="contained"
               onClick={handleSave}
+              disabled={saving}
               sx={{ backgroundColor: '#2e7d32' }}
             >
-              Save Diet
+              {saving ? 'Saving...' : 'Save Diet'}
             </Button>
           </Box>
         </>
@@ -289,20 +280,21 @@ const DietBuilder = ({ clientName, tmb, onSave, onBack, meals: initialMeals, onM
         <DietCharts meals={meals} tmb={tmb} />
       )}
 
+      {/* Add Food Dialog */}
       <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>Add Food to {selectedMeal}</DialogTitle>
+        <DialogTitle>Add Food to {mealTypes.find(m => m.key === selectedMeal)?.label}</DialogTitle>
         <DialogContent>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2 }}>
             <FormControl fullWidth>
               <InputLabel>Select Food</InputLabel>
               <Select
                 value={selectedFood}
-                onChange={(e) => setSelectedFood(e.target.value as number)}
+                onChange={(e) => setSelectedFood(e.target.value)}
                 label="Select Food"
               >
-                {mockFoods.map(food => (
+                {foods.map(food => (
                   <MenuItem key={food.id} value={food.id}>
-                    {food.name} ({food.portion})
+                    {food.name} ({food.group}) - {food.calories} cal/100g
                   </MenuItem>
                 ))}
               </Select>
@@ -313,13 +305,15 @@ const DietBuilder = ({ clientName, tmb, onSave, onBack, meals: initialMeals, onM
               type="number"
               value={quantity}
               onChange={(e) => setQuantity(e.target.value)}
-              helperText="Enter quantity in grams, ml, or units"
+              helperText="Enter quantity in grams"
             />
           </Box>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setDialogOpen(false)}>Cancel</Button>
-          <Button onClick={handleAddMeal} variant="contained">Add</Button>
+          <Button onClick={handleAddMeal} variant="contained">
+            Add Food
+          </Button>
         </DialogActions>
       </Dialog>
     </Box>

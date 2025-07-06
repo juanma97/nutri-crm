@@ -1,6 +1,5 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { 
-  Paper, 
   TextField, 
   Button, 
   Grid, 
@@ -9,6 +8,7 @@ import {
   MenuItem 
 } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
+import SaveIcon from '@mui/icons-material/Save'
 import type { Food, FoodFormData } from '../types'
 
 const foodGroups = [
@@ -22,10 +22,12 @@ const foodGroups = [
 ]
 
 interface FoodFormProps {
-  onAddFood: (food: Omit<Food, 'id'>) => void
+  food?: Food | null
+  onSave: (food: Omit<Food, 'id'>) => Promise<void>
+  onCancel: () => void
 }
 
-const FoodForm = ({ onAddFood }: FoodFormProps) => {
+const FoodForm = ({ food, onSave, onCancel }: FoodFormProps) => {
   const [formData, setFormData] = useState<FoodFormData>({
     name: '',
     group: '',
@@ -37,6 +39,24 @@ const FoodForm = ({ onAddFood }: FoodFormProps) => {
     fiber: '',
     link: ''
   })
+  const [loading, setLoading] = useState(false)
+
+  // Cargar datos del alimento si estamos editando
+  useEffect(() => {
+    if (food) {
+      setFormData({
+        name: food.name,
+        group: food.group,
+        portion: food.portion,
+        calories: food.calories.toString(),
+        proteins: food.proteins.toString(),
+        fats: food.fats.toString(),
+        carbs: food.carbs.toString(),
+        fiber: food.fiber.toString(),
+        link: food.link
+      })
+    }
+  }, [food])
 
   const handleInputChange = (field: keyof FoodFormData) => (
     event: React.ChangeEvent<HTMLInputElement>
@@ -47,44 +67,55 @@ const FoodForm = ({ onAddFood }: FoodFormProps) => {
     })
   }
 
-  const handleSubmit = (event: React.FormEvent) => {
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault()
     
     if (!formData.name || !formData.group || !formData.portion) {
       return
     }
 
-    const newFood: Omit<Food, 'id'> = {
-      name: formData.name,
-      group: formData.group,
-      portion: formData.portion,
-      calories: Number(formData.calories) || 0,
-      proteins: Number(formData.proteins) || 0,
-      fats: Number(formData.fats) || 0,
-      carbs: Number(formData.carbs) || 0,
-      fiber: Number(formData.fiber) || 0,
-      link: formData.link
-    }
+    setLoading(true)
 
-    onAddFood(newFood)
-    
-    setFormData({
-      name: '',
-      group: '',
-      portion: '',
-      calories: '',
-      proteins: '',
-      fats: '',
-      carbs: '',
-      fiber: '',
-      link: ''
-    })
+    try {
+      const newFood: Omit<Food, 'id'> = {
+        name: formData.name,
+        group: formData.group,
+        portion: formData.portion,
+        calories: Number(formData.calories) || 0,
+        proteins: Number(formData.proteins) || 0,
+        fats: Number(formData.fats) || 0,
+        carbs: Number(formData.carbs) || 0,
+        fiber: Number(formData.fiber) || 0,
+        link: formData.link
+      }
+
+      await onSave(newFood)
+      
+      // Solo limpiar el formulario si no estamos editando
+      if (!food) {
+        setFormData({
+          name: '',
+          group: '',
+          portion: '',
+          calories: '',
+          proteins: '',
+          fats: '',
+          carbs: '',
+          fiber: '',
+          link: ''
+        })
+      }
+    } catch (error) {
+      console.error('Error saving food:', error)
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
-    <Paper elevation={3} sx={{ p: 3, mb: 3 }}>
+    <Box>
       <Typography variant="h6" gutterBottom>
-        Add New Food
+        {food ? 'Edit Food' : 'Add New Food'}
       </Typography>
       <Box component="form" onSubmit={handleSubmit}>
         <Grid container spacing={2}>
@@ -97,6 +128,7 @@ const FoodForm = ({ onAddFood }: FoodFormProps) => {
               value={formData.name}
               onChange={handleInputChange('name')}
               required
+              disabled={loading}
             />
           </Grid>
           <Grid item xs={12} md={6}>
@@ -109,6 +141,7 @@ const FoodForm = ({ onAddFood }: FoodFormProps) => {
               value={formData.group}
               onChange={handleInputChange('group')}
               required
+              disabled={loading}
             >
               {foodGroups.map((group) => (
                 <MenuItem key={group} value={group}>
@@ -126,6 +159,7 @@ const FoodForm = ({ onAddFood }: FoodFormProps) => {
               value={formData.portion}
               onChange={handleInputChange('portion')}
               required
+              disabled={loading}
             />
           </Grid>
           <Grid item xs={12} md={3}>
@@ -137,6 +171,7 @@ const FoodForm = ({ onAddFood }: FoodFormProps) => {
               type="number"
               value={formData.calories}
               onChange={handleInputChange('calories')}
+              disabled={loading}
             />
           </Grid>
           <Grid item xs={12} md={3}>
@@ -148,6 +183,7 @@ const FoodForm = ({ onAddFood }: FoodFormProps) => {
               type="number"
               value={formData.proteins}
               onChange={handleInputChange('proteins')}
+              disabled={loading}
             />
           </Grid>
           <Grid item xs={12} md={3}>
@@ -159,6 +195,7 @@ const FoodForm = ({ onAddFood }: FoodFormProps) => {
               type="number"
               value={formData.fats}
               onChange={handleInputChange('fats')}
+              disabled={loading}
             />
           </Grid>
           <Grid item xs={12} md={4}>
@@ -170,6 +207,7 @@ const FoodForm = ({ onAddFood }: FoodFormProps) => {
               type="number"
               value={formData.carbs}
               onChange={handleInputChange('carbs')}
+              disabled={loading}
             />
           </Grid>
           <Grid item xs={12} md={4}>
@@ -181,6 +219,7 @@ const FoodForm = ({ onAddFood }: FoodFormProps) => {
               type="number"
               value={formData.fiber}
               onChange={handleInputChange('fiber')}
+              disabled={loading}
             />
           </Grid>
           <Grid item xs={12} md={4}>
@@ -191,21 +230,32 @@ const FoodForm = ({ onAddFood }: FoodFormProps) => {
               size="small"
               value={formData.link}
               onChange={handleInputChange('link')}
+              disabled={loading}
             />
           </Grid>
           <Grid item xs={12}>
-            <Button
-              type="submit"
-              variant="contained"
-              startIcon={<AddIcon />}
-              sx={{ backgroundColor: '#2e7d32' }}
-            >
-              Add Food
-            </Button>
+            <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
+              <Button
+                variant="outlined"
+                onClick={onCancel}
+                disabled={loading}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                variant="contained"
+                startIcon={food ? <SaveIcon /> : <AddIcon />}
+                disabled={loading}
+                sx={{ backgroundColor: '#2e7d32' }}
+              >
+                {loading ? 'Saving...' : (food ? 'Save Changes' : 'Add Food')}
+              </Button>
+            </Box>
           </Grid>
         </Grid>
       </Box>
-    </Paper>
+    </Box>
   )
 }
 

@@ -52,10 +52,11 @@ export interface DayMeals {
 }
 
 export interface Diet {
-  id: number
+  id: string
   name: string
   clientName: string
   tmb: number
+  clientData?: Client
   meals: {
     monday: DayMeals
     tuesday: DayMeals

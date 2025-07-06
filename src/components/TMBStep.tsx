@@ -10,22 +10,21 @@ import {
 import type { Client } from '../types'
 
 interface TMBStepProps {
-  onComplete?: (name: string, tmb: number) => void
+  onComplete?: (name: string, tmb: number, clientData?: Client) => void
   onNext?: () => void
   onUpdate?: (tmb: number, clientName: string) => void
   initialClientName?: string
   initialTMB?: number
-  clientName?: string
-  tmb?: number
+  initialClientData?: Client | null
 }
 
-const TMBStep = ({ onComplete, onNext, onUpdate, initialClientName = '', initialTMB = 0, clientName, tmb: propTmb }: TMBStepProps) => {
+const TMBStep = ({ onComplete, onNext, onUpdate, initialClientName = '', initialTMB = 0, initialClientData }: TMBStepProps) => {
   const [client, setClient] = useState<Omit<Client, 'age' | 'weight' | 'height'> & { age: string, weight: string, height: string }>({
-    name: initialClientName,
-    age: '',
-    weight: '',
-    height: '',
-    gender: 'male'
+    name: initialClientName || initialClientData?.name || '',
+    age: initialClientData?.age?.toString() || '',
+    weight: initialClientData?.weight?.toString() || '',
+    height: initialClientData?.height?.toString() || '',
+    gender: initialClientData?.gender || 'male'
   })
   const [tmb, setTmb] = useState<number | null>(initialTMB || null)
   const [errors, setErrors] = useState<string[]>([])
@@ -76,7 +75,7 @@ const TMBStep = ({ onComplete, onNext, onUpdate, initialClientName = '', initial
     setTmb(calculatedTMB)
     
     if (onComplete) {
-      onComplete(client.name, calculatedTMB)
+      onComplete(client.name, calculatedTMB, clientData)
     } else if (onUpdate) {
       onUpdate(calculatedTMB, client.name)
     }

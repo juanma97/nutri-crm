@@ -4,41 +4,56 @@ import { useNavigate } from 'react-router-dom'
 import TMBStep from '../components/TMBStep'
 import DietBuilder from '../components/DietBuilder'
 import { useFirebase } from '../contexts/FirebaseContext'
-import type { Diet } from '../types'
+import type { Diet, Client } from '../types'
 
 const steps = ['Calculate TMB', 'Build Diet']
 
 const CreateDiet = () => {
   const [activeStep, setActiveStep] = useState(0)
   const [tmbData, setTmbData] = useState({ tmb: 0, clientName: '' })
+  const [clientData, setClientData] = useState<Client | null>(null)
   const [dietData, setDietData] = useState<Omit<Diet, 'id' | 'createdAt' | 'shareId'>>({
     name: '',
     clientName: '',
     tmb: 0,
-    meals: Array(7).fill(null).map(() => Array(5).fill(null).map(() => ({ foods: [] })))
+    clientData: undefined,
+    meals: {
+      monday: { breakfast: [], morningSnack: [], lunch: [], afternoonSnack: [], dinner: [] },
+      tuesday: { breakfast: [], morningSnack: [], lunch: [], afternoonSnack: [], dinner: [] },
+      wednesday: { breakfast: [], morningSnack: [], lunch: [], afternoonSnack: [], dinner: [] },
+      thursday: { breakfast: [], morningSnack: [], lunch: [], afternoonSnack: [], dinner: [] },
+      friday: { breakfast: [], morningSnack: [], lunch: [], afternoonSnack: [], dinner: [] },
+      saturday: { breakfast: [], morningSnack: [], lunch: [], afternoonSnack: [], dinner: [] },
+      sunday: { breakfast: [], morningSnack: [], lunch: [], afternoonSnack: [], dinner: [] }
+    }
   })
   
   const { addDiet } = useFirebase()
   const navigate = useNavigate()
 
-  const handleTMBComplete = (data: { tmb: number; clientName: string }) => {
-    setTmbData(data)
-    setDietData(prev => ({
-      ...prev,
-      tmb: data.tmb,
-      clientName: data.clientName,
-      name: `Diet for ${data.clientName}`
-    }))
+  const handleTMBComplete = (clientName: string, tmb: number, client?: Client) => {
+    setTmbData({ tmb, clientName })
+    setClientData(client || null)
+    
+    const updatedDietData = {
+      ...dietData,
+      tmb,
+      clientName,
+      clientData: client || undefined,
+      name: `Diet for ${clientName}`
+    }
+    
+    setDietData(updatedDietData)
     setActiveStep(1)
   }
 
-  const handleDietComplete = async (meals: Diet['meals']) => {
-    const finalDietData = {
+  const handleDietSave = async (meals: Diet['meals']) => {
+    const currentDietData = {
       ...dietData,
       meals
     }
-
-    const success = await addDiet(finalDietData)
+    
+    const success = await addDiet(currentDietData)
     if (success) {
       navigate('/diets')
     }
@@ -54,14 +69,16 @@ const CreateDiet = () => {
         return (
           <TMBStep 
             onComplete={handleTMBComplete}
-            initialValues={tmbData}
+            initialClientName={tmbData.clientName}
+            initialTMB={tmbData.tmb}
+            initialClientData={clientData}
           />
         )
       case 1:
         return (
           <DietBuilder
             tmb={tmbData.tmb}
-            onComplete={handleDietComplete}
+            onSave={handleDietSave}
             initialMeals={dietData.meals}
           />
         )
