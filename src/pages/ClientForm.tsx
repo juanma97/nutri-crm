@@ -14,7 +14,7 @@ import {
 import { useNavigate, useParams } from 'react-router-dom'
 import { useFirebase } from '../contexts/FirebaseContext'
 import { useNotifications } from '../hooks/useNotifications'
-import type { ClientFormData } from '../types'
+import type { ClientFormData, Client } from '../types'
 
 const ClientForm = () => {
   const { id } = useParams<{ id: string }>()
@@ -46,6 +46,29 @@ const ClientForm = () => {
 
   const [errors, setErrors] = useState<Partial<ClientFormData>>({})
 
+  // Función helper para manejar fechas de manera segura
+  const safeParseDate = (dateValue: string | Date | undefined): string => {
+    if (!dateValue) return ''
+    try {
+      const date = new Date(dateValue)
+      return isNaN(date.getTime()) ? '' : date.toISOString().split('T')[0]
+    } catch (error) {
+      console.error('Error parsing date:', error)
+      return ''
+    }
+  }
+
+  const safeCreateDate = (dateString: string): Date | undefined => {
+    if (!dateString) return undefined
+    try {
+      const date = new Date(dateString)
+      return isNaN(date.getTime()) ? undefined : date
+    } catch (error) {
+      console.error('Error creating date:', error)
+      return undefined
+    }
+  }
+
   // Cargar datos del cliente si estamos editando
   useEffect(() => {
     if (id) {
@@ -55,7 +78,7 @@ const ClientForm = () => {
           name: client.name,
           email: client.email,
           phone: client.phone || '',
-          birthDate: client.birthDate ? new Date(client.birthDate).toISOString().split('T')[0] : '',
+          birthDate: safeParseDate(client.birthDate),
           gender: client.gender || '',
           weight: client.weight?.toString() || '',
           height: client.height?.toString() || '',
@@ -88,6 +111,11 @@ const ClientForm = () => {
       newErrors.email = 'Email inválido'
     }
 
+    // Fecha de nacimiento es obligatoria en creación
+    if (!id && !formData.birthDate) {
+      newErrors.birthDate = 'La fecha de nacimiento es requerida'
+    }
+
     if (formData.height && (isNaN(Number(formData.height)) || Number(formData.height) <= 0)) {
       newErrors.height = 'Altura inválida'
     }
@@ -107,17 +135,45 @@ const ClientForm = () => {
 
     setLoading(true)
     try {
-      const clientData = {
-        ...formData,
+      // Preparar los datos del cliente
+      const clientData: Omit<Client, 'id' | 'createdAt' | 'updatedAt'> = {
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone || '',
+        gender: (formData.gender || '') as 'male' | 'female' | '',
         height: formData.height ? Number(formData.height) : undefined,
         weight: formData.weight ? Number(formData.weight) : undefined,
-        birthDate: formData.birthDate ? new Date(formData.birthDate) : undefined,
-        gender: formData.gender as 'male' | 'female' | ''
+        activityLevel: formData.activityLevel,
+        goal: formData.goal,
+        medicalConditions: formData.medicalConditions || '',
+        allergies: formData.allergies || '',
+        notes: formData.notes || '',
+        status: formData.status,
+        emergencyContact: formData.emergencyContact
+      }
+
+      // Manejar la fecha de nacimiento de manera especial
+      if (formData.birthDate) {
+        const parsedDate = safeCreateDate(formData.birthDate)
+        if (parsedDate) {
+          clientData.birthDate = parsedDate
+        }
+      } else if (id) {
+        // En edición, si no hay fecha en el formulario, mantener la original
+        const originalClient = getClientById(id)
+        if (originalClient?.birthDate) {
+          clientData.birthDate = originalClient.birthDate
+        }
+      } else {
+        // En creación, la fecha es obligatoria (ya validada arriba)
+        throw new Error('La fecha de nacimiento es requerida')
       }
 
       let success = false
       if (id) {
-        success = await updateClient(id, clientData)
+        // Para actualización, usar Partial<Client>
+        const updateData: Partial<Client> = { ...clientData }
+        success = await updateClient(id, updateData)
         if (success) showSuccess('Cliente actualizado correctamente')
       } else {
         success = await addClient(clientData)
@@ -161,7 +217,7 @@ const ClientForm = () => {
   }
 
   return (
-    <Box sx={{ width: '100%', px: 3 }}>
+    <Box sx={{ width: '100%', px: 3, py: 3 }}>
       <Typography variant="h4" sx={{ mb: 3 }}>
         {id ? 'Editar Cliente' : 'Agregar Cliente'}
       </Typography>
@@ -206,10 +262,13 @@ const ClientForm = () => {
               />
 
               <TextField
-                label="Fecha de nacimiento"
+                label={id ? "Fecha de nacimiento" : "Fecha de nacimiento *"}
                 type="date"
                 value={formData.birthDate}
                 onChange={(e) => handleInputChange('birthDate', e.target.value)}
+                error={!!errors.birthDate}
+                helperText={errors.birthDate}
+                required={!id}
                 InputLabelProps={{ shrink: true }}
                 sx={{ flex: '1 1 300px' }}
               />
