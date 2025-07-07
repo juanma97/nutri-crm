@@ -45,14 +45,14 @@ const FoodForm = ({ food, onSave, onCancel }: FoodFormProps) => {
   useEffect(() => {
     if (food) {
       setFormData({
-        name: food.name,
-        group: food.group,
-        portion: food.portion,
-        calories: food.calories.toString(),
-        proteins: food.proteins.toString(),
-        fats: food.fats.toString(),
-        carbs: food.carbs.toString(),
-        fiber: food.fiber.toString(),
+        name: food?.name,
+        group: food?.group,
+        portion: food?.portion,
+        calories: food?.calories?.toString(),
+        proteins: food?.proteins?.toString(),
+        fats: food?.fats?.toString(),
+        carbs: food?.carbs?.toString(),
+        fiber: food?.fiber?.toString(),
         link: food.link
       })
     }

@@ -1,19 +1,17 @@
 import React, { useState, useEffect } from 'react'
-import { Box, Stepper, Step, StepLabel, Button, Typography, Paper, CircularProgress } from '@mui/material'
+import { Box, Button, Typography, Paper, CircularProgress } from '@mui/material'
 import { useNavigate, useParams } from 'react-router-dom'
 import TMBStep from '../components/TMBStep'
 import DietBuilder from '../components/DietBuilder'
 import { useFirebase } from '../contexts/FirebaseContext'
 import type { Diet, Client } from '../types'
 
-const steps = ['Calculate TMB', 'Build Diet']
-
 const EditDiet = () => {
   const { id } = useParams<{ id: string }>()
   const { diets, updateDiet, loadingDiets } = useFirebase()
   const navigate = useNavigate()
   
-  const [activeStep, setActiveStep] = useState(0)
+  const [activeStep, setActiveStep] = useState(1)
   const [diet, setDiet] = useState<Diet | null>(null)
   const [tmbData, setTmbData] = useState({ tmb: 0, clientName: '' })
 
@@ -116,18 +114,14 @@ const EditDiet = () => {
     <Box sx={{ width: '100%', px: 3 }}>
       <Paper elevation={3} sx={{ p: 4 }}>
         <Typography variant="h4" gutterBottom>
-          Edit Diet - {diet.clientName}
+          Editar Dieta - {diet.clientName}
         </Typography>
         
-        <Stepper activeStep={activeStep} sx={{ mb: 4 }}>
-          {steps.map((label) => (
-            <Step key={label}>
-              <StepLabel>{label}</StepLabel>
-            </Step>
-          ))}
-        </Stepper>
+        <Typography variant="body1" sx={{ mb: 3, color: 'text.secondary' }}>
+          Editando la dieta para {diet.clientName} (TMB: {diet.tmb} kcal)
+        </Typography>
 
-        {activeStep === steps.length ? (
+        {activeStep === 2 ? (
           <Box sx={{ textAlign: 'center' }}>
             <Typography variant="h6" gutterBottom>
               All steps completed
