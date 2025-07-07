@@ -108,7 +108,7 @@ const DietList = () => {
   }
 
   const handleCreateDiet = () => {
-    navigate('/diets/create')
+    navigate('/diets/new')
   }
 
   const handleViewDiet = (diet: Diet) => {

@@ -31,7 +31,7 @@ const TMBStep = ({ onComplete, onNext, onUpdate, initialClientName = '', initial
   const [selectedClientId, setSelectedClientId] = useState<string>('')
   const [client, setClient] = useState({
     name: initialClientName || initialClientData?.name || '',
-    birthDate: initialClientData?.birthDate ? new Date(initialClientData.birthDate).toISOString().split('T')[0] : '',
+    age: initialClientData?.age?.toString() || '',
     weight: initialClientData?.weight?.toString() || '',
     height: initialClientData?.height?.toString() || '',
     gender: initialClientData?.gender || 'male'
@@ -39,29 +39,15 @@ const TMBStep = ({ onComplete, onNext, onUpdate, initialClientName = '', initial
   const [tmb, setTmb] = useState<number | null>(initialTMB || null)
   const [errors, setErrors] = useState<string[]>([])
 
-  const calculateAge = (birthDate: Date): number => {
-    const today = new Date()
-    const birth = new Date(birthDate)
-    let age = today.getFullYear() - birth.getFullYear()
-    const monthDiff = today.getMonth() - birth.getMonth()
-    
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
-      age--
-    }
-    
-    return age
-  }
+
 
   const calculateTMB = (clientData: Client): number => {
-    const { weight, height, gender, birthDate } = clientData
-    
-    // Calcular edad desde birthDate
-    const age = birthDate ? calculateAge(birthDate) : 0
+    const { weight, height, gender, age } = clientData
     
     if (gender === 'male') {
-      return 88.362 + (13.397 * (weight || 0)) + (4.799 * (height || 0)) - (5.677 * age)
+      return 88.362 + (13.397 * (weight || 0)) + (4.799 * (height || 0)) - (5.677 * (age || 0))
     } else {
-      return 447.593 + (9.247 * (weight || 0)) + (3.098 * (height || 0)) - (4.330 * age)
+      return 447.593 + (9.247 * (weight || 0)) + (3.098 * (height || 0)) - (4.330 * (age || 0))
     }
   }
 
@@ -77,9 +63,15 @@ const TMBStep = ({ onComplete, onNext, onUpdate, initialClientName = '', initial
   const handleClientSelect = (clientId: string) => {
     setSelectedClientId(clientId)
     const selectedClient = clients.find(c => c.id === clientId)
-    if (selectedClient && selectedClient.weight && selectedClient.height && selectedClient.birthDate) {
-      const calculatedTMB = calculateTMB(selectedClient)
-      setTmb(calculatedTMB)
+    if (selectedClient) {
+      // Verificar que todos los datos necesarios estén presentes
+      if (selectedClient.weight && selectedClient.height && selectedClient.age) {
+        const calculatedTMB = calculateTMB(selectedClient)
+        setTmb(calculatedTMB)
+      } else {
+        setTmb(null)
+        console.warn('Cliente seleccionado no tiene todos los datos necesarios:', selectedClient)
+      }
     }
   }
 
@@ -90,7 +82,7 @@ const TMBStep = ({ onComplete, onNext, onUpdate, initialClientName = '', initial
       if (!selectedClientId) newErrors.push('Please select a client')
     } else {
       if (!client.name.trim()) newErrors.push('Name is required')
-      if (!client.birthDate) newErrors.push('Birth date is required')
+      if (!client.age) newErrors.push('Age is required')
       if (!client.weight || Number(client.weight) <= 0) newErrors.push('Valid weight is required')
       if (!client.height || Number(client.height) <= 0) newErrors.push('Valid height is required')
     }
@@ -118,7 +110,7 @@ const TMBStep = ({ onComplete, onNext, onUpdate, initialClientName = '', initial
       // Crear nuevo cliente
       clientData = {
         name: client.name,
-        birthDate: client.birthDate ? new Date(client.birthDate) : undefined,
+        age: Number(client.age),
         weight: Number(client.weight),
         height: Number(client.height),
         gender: client.gender
@@ -140,10 +132,10 @@ const TMBStep = ({ onComplete, onNext, onUpdate, initialClientName = '', initial
   }
 
   useEffect(() => {
-    if (tabValue === 1 && client.birthDate && client.weight && client.height) {
+    if (tabValue === 1 && client.age && client.weight && client.height) {
       const clientData: Client = {
         name: client.name,
-        birthDate: new Date(client.birthDate),
+        age: Number(client.age),
         weight: Number(client.weight),
         height: Number(client.height),
         gender: client.gender
@@ -151,7 +143,7 @@ const TMBStep = ({ onComplete, onNext, onUpdate, initialClientName = '', initial
       const calculatedTMB = calculateTMB(clientData)
       setTmb(calculatedTMB)
     }
-  }, [client.birthDate, client.weight, client.height, client.gender, tabValue])
+  }, [client.age, client.weight, client.height, client.gender, tabValue])
 
   return (
     <Box sx={{ width: '100%', maxWidth: '100%', height: '100vw', overflow: 'hidden' }}>
@@ -188,10 +180,9 @@ const TMBStep = ({ onComplete, onNext, onUpdate, initialClientName = '', initial
               label="Select Client"
             >
               {clients.map((client) => {
-                const age = client.birthDate ? calculateAge(client.birthDate) : 'N/A'
                 return (
                   <MenuItem key={client.id} value={client.id}>
-                    {client.name} - {age} años, {client.weight}kg, {client.height}cm
+                    {client.name} - {client.age || 'N/A'} años, {client.weight || 'N/A'}kg, {client.height || 'N/A'}cm
                   </MenuItem>
                 )
               })}
@@ -199,13 +190,16 @@ const TMBStep = ({ onComplete, onNext, onUpdate, initialClientName = '', initial
           </FormControl>
 
           {selectedClientId && (
-            <Alert severity="info">
+            <Alert severity={tmb ? "info" : "warning"}>
               <Typography variant="h6">
-                Basal Metabolic Rate (TMB): {tmb ? Math.round(tmb) : 'Calculating...'} calories/day
+                Basal Metabolic Rate (TMB): {tmb ? Math.round(tmb) : 'Cannot calculate'} calories/day
               </Typography>
-              <Typography variant="body2">
-                This is the number of calories your body needs at rest to maintain basic life functions.
-              </Typography>
+                      <Typography variant="body2">
+          {tmb 
+            ? "This is the number of calories your body needs at rest to maintain basic life functions."
+            : "The selected client is missing required data (weight, height, or age) to calculate TMB."
+          }
+        </Typography>
             </Alert>
           )}
         </Box>

@@ -28,7 +28,6 @@ export interface Client {
   name: string
   email: string
   phone: string
-  birthDate?: Date
   age?: number
   weight?: number
   height?: number
@@ -54,7 +53,7 @@ export interface ClientFormData {
   name: string
   email: string
   phone: string
-  birthDate: string
+  age: string
   gender: string
   weight: string
   height: string

@@ -27,7 +27,7 @@ const ClientForm = () => {
     name: '',
     email: '',
     phone: '',
-    birthDate: '',
+    age: '',
     gender: '',
     weight: '',
     height: '',
@@ -46,27 +46,10 @@ const ClientForm = () => {
 
   const [errors, setErrors] = useState<Partial<ClientFormData>>({})
 
-  // Función helper para manejar fechas de manera segura
-  const safeParseDate = (dateValue: string | Date | undefined): string => {
-    if (!dateValue) return ''
-    try {
-      const date = new Date(dateValue)
-      return isNaN(date.getTime()) ? '' : date.toISOString().split('T')[0]
-    } catch (error) {
-      console.error('Error parsing date:', error)
-      return ''
-    }
-  }
-
-  const safeCreateDate = (dateString: string): Date | undefined => {
-    if (!dateString) return undefined
-    try {
-      const date = new Date(dateString)
-      return isNaN(date.getTime()) ? undefined : date
-    } catch (error) {
-      console.error('Error creating date:', error)
-      return undefined
-    }
+  // Función helper para manejar edad de manera segura
+  const safeParseAge = (ageValue: number | undefined): string => {
+    if (ageValue === undefined || ageValue === null) return ''
+    return ageValue.toString()
   }
 
   // Cargar datos del cliente si estamos editando
@@ -78,7 +61,7 @@ const ClientForm = () => {
           name: client.name,
           email: client.email,
           phone: client.phone || '',
-          birthDate: safeParseDate(client.birthDate),
+          age: safeParseAge(client.age),
           gender: client.gender || '',
           weight: client.weight?.toString() || '',
           height: client.height?.toString() || '',
@@ -111,9 +94,9 @@ const ClientForm = () => {
       newErrors.email = 'Email inválido'
     }
 
-    // Fecha de nacimiento es obligatoria en creación
-    if (!id && !formData.birthDate) {
-      newErrors.birthDate = 'La fecha de nacimiento es requerida'
+    // Edad es obligatoria en creación
+    if (!id && !formData.age) {
+      newErrors.age = 'La edad es requerida'
     }
 
     if (formData.height && (isNaN(Number(formData.height)) || Number(formData.height) <= 0)) {
@@ -152,21 +135,21 @@ const ClientForm = () => {
         emergencyContact: formData.emergencyContact
       }
 
-      // Manejar la fecha de nacimiento de manera especial
-      if (formData.birthDate) {
-        const parsedDate = safeCreateDate(formData.birthDate)
-        if (parsedDate) {
-          clientData.birthDate = parsedDate
+      // Manejar la edad de manera especial
+      if (formData.age) {
+        const parsedAge = Number(formData.age)
+        if (!isNaN(parsedAge) && parsedAge > 0) {
+          clientData.age = parsedAge
         }
       } else if (id) {
-        // En edición, si no hay fecha en el formulario, mantener la original
+        // En edición, si no hay edad en el formulario, mantener la original
         const originalClient = getClientById(id)
-        if (originalClient?.birthDate) {
-          clientData.birthDate = originalClient.birthDate
+        if (originalClient?.age) {
+          clientData.age = originalClient.age
         }
       } else {
-        // En creación, la fecha es obligatoria (ya validada arriba)
-        throw new Error('La fecha de nacimiento es requerida')
+        // En creación, la edad es obligatoria (ya validada arriba)
+        throw new Error('La edad es requerida')
       }
 
       let success = false
@@ -262,14 +245,14 @@ const ClientForm = () => {
               />
 
               <TextField
-                label={id ? "Fecha de nacimiento" : "Fecha de nacimiento *"}
-                type="date"
-                value={formData.birthDate}
-                onChange={(e) => handleInputChange('birthDate', e.target.value)}
-                error={!!errors.birthDate}
-                helperText={errors.birthDate}
+                label={id ? "Edad" : "Edad *"}
+                type="number"
+                value={formData.age}
+                onChange={(e) => handleInputChange('age', e.target.value)}
+                error={!!errors.age}
+                helperText={errors.age}
                 required={!id}
-                InputLabelProps={{ shrink: true }}
+                inputProps={{ min: 1, max: 120 }}
                 sx={{ flex: '1 1 300px' }}
               />
             </Box>

@@ -100,7 +100,7 @@ const ClientList = () => {
   }
 
   const handleCreateClient = () => {
-    navigate('/clients/create')
+    navigate('/clients/new')
   }
 
   const handleViewClient = (client: Client) => {

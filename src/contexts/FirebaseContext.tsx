@@ -136,6 +136,7 @@ export const FirebaseProvider: React.FC<{ children: ReactNode }> = ({ children }
       const clientsData: Client[] = []
       querySnapshot.forEach((doc) => {
         const data = doc.data()
+        
         clientsData.push({
           id: doc.id,
           ...data,
@@ -320,14 +321,18 @@ export const FirebaseProvider: React.FC<{ children: ReactNode }> = ({ children }
     
     try {
       const clientsRef = collection(db, 'clients')
-      const newClient = {
+      
+      // Asegurar que birthDate se guarde correctamente
+      const clientToSave = {
         ...clientData,
         userId: user.id,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
       }
       
-      const docRef = await addDoc(clientsRef, newClient)
+      // La edad ya es un número, no necesita conversión especial
+      
+      const docRef = await addDoc(clientsRef, clientToSave)
       const addedClient: Client = { 
         id: docRef.id,
         ...clientData,
