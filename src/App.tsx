@@ -1,23 +1,23 @@
-import React from 'react'
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { ThemeProvider, createTheme } from '@mui/material/styles'
 import CssBaseline from '@mui/material/CssBaseline'
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
-import TopNav from './components/TopNav'
+import { SnackbarProvider } from 'notistack'
+import { AuthProvider } from './contexts/AuthContext'
+import { FirebaseProvider } from './contexts/FirebaseContext'
 import ProtectedRoute from './components/ProtectedRoute'
+import TopNav from './components/TopNav'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
+import ClientList from './pages/ClientList'
+import ClientForm from './pages/ClientForm'
 import FoodList from './pages/FoodList'
+import FoodFormPage from './pages/FoodFormPage'
 import DietList from './pages/DietList'
 import CreateDiet from './pages/CreateDiet'
 import EditDiet from './pages/EditDiet'
 import DietViewer from './pages/DietViewer'
-import ClientList from './pages/ClientList'
-import ClientForm from './pages/ClientForm'
 import Reports from './pages/Reports'
-import { AuthProvider } from './contexts/AuthContext'
-import { FirebaseProvider } from './contexts/FirebaseContext'
-import { SnackbarProvider } from 'notistack'
-import './styles/global.css'
+import './App.css'
 
 const theme = createTheme({
   palette: {
@@ -25,15 +25,12 @@ const theme = createTheme({
       main: '#2e7d32',
     },
     secondary: {
-      main: '#ff6b6b',
+      main: '#1976d2',
     },
-  },
-  typography: {
-    fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
   },
 })
 
-const App = () => {
+function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
@@ -50,120 +47,22 @@ const App = () => {
             <Router>
               <div className="App">
                 <Routes>
-                  {/* Rutas públicas */}
                   <Route path="/login" element={<Login />} />
-                  <Route path="/diet/:shareId" element={<DietViewer />} />
-                  
-                  {/* Rutas protegidas */}
-                  <Route path="/" element={
-                    <ProtectedRoute>
-                      <div style={{ minHeight: '100vh', width: '100vw', maxWidth: '100vw', display: 'flex', flexDirection: 'column', margin: 0, padding: 0 }}>
-                        <TopNav />
-                        <div style={{ flex: 1, width: '100%' }}>
-                          <Navigate to="/dashboard" replace />
-                        </div>
-                      </div>
-                    </ProtectedRoute>
-                  } />
-                  
-                  <Route path="/dashboard" element={
-                    <ProtectedRoute>
-                      <div style={{ minHeight: '100vh', width: '100vw', maxWidth: '100vw', display: 'flex', flexDirection: 'column', margin: 0, padding: 0 }}>
-                        <TopNav />
-                        <div style={{ flex: 1, width: '100%' }}>
-                          <Dashboard />
-                        </div>
-                      </div>
-                    </ProtectedRoute>
-                  } />
-                  
-                  <Route path="/foods" element={
-                    <ProtectedRoute>
-                      <div style={{ minHeight: '100vh', width: '100vw', maxWidth: '100vw', display: 'flex', flexDirection: 'column', margin: 0, padding: 0 }}>
-                        <TopNav />
-                        <div style={{ flex: 1, width: '100%' }}>
-                          <FoodList />
-                        </div>
-                      </div>
-                    </ProtectedRoute>
-                  } />
-                  
-                  <Route path="/diets" element={
-                    <ProtectedRoute>
-                      <div style={{ minHeight: '100vh', width: '100vw', maxWidth: '100vw', display: 'flex', flexDirection: 'column', margin: 0, padding: 0 }}>
-                        <TopNav />
-                        <div style={{ flex: 1, width: '100%' }}>
-                          <DietList />
-                        </div>
-                      </div>
-                    </ProtectedRoute>
-                  } />
-                  
-                  <Route path="/diets/create" element={
-                    <ProtectedRoute>
-                      <div style={{ minHeight: '100vh', width: '100vw', maxWidth: '100vw', display: 'flex', flexDirection: 'column', margin: 0, padding: 0 }}>
-                        <TopNav />
-                        <div style={{ flex: 1, width: '100%' }}>
-                          <CreateDiet />
-                        </div>
-                      </div>
-                    </ProtectedRoute>
-                  } />
-                  
-                  <Route path="/diets/edit/:id" element={
-                    <ProtectedRoute>
-                      <div style={{ minHeight: '100vh', width: '100vw', maxWidth: '100vw', display: 'flex', flexDirection: 'column', margin: 0, padding: 0 }}>
-                        <TopNav />
-                        <div style={{ flex: 1, width: '100%' }}>
-                          <EditDiet />
-                        </div>
-                      </div>
-                    </ProtectedRoute>
-                  } />
-                  
-                  <Route path="/clients" element={
-                    <ProtectedRoute>
-                      <div style={{ minHeight: '100vh', width: '100vw', maxWidth: '100vw', display: 'flex', flexDirection: 'column', margin: 0, padding: 0 }}>
-                        <TopNav />
-                        <div style={{ flex: 1, width: '100%' }}>
-                          <ClientList />
-                        </div>
-                      </div>
-                    </ProtectedRoute>
-                  } />
-                  
-                  <Route path="/clients/create" element={
-                    <ProtectedRoute>
-                      <div style={{ minHeight: '100vh', width: '100vw', maxWidth: '100vw', display: 'flex', flexDirection: 'column', margin: 0, padding: 0 }}>
-                        <TopNav />
-                        <div style={{ flex: 1, width: '100%' }}>
-                          <ClientForm />
-                        </div>
-                      </div>
-                    </ProtectedRoute>
-                  } />
-                  
-                  <Route path="/clients/edit/:id" element={
-                    <ProtectedRoute>
-                      <div style={{ minHeight: '100vh', width: '100vw', maxWidth: '100vw', display: 'flex', flexDirection: 'column', margin: 0, padding: 0 }}>
-                        <TopNav />
-                        <div style={{ flex: 1, width: '100%' }}>
-                          <ClientForm />
-                        </div>
-                      </div>
-                    </ProtectedRoute>
-                  } />
-                  
-                  <Route path="/reports" element={
-                    <ProtectedRoute>
-                      <div style={{ minHeight: '100vh', width: '100vw', maxWidth: '100vw', display: 'flex', flexDirection: 'column', margin: 0, padding: 0 }}>
-                        <TopNav />
-                        <div style={{ flex: 1, width: '100%' }}>
-                          <Reports />
-                        </div>
-                      </div>
-                    </ProtectedRoute>
-                  } />
+                  <Route path="/" element={<ProtectedRoute><TopNav /></ProtectedRoute>}>
+                    <Route index element={<Navigate to="/dashboard" replace />} />
+                    <Route path="dashboard" element={<Dashboard />} />
+                    <Route path="clients" element={<ClientList />} />
+                    <Route path="clients/new" element={<ClientForm />} />
+                    <Route path="clients/edit/:id" element={<ClientForm />} />
+                    <Route path="foods" element={<FoodList />} />
+                    <Route path="foods/new" element={<FoodFormPage />} />
+                    <Route path="foods/edit/:id" element={<FoodFormPage />} />
+                    <Route path="diets" element={<DietList />} />
+                    <Route path="diets/new" element={<CreateDiet />} />
+                    <Route path="diets/edit/:id" element={<EditDiet />} />
+                    <Route path="diets/view/:id" element={<DietViewer />} />
+                    <Route path="reports" element={<Reports />} />
+                  </Route>
                 </Routes>
               </div>
             </Router>

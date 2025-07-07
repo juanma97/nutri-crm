@@ -52,7 +52,7 @@ import type { Client } from '../types'
 const ClientList = () => {
   const { clients, deleteClient, loadingClients } = useFirebase()
   const navigate = useNavigate()
-  const { showSuccess, showError } = useNotifications()
+  const { showSuccess } = useNotifications()
   
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
@@ -62,18 +62,6 @@ const ClientList = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const [selectedClientForMenu, setSelectedClientForMenu] = useState<Client | null>(null)
 
-  const calculateAge = (birthDate: Date) => {
-    const today = new Date()
-    const birth = new Date(birthDate)
-    let age = today.getFullYear() - birth.getFullYear()
-    const monthDiff = today.getMonth() - birth.getMonth()
-    
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
-      age--
-    }
-    
-    return age
-  }
 
   const getStatusColor = (status: string) => {
     switch (status) {

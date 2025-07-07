@@ -1,23 +1,23 @@
-import React, { useState, useEffect } from 'react'
-import { 
-  Box, 
-  Paper, 
-  Typography, 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableContainer, 
-  TableHead, 
-  TableRow,
-  Chip,
-  CircularProgress,
-  Alert,
-  Button
-} from '@mui/material'
+import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
+import {
+  Box,
+  Paper,
+  Typography,
+  Button,
+  Chip,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Alert,
+  CircularProgress,
+} from '@mui/material'
 import { useFirebase } from '../contexts/FirebaseContext'
 import DietCharts from '../components/DietCharts'
-import type { Diet, DayOfWeek, MealType } from '../types'
+import type { DayOfWeek, MealType, Diet, DietMeal } from '../types'
 
 const daysOfWeek: { key: DayOfWeek; label: string }[] = [
   { key: 'monday', label: 'Monday' },
@@ -68,7 +68,7 @@ const DietViewer = () => {
     let totalCalories = 0
 
     Object.values(dayMeals).forEach(mealList => {
-      mealList.forEach(meal => {
+      mealList.forEach((meal: DietMeal) => {
         totalCalories += meal.calories
       })
     })
@@ -142,7 +142,7 @@ const DietViewer = () => {
         <Typography variant="h5" gutterBottom>
           Nutrition Analysis
         </Typography>
-        <DietCharts meals={diet.meals} tmb={diet.tmb} />
+        <DietCharts meals={diet.meals as unknown as Record<DayOfWeek, Record<string, DietMeal[]>>} tmb={diet.tmb} />
       </Paper>
 
       {/* Weekly Plan */}

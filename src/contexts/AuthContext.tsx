@@ -64,10 +64,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   }
 
-  const register = async (email: string, password: string, name: string): Promise<boolean> => {
+  const register = async (email: string, password: string): Promise<boolean> => {
     try {
       setLoading(true)
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password)
+      await createUserWithEmailAndPassword(auth, email, password)
       
       // Aquí podrías actualizar el displayName del usuario si es necesario
       // await updateProfile(userCredential.user, { displayName: name })

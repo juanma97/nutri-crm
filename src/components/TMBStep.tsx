@@ -170,7 +170,7 @@ const TMBStep = ({ onComplete, onNext, onUpdate, initialClientName = '', initial
       <Paper elevation={1} sx={{ mb: 3 }}>
         <Tabs 
           value={tabValue} 
-          onChange={(e, newValue) => setTabValue(newValue)}
+          onChange={(_, newValue) => setTabValue(newValue)}
           sx={{ borderBottom: 1, borderColor: 'divider' }}
         >
           <Tab label="Select Client" />

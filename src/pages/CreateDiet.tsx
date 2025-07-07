@@ -1,6 +1,14 @@
-import React, { useState } from 'react'
-import { Box, Stepper, Step, StepLabel, Button, Typography, Paper } from '@mui/material'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import {
+  Box,
+  Paper,
+  Typography,
+  Stepper,
+  Step,
+  StepLabel,
+  Button,
+} from '@mui/material'
 import TMBStep from '../components/TMBStep'
 import DietBuilder from '../components/DietBuilder'
 import { useFirebase } from '../contexts/FirebaseContext'

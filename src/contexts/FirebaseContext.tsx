@@ -14,7 +14,7 @@ import {
 import { db } from '../firebase/config'
 import { useAuth } from './AuthContext'
 import { useNotifications } from '../hooks/useNotifications'
-import type { Diet, Food, Client, ClientFormData } from '../types'
+import type { Diet, Food, Client } from '../types'
 
 interface FirebaseContextType {
   // Foods

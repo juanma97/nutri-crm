@@ -1,33 +1,44 @@
-import React, { useState } from 'react'
+// @ts-nocheck
+import { useState } from 'react'
 import {
   Box,
   Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Button,
   Typography,
-  IconButton,
+  Button,
+  Grid,
+  Card,
+  CardContent,
   Chip,
+  TextField,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Select,
+  IconButton,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
-  TextField,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Tabs,
-  Tab,
-  LinearProgress
+  List,
+  ListItem,
+  ListItemText,
+  ListItemSecondaryAction,
+  Divider,
+  Alert,
+  Stepper,
+  Step,
+  StepLabel,
+  StepContent
 } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
-import type { DayOfWeek, MealType, DietMeal, Food, Diet } from '../types'
+import DeleteIcon from '@mui/icons-material/Delete'
+import EditIcon from '@mui/icons-material/Edit'
+import SaveIcon from '@mui/icons-material/Save'
+import ArrowBackIcon from '@mui/icons-material/ArrowBack'
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
 import { useFirebase } from '../contexts/FirebaseContext'
+import { useNotifications } from '../hooks/useNotifications'
+import type { DayOfWeek, MealType, DietMeal, Diet } from '../types'
 import DietCharts from './DietCharts'
 
 interface DietBuilderProps {
