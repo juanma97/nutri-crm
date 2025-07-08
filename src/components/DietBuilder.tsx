@@ -5,9 +5,6 @@ import {
   Paper,
   Typography,
   Button,
-  Grid,
-  Card,
-  CardContent,
   Chip,
   TextField,
   MenuItem,
@@ -19,16 +16,6 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemSecondaryAction,
-  Divider,
-  Alert,
-  Stepper,
-  Step,
-  StepLabel,
-  StepContent,
   Tabs,
   Tab,
   Table,
@@ -40,13 +27,7 @@ import {
   LinearProgress
 } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
-import DeleteIcon from '@mui/icons-material/Delete'
-import EditIcon from '@mui/icons-material/Edit'
-import SaveIcon from '@mui/icons-material/Save'
-import ArrowBackIcon from '@mui/icons-material/ArrowBack'
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
 import { useFirebase } from '../contexts/FirebaseContext'
-import { useNotifications } from '../hooks/useNotifications'
 import type { DayOfWeek, MealType, DietMeal, Diet } from '../types'
 import DietCharts from './DietCharts'
 
@@ -263,7 +244,7 @@ const DietBuilder = ({ tmb, onSave, initialMeals }: DietBuilderProps) => {
                     <LinearProgress
                       variant="determinate"
                       value={Math.min((totals.totalCalories / tmb) * 100, 120)}
-                      color={status.color as any}
+                      color={status.color as 'error' | 'warning' | 'success'}
                       sx={{ mb: 1 }}
                     />
                     <Typography variant="caption" color={status.color}>

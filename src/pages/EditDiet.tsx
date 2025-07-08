@@ -10,7 +10,7 @@ const EditDiet = () => {
   const { id } = useParams<{ id: string }>()
   const { diets, updateDiet, loadingDiets } = useFirebase()
   const navigate = useNavigate()
-  
+
   const [activeStep, setActiveStep] = useState(1)
   const [diet, setDiet] = useState<Diet | null>(null)
   const [tmbData, setTmbData] = useState({ tmb: 0, clientName: '' })
@@ -19,7 +19,7 @@ const EditDiet = () => {
   useEffect(() => {
     if (id && diets.length > 0) {
       const foundDiet = diets.find(d => d.id === id)
-      
+
       if (foundDiet) {
         setDiet(foundDiet)
         setTmbData({
@@ -33,11 +33,19 @@ const EditDiet = () => {
   const handleTMBComplete = (clientName: string, tmb: number, clientData?: Client) => {
     setTmbData({ tmb, clientName })
     if (diet) {
+      // Limpiar el objeto clientData para eliminar campos undefined
+      let cleanClientData = undefined
+      if (clientData) {
+        cleanClientData = Object.fromEntries(
+          Object.entries(clientData).filter(([, value]) => value !== undefined)
+        ) as Client
+      }
+      
       setDiet(prev => prev ? {
         ...prev,
         tmb,
         clientName,
-        clientData: clientData || prev.clientData
+        clientData: cleanClientData || prev.clientData
       } : null)
     }
     setActiveStep(1)
@@ -67,7 +75,7 @@ const EditDiet = () => {
     switch (step) {
       case 0:
         return (
-          <TMBStep 
+          <TMBStep
             onComplete={handleTMBComplete}
             initialClientName={tmbData.clientName}
             initialTMB={tmbData.tmb}
@@ -116,7 +124,7 @@ const EditDiet = () => {
         <Typography variant="h4" gutterBottom>
           Editar Dieta - {diet.clientName}
         </Typography>
-        
+
         <Typography variant="body1" sx={{ mb: 3, color: 'text.secondary' }}>
           Editando la dieta para {diet.clientName} (TMB: {diet.tmb} kcal)
         </Typography>
@@ -133,7 +141,7 @@ const EditDiet = () => {
         ) : (
           <Box>
             {renderStepContent(activeStep)}
-            
+
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
               <Button
                 disabled={activeStep === 0}

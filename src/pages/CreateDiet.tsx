@@ -43,11 +43,19 @@ const CreateDiet = () => {
     setTmbData({ tmb, clientName })
     setClientData(client || null)
     
+    // Limpiar el objeto clientData para eliminar campos undefined
+    let cleanClientData = undefined
+    if (client) {
+      cleanClientData = Object.fromEntries(
+        Object.entries(client).filter(([, value]) => value !== undefined)
+      ) as Client
+    }
+    
     const updatedDietData = {
       ...dietData,
       tmb,
       clientName,
-      clientData: client || undefined,
+      clientData: cleanClientData,
       name: `Diet for ${clientName}`
     }
     
@@ -96,7 +104,7 @@ const CreateDiet = () => {
   }
 
   return (
-    <Box sx={{ width: '100%', px: 3 }}>
+    <Box sx={{ width: '100%' }}>
       <Paper elevation={3} sx={{ p: 4 }}>
         <Typography variant="h4" gutterBottom>
           Create New Diet

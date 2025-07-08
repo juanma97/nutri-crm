@@ -98,7 +98,7 @@ const FoodList = () => {
   }
 
   return (
-    <Box sx={{ width: '100%', height: '100vw', px: 3, py: 3 }}>
+    <Box sx={{ width: '100%', height: '100vw', py: 3, px: 3 }}>
       {/* Header */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Typography variant="h4">Foods</Typography>

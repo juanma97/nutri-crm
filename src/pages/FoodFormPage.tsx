@@ -43,7 +43,7 @@ const FoodFormPage = () => {
   }
 
   return (
-    <Box sx={{ width: '100%', px: 3, py: 3 }}>
+    <Box sx={{ width: '100%', py: 3 }}>
       <Paper elevation={2} sx={{ p: 3 }}>
         <FoodForm 
           food={food}

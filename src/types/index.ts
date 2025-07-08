@@ -45,7 +45,6 @@ export interface Client {
   }
   createdAt: Date
   updatedAt: Date
-  lastVisit?: Date
   nextVisit?: Date
 }
 

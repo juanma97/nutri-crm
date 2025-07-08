@@ -138,7 +138,7 @@ const ClientList = () => {
   }
 
   return (
-    <Box sx={{ width: '100%', height: '100vw', px: 3, py: 3 }}>
+    <Box sx={{ width: '100%', height: '100vw', py: 3, px: 3 }}>
       {/* Header */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Typography variant="h4">Clientes</Typography>
@@ -225,7 +225,7 @@ const ClientList = () => {
                   <TableCell>Edad</TableCell>
                   <TableCell>Objetivo</TableCell>
                   <TableCell>Estado</TableCell>
-                  <TableCell>Última visita</TableCell>
+                                      <TableCell>Próxima visita</TableCell>
                   <TableCell align="center">Acciones</TableCell>
                 </TableRow>
               </TableHead>
@@ -269,12 +269,12 @@ const ClientList = () => {
                     <TableCell>
                       <Chip 
                         label={client.status === 'active' ? 'Activo' : client.status === 'inactive' ? 'Inactivo' : 'Completado'} 
-                        color={getStatusColor(client.status) as any}
+                        color={getStatusColor(client.status) as 'success' | 'warning' | 'info' | 'default'}
                         size="small" 
                       />
                     </TableCell>
                     <TableCell>
-                      {client.lastVisit ? new Date(client.lastVisit).toLocaleDateString() : 'Nunca'}
+                      {client.nextVisit ? new Date(client.nextVisit).toLocaleDateString() : 'No programada'}
                     </TableCell>
                     <TableCell align="center">
                       <Tooltip title="Ver">
@@ -335,7 +335,7 @@ const ClientList = () => {
                     </Box>
                     <Chip 
                       label={client.status === 'active' ? 'Activo' : client.status === 'inactive' ? 'Inactivo' : 'Completado'} 
-                      color={getStatusColor(client.status) as any}
+                      color={getStatusColor(client.status) as 'success' | 'warning' | 'info' | 'default'}
                       size="small" 
                     />
                   </Box>
@@ -351,7 +351,7 @@ const ClientList = () => {
                       Objetivo: {getGoalLabel(client.goal)}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
-                      Última visita: {client.lastVisit ? new Date(client.lastVisit).toLocaleDateString() : 'Nunca'}
+                      Próxima visita: {client.nextVisit ? new Date(client.nextVisit).toLocaleDateString() : 'No programada'}
                     </Typography>
                   </Box>
 

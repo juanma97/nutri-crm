@@ -142,7 +142,6 @@ export const FirebaseProvider: React.FC<{ children: ReactNode }> = ({ children }
           ...data,
           createdAt: data.createdAt?.toDate() || new Date(),
           updatedAt: data.updatedAt?.toDate() || new Date(),
-          lastVisit: data.lastVisit?.toDate(),
           nextVisit: data.nextVisit?.toDate()
         } as Client)
       })

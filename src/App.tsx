@@ -16,6 +16,7 @@ import DietList from './pages/DietList'
 import CreateDiet from './pages/CreateDiet'
 import EditDiet from './pages/EditDiet'
 import DietViewer from './pages/DietViewer'
+import SharedDiet from './pages/SharedDiet'
 import Reports from './pages/Reports'
 import './App.css'
 
@@ -63,6 +64,7 @@ function App() {
                     <Route path="diets/view/:id" element={<DietViewer />} />
                     <Route path="reports" element={<Reports />} />
                   </Route>
+                  <Route path="/diet/:shareId" element={<SharedDiet />} />
                 </Routes>
               </div>
             </Router>

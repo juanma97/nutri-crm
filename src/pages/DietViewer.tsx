@@ -95,7 +95,7 @@ const DietViewer = () => {
 
   if (notFound) {
     return (
-      <Box sx={{ width: '100%', px: 3 }}>
+      <Box sx={{ width: '100%', px: 3, py: 3}}>
         <Paper elevation={3} sx={{ p: 4, textAlign: 'center' }}>
           <Alert severity="error" sx={{ mb: 3 }}>
             <Typography variant="h6" gutterBottom>
@@ -122,7 +122,7 @@ const DietViewer = () => {
   }
 
   return (
-    <Box sx={{ width: '100%', px: 3 }}>
+    <Box sx={{ width: '100%' }}>
       {/* Header */}
       <Paper elevation={3} sx={{ p: 4, mb: 3 }}>
         <Typography variant="h3" gutterBottom sx={{ color: '#2e7d32' }}>

@@ -101,7 +101,7 @@ const Reports = () => {
   }
 
   return (
-    <Box sx={{ width: '100%', px: 3, py: 3 }}>
+    <Box sx={{ width: '100%', py: 3, px: 3 }}>
       <Typography variant="h4" gutterBottom>
         Reports & Analytics
       </Typography>

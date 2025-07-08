@@ -200,7 +200,7 @@ const ClientForm = () => {
   }
 
   return (
-    <Box sx={{ width: '100%', px: 3, py: 3 }}>
+    <Box sx={{ width: '100%', py: 3 }}>
       <Typography variant="h4" sx={{ mb: 3 }}>
         {id ? 'Editar Cliente' : 'Agregar Cliente'}
       </Typography>
