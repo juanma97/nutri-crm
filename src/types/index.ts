@@ -3,6 +3,7 @@ export interface Food {
   name: string
   group: string
   portion: string
+  unitOfMeasure: string
   calories: number
   proteins: number
   fats: number
