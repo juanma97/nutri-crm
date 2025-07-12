@@ -22,6 +22,12 @@ const foodGroups = [
   'Beverages'
 ]
 
+const unit = [
+  'gr',
+  'ml', 
+  'unit'
+]
+
 interface FoodFormProps {
   food?: Food | null
   onSave: (food: Omit<Food, 'id'>) => Promise<void>
@@ -33,6 +39,7 @@ const FoodForm = ({ food, onSave, onCancel }: FoodFormProps) => {
     name: '',
     group: '',
     portion: '',
+    unitOfMeasure: '',
     calories: '',
     proteins: '',
     fats: '',
@@ -49,6 +56,7 @@ const FoodForm = ({ food, onSave, onCancel }: FoodFormProps) => {
         name: food?.name,
         group: food?.group,
         portion: food?.portion,
+        unitOfMeasure: food?.unitOfMeasure,
         calories: food?.calories?.toString(),
         proteins: food?.proteins?.toString(),
         fats: food?.fats?.toString(),
@@ -82,6 +90,7 @@ const FoodForm = ({ food, onSave, onCancel }: FoodFormProps) => {
         name: formData.name,
         group: formData.group,
         portion: formData.portion,
+        unitOfMeasure: formData.unitOfMeasure,
         calories: Number(formData.calories) || 0,
         proteins: Number(formData.proteins) || 0,
         fats: Number(formData.fats) || 0,
@@ -98,6 +107,7 @@ const FoodForm = ({ food, onSave, onCancel }: FoodFormProps) => {
           name: '',
           group: '',
           portion: '',
+          unitOfMeasure:'',
           calories: '',
           proteins: '',
           fats: '',
@@ -154,7 +164,7 @@ const FoodForm = ({ food, onSave, onCancel }: FoodFormProps) => {
           <Grid item xs={12} md={3}>
             <TextField
               fullWidth
-              label="Portion (g/ml/unit)"
+              label="Portion"
               variant="outlined"
               size="small"
               value={formData.portion}
@@ -162,6 +172,25 @@ const FoodForm = ({ food, onSave, onCancel }: FoodFormProps) => {
               required
               disabled={loading}
             />
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <TextField
+              fullWidth
+              select
+              label="Unit of measure"
+              variant="outlined"
+              size="small"
+              value={formData.unitOfMeasure}
+              onChange={handleInputChange('unitOfMeasure')}
+              required
+              disabled={loading}
+            >
+              {unit.map((ut) => (
+                <MenuItem key={ut} value={ut}>
+                  {ut}
+                </MenuItem>
+              ))}
+            </TextField>
           </Grid>
           <Grid item xs={12} md={3}>
             <TextField

@@ -186,7 +186,7 @@ const FoodList = () => {
                       variant="outlined"
                     />
                   </TableCell>
-                  <TableCell>{food.portion}</TableCell>
+                  <TableCell>{food.portion} {food.unitOfMeasure}</TableCell>
                   <TableCell>{food.calories}</TableCell>
                   <TableCell>{food.proteins}g</TableCell>
                   <TableCell>{food.fats}g</TableCell>
