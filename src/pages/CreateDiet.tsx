@@ -12,7 +12,7 @@ import {
 import TMBStep from '../components/TMBStep'
 import DietBuilder from '../components/DietBuilder'
 import { useFirebase } from '../contexts/FirebaseContext'
-import type { Diet, Client } from '../types'
+import type { Diet, Client, Supplement } from '../types'
 
 const steps = ['Calculate TMB', 'Build Diet']
 
@@ -63,10 +63,11 @@ const CreateDiet = () => {
     setActiveStep(1)
   }
 
-  const handleDietSave = async (meals: Diet['meals']) => {
+  const handleDietSave = async (meals: Diet['meals'], supplements?: Supplement[]) => {
     const currentDietData = {
       ...dietData,
-      meals
+      meals,
+      supplements: supplements || []
     }
     
     const success = await addDiet(currentDietData)

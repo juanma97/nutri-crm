@@ -90,6 +90,14 @@ export interface DayMeals {
   dinner: DietMeal[]
 }
 
+export interface Supplement {
+  id: string
+  name: string
+  quantity: string
+  time?: string
+  comments?: string
+}
+
 export interface Diet {
   id: string
   name: string
@@ -105,6 +113,7 @@ export interface Diet {
     saturday: DayMeals
     sunday: DayMeals
   }
+  supplements?: Supplement[]
   createdAt: Date
   shareId?: string
 }

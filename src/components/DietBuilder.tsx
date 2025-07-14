@@ -34,13 +34,15 @@ import {
 import AddIcon from '@mui/icons-material/Add'
 import SearchIcon from '@mui/icons-material/Search'
 import { useFirebase } from '../contexts/FirebaseContext'
-import type { DayOfWeek, MealType, DietMeal, Diet } from '../types'
+import type { DayOfWeek, MealType, DietMeal, Diet, Supplement } from '../types'
 import DietCharts from './DietCharts'
+import SupplementForm from './SupplementForm'
 
 interface DietBuilderProps {
   tmb: number
-  onSave: (meals: Diet['meals']) => Promise<void>
+  onSave: (meals: Diet['meals'], supplements?: Supplement[]) => Promise<void>
   initialMeals?: Diet['meals']
+  initialSupplements?: Supplement[]
   dietName?: string
 }
 
@@ -62,7 +64,7 @@ const mealTypes: { key: MealType; label: string }[] = [
   { key: 'dinner', label: 'Dinner' }
 ]
 
-const DietBuilder = ({ tmb, onSave, initialMeals, dietName }: DietBuilderProps) => {
+const DietBuilder = ({ tmb, onSave, initialMeals, initialSupplements, dietName }: DietBuilderProps) => {
   const { foods } = useFirebase()
   
   const [meals, setMeals] = useState<Diet['meals']>(initialMeals || {
@@ -74,6 +76,8 @@ const DietBuilder = ({ tmb, onSave, initialMeals, dietName }: DietBuilderProps) 
     saturday: { breakfast: [], morningSnack: [], lunch: [], afternoonSnack: [], dinner: [] },
     sunday: { breakfast: [], morningSnack: [], lunch: [], afternoonSnack: [], dinner: [] }
   })
+  
+  const [supplements, setSupplements] = useState<Supplement[]>(initialSupplements || [])
   
   const [dialogOpen, setDialogOpen] = useState(false)
   const [selectedDay, setSelectedDay] = useState<DayOfWeek>('monday')
@@ -183,14 +187,46 @@ const DietBuilder = ({ tmb, onSave, initialMeals, dietName }: DietBuilderProps) 
   }
 
   const handleSave = async () => {
+    // Validar que todos los suplementos tengan nombre y cantidad
+    const invalidSupplements = supplements.filter(s => 
+      s.name.trim() === '' || s.quantity.trim() === ''
+    )
+    
+    if (invalidSupplements.length > 0) {
+      alert('Por favor completa todos los campos obligatorios de los suplementos (nombre y cantidad)')
+      return
+    }
+    
     setSaving(true)
     try {
-      await onSave(meals)
+      await onSave(meals, supplements)
     } catch (error) {
       console.error('Error saving diet:', error)
     } finally {
       setSaving(false)
     }
+  }
+
+  const handleAddSupplement = () => {
+    const newSupplement: Supplement = {
+      id: Date.now().toString(),
+      name: '',
+      quantity: '',
+      time: '',
+      comments: ''
+    }
+    setSupplements([...supplements, newSupplement])
+  }
+
+  const handleUpdateSupplement = (index: number, updatedSupplement: Supplement) => {
+    const updatedSupplements = [...supplements]
+    updatedSupplements[index] = updatedSupplement
+    setSupplements(updatedSupplements)
+  }
+
+  const handleDeleteSupplement = (index: number) => {
+    const updatedSupplements = supplements.filter((_, i) => i !== index)
+    setSupplements(updatedSupplements)
   }
 
   return (
@@ -210,6 +246,7 @@ const DietBuilder = ({ tmb, onSave, initialMeals, dietName }: DietBuilderProps) 
       <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
         <Tabs value={activeTab} onChange={(_, newValue) => setActiveTab(newValue)}>
           <Tab label="Meal Builder" />
+          <Tab label="Suplementación" />
           <Tab label="Analytics" />
         </Tabs>
       </Box>
@@ -322,6 +359,49 @@ const DietBuilder = ({ tmb, onSave, initialMeals, dietName }: DietBuilderProps) 
       )}
 
       {activeTab === 1 && (
+        <Box>
+          <Paper elevation={3} sx={{ p: 3, mb: 3 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+              <Typography variant="h6">
+                Suplementación
+              </Typography>
+              <Button
+                variant="contained"
+                startIcon={<AddIcon />}
+                onClick={handleAddSupplement}
+                sx={{ backgroundColor: '#2e7d32' }}
+              >
+                Agregar Suplemento
+              </Button>
+            </Box>
+            
+            {supplements.length === 0 ? (
+              <Box sx={{ textAlign: 'center', py: 4 }}>
+                <Typography variant="body1" color="text.secondary" gutterBottom>
+                  No hay suplementos agregados
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Haz clic en "Agregar Suplemento" para comenzar
+                </Typography>
+              </Box>
+            ) : (
+              <Box>
+                {supplements.map((supplement, index) => (
+                  <SupplementForm
+                    key={supplement.id}
+                    supplement={supplement}
+                    onUpdate={(updatedSupplement) => handleUpdateSupplement(index, updatedSupplement)}
+                    onDelete={() => handleDeleteSupplement(index)}
+                    index={index}
+                  />
+                ))}
+              </Box>
+            )}
+          </Paper>
+        </Box>
+      )}
+
+      {activeTab === 2 && (
         <DietCharts meals={meals} tmb={tmb} />
       )}
 

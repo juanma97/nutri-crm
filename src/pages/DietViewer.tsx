@@ -17,7 +17,7 @@ import {
 } from '@mui/material'
 import { useFirebase } from '../contexts/FirebaseContext'
 import DietCharts from '../components/DietCharts'
-import type { DayOfWeek, MealType, Diet, DietMeal } from '../types'
+import type { DayOfWeek, MealType, Diet, DietMeal, Supplement } from '../types'
 
 const daysOfWeek: { key: DayOfWeek; label: string }[] = [
   { key: 'monday', label: 'Monday' },
@@ -144,6 +144,46 @@ const DietViewer = () => {
         </Typography>
         <DietCharts meals={diet.meals as unknown as Record<DayOfWeek, Record<string, DietMeal[]>>} tmb={diet.tmb} />
       </Paper>
+
+      {/* Supplements */}
+      {diet.supplements && diet.supplements.length > 0 && (
+        <Paper elevation={3} sx={{ p: 4, mb: 3 }}>
+          <Typography variant="h5" gutterBottom>
+            Suplementación
+          </Typography>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            {diet.supplements.map((supplement, index) => (
+              <Box key={supplement.id} sx={{ p: 2, border: '1px solid #e0e0e0', borderRadius: 1 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+                    {supplement.name}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {supplement.quantity}
+                  </Typography>
+                </Box>
+                {(supplement.time || supplement.comments) && (
+                  <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+                    {supplement.time && (
+                      <Chip 
+                        label={`Hora: ${supplement.time}`} 
+                        size="small" 
+                        color="primary" 
+                        variant="outlined"
+                      />
+                    )}
+                    {supplement.comments && (
+                      <Typography variant="body2" color="text.secondary">
+                        {supplement.comments}
+                      </Typography>
+                    )}
+                  </Box>
+                )}
+              </Box>
+            ))}
+          </Box>
+        </Paper>
+      )}
 
       {/* Weekly Plan */}
       <Paper elevation={3} sx={{ p: 4 }}>

@@ -4,7 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import TMBStep from '../components/TMBStep'
 import DietBuilder from '../components/DietBuilder'
 import { useFirebase } from '../contexts/FirebaseContext'
-import type { Diet, Client } from '../types'
+import type { Diet, Client, Supplement } from '../types'
 
 const EditDiet = () => {
   const { id } = useParams<{ id: string }>()
@@ -56,13 +56,14 @@ const EditDiet = () => {
     setActiveStep(1)
   }
 
-  const handleDietSave = async (meals: Diet['meals']) => {
+  const handleDietSave = async (meals: Diet['meals'], supplements?: Supplement[]) => {
     if (!diet) return
 
     const updatedDiet = {
       ...diet,
       name: dietName,
-      meals
+      meals,
+      supplements: supplements || []
     }
 
     const success = await updateDiet(diet.id, updatedDiet)
@@ -94,6 +95,7 @@ const EditDiet = () => {
             tmb={diet.tmb}
             onSave={handleDietSave}
             initialMeals={diet.meals}
+            initialSupplements={diet.supplements}
             dietName={dietName}
           />
         )
