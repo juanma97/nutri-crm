@@ -41,6 +41,7 @@ import SupplementForm from './SupplementForm'
 interface DietBuilderProps {
   tmb: number
   onSave: (meals: Diet['meals'], supplements?: Supplement[]) => Promise<void>
+  onBack?: () => void
   initialMeals?: Diet['meals']
   initialSupplements?: Supplement[]
   dietName?: string
@@ -64,7 +65,7 @@ const mealTypes: { key: MealType; label: string }[] = [
   { key: 'dinner', label: 'Dinner' }
 ]
 
-const DietBuilder = ({ tmb, onSave, initialMeals, initialSupplements, dietName }: DietBuilderProps) => {
+const DietBuilder = ({ tmb, onSave, onBack, initialMeals, initialSupplements, dietName }: DietBuilderProps) => {
   const { foods } = useFirebase()
   
   const [meals, setMeals] = useState<Diet['meals']>(initialMeals || {
@@ -341,20 +342,6 @@ const DietBuilder = ({ tmb, onSave, initialMeals, initialSupplements, dietName }
               })}
             </Box>
           </Paper>
-
-          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-            <Button variant="outlined">
-              Back
-            </Button>
-            <Button
-              variant="contained"
-              onClick={handleSave}
-              disabled={saving}
-              sx={{ backgroundColor: '#2e7d32' }}
-            >
-              {saving ? 'Saving...' : 'Save Diet'}
-            </Button>
-          </Box>
         </>
       )}
 
@@ -404,6 +391,37 @@ const DietBuilder = ({ tmb, onSave, initialMeals, initialSupplements, dietName }
       {activeTab === 2 && (
         <DietCharts meals={meals} tmb={tmb} />
       )}
+
+      {/* Global Action Buttons - Available in all tabs */}
+      <Box sx={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center',
+        mt: 4,
+        gap: 2,
+        flexWrap: 'wrap'
+      }}>
+        {onBack && (
+          <Button
+            variant="outlined"
+            onClick={onBack}
+            sx={{ minWidth: '120px' }}
+          >
+            Back
+          </Button>
+        )}
+        <Button
+          variant="contained"
+          onClick={handleSave}
+          disabled={saving}
+          sx={{ 
+            backgroundColor: '#2e7d32',
+            minWidth: '140px'
+          }}
+        >
+          {saving ? 'Saving...' : 'Save Diet'}
+        </Button>
+      </Box>
 
       {/* Add Food Dialog */}
       <Dialog 

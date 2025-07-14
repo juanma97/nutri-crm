@@ -98,6 +98,7 @@ const CreateDiet = () => {
           <DietBuilder
             tmb={tmbData.tmb}
             onSave={handleDietSave}
+            onBack={handleBack}
             initialMeals={dietData.meals}
             dietName={dietData.name}
           />
@@ -134,15 +135,6 @@ const CreateDiet = () => {
         ) : (
           <Box>
             {renderStepContent(activeStep)}
-            
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
-              <Button
-                disabled={activeStep === 0}
-                onClick={handleBack}
-              >
-                Back
-              </Button>
-            </Box>
           </Box>
         )}
       </Paper>

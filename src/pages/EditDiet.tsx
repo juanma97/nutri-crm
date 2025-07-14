@@ -94,6 +94,7 @@ const EditDiet = () => {
           <DietBuilder
             tmb={diet.tmb}
             onSave={handleDietSave}
+            onBack={handleBack}
             initialMeals={diet.meals}
             initialSupplements={diet.supplements}
             dietName={dietName}
@@ -162,15 +163,6 @@ const EditDiet = () => {
         ) : (
           <Box>
             {renderStepContent(activeStep)}
-
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
-              <Button
-                disabled={activeStep === 0}
-                onClick={handleBack}
-              >
-                Back
-              </Button>
-            </Box>
           </Box>
         )}
       </Paper>
