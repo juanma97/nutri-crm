@@ -89,6 +89,25 @@ const DietBuilder = ({ tmb, onSave, initialMeals, dietName }: DietBuilderProps) 
     food.name.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
+  // Función helper para calcular el factor de conversión basado en la porción del alimento
+  const calculateConversionFactor = (food: any, quantity: number): number => {
+    // Extraer el valor numérico de la porción (ej: "100" de "100g", "1" de "1 unit")
+    const portionValue = parseFloat(food.portion.replace(/[^\d.]/g, '')) || 1
+    return quantity / portionValue
+  }
+
+  // Función helper para formatear las calorías con la porción y unidad correcta
+  const formatCaloriesWithPortion = (food: any): string => {
+    const calories = food.calories || 0
+    const portion = food.portion || '1'
+    const unit = food.unitOfMeasure || 'unit'
+    
+    // Extraer solo el número de la porción (ej: "100" de "100g")
+    const portionValue = parseFloat(portion.replace(/[^\d.]/g, '')) || 1
+    
+    return `${calories} kcal / ${portionValue} ${unit}`
+  }
+
   const calculateDailyTotals = (day: DayOfWeek) => {
     const dayMeals = meals[day]
     let totalCalories = 0
@@ -122,16 +141,19 @@ const DietBuilder = ({ tmb, onSave, initialMeals, dietName }: DietBuilderProps) 
     if (selectedFood && quantity) {
       const food = foods.find(f => f.id === selectedFood)
       if (food) {
+        // Calcular el factor de conversión basado en la porción del alimento
+        const conversionFactor = calculateConversionFactor(food, Number(quantity))
+        
         const newMeal: DietMeal = {
           foodId: parseInt(food.id),
           foodName: food.name,
           quantity: Number(quantity),
-          unit: food.portion.includes('g') ? 'g' : food.portion.includes('ml') ? 'ml' : 'unit',
-          calories: (food.calories * Number(quantity)) / 100,
-          proteins: (food.proteins * Number(quantity)) / 100,
-          fats: (food.fats * Number(quantity)) / 100,
-          carbs: (food.carbs * Number(quantity)) / 100,
-          fiber: (food.fiber * Number(quantity)) / 100
+          unit: food.unitOfMeasure || 'unit',
+          calories: food.calories * conversionFactor,
+          proteins: food.proteins * conversionFactor,
+          fats: food.fats * conversionFactor,
+          carbs: food.carbs * conversionFactor,
+          fiber: food.fiber * conversionFactor
         }
 
         setMeals(prev => ({
@@ -219,7 +241,7 @@ const DietBuilder = ({ tmb, onSave, initialMeals, dietName }: DietBuilderProps) 
                             {meals[day.key][meal.key].map((dietMeal, index) => (
                               <Chip
                                 key={index}
-                                label={`${dietMeal.foodName} (${dietMeal.quantity}${dietMeal.unit})`}
+                                label={`${dietMeal.foodName} (${dietMeal.quantity} ${dietMeal.unit})`}
                                 size="small"
                                 onDelete={() => handleRemoveMeal(day.key, meal.key, index)}
                                 sx={{ fontSize: '0.7rem' }}
@@ -348,7 +370,7 @@ const DietBuilder = ({ tmb, onSave, initialMeals, dietName }: DietBuilderProps) 
                         >
                           <ListItemText 
                             primary={food.name}
-                            secondary={`${food.group} - ${food.calories} cal/100g`}
+                            secondary={`${food.group} - ${formatCaloriesWithPortion(food)}`}
                           />
                         </ListItemButton>
                       </ListItem>
@@ -382,7 +404,7 @@ const DietBuilder = ({ tmb, onSave, initialMeals, dietName }: DietBuilderProps) 
                   type="number"
                   value={quantity}
                   onChange={(e) => setQuantity(e.target.value)}
-                  helperText="Enter quantity in grams"
+                  helperText={`Enter quantity in ${foods.find(f => f.id === selectedFood)?.unitOfMeasure || 'unit'}`}
                 />
               </Box>
             )}
