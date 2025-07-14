@@ -24,9 +24,15 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  LinearProgress
+  LinearProgress,
+  InputAdornment,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemButton
 } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
+import SearchIcon from '@mui/icons-material/Search'
 import { useFirebase } from '../contexts/FirebaseContext'
 import type { DayOfWeek, MealType, DietMeal, Diet } from '../types'
 import DietCharts from './DietCharts'
@@ -76,6 +82,12 @@ const DietBuilder = ({ tmb, onSave, initialMeals, dietName }: DietBuilderProps) 
   const [quantity, setQuantity] = useState<string>('')
   const [activeTab, setActiveTab] = useState(0)
   const [saving, setSaving] = useState(false)
+  const [searchTerm, setSearchTerm] = useState('')
+
+  // Filtrar alimentos basado en el término de búsqueda
+  const filteredFoods = foods.filter(food => 
+    food.name.toLowerCase().includes(searchTerm.toLowerCase())
+  )
 
   const calculateDailyTotals = (day: DayOfWeek) => {
     const dayMeals = meals[day]
@@ -133,6 +145,7 @@ const DietBuilder = ({ tmb, onSave, initialMeals, dietName }: DietBuilderProps) 
         setDialogOpen(false)
         setSelectedFood('')
         setQuantity('')
+        setSearchTerm('')
       }
     }
   }
@@ -217,6 +230,9 @@ const DietBuilder = ({ tmb, onSave, initialMeals, dietName }: DietBuilderProps) 
                               onClick={() => {
                                 setSelectedDay(day.key)
                                 setSelectedMeal(meal.key)
+                                setSelectedFood('')
+                                setSearchTerm('')
+                                setQuantity('')
                                 setDialogOpen(true)
                               }}
                               sx={{ alignSelf: 'center' }}
@@ -288,39 +304,104 @@ const DietBuilder = ({ tmb, onSave, initialMeals, dietName }: DietBuilderProps) 
       )}
 
       {/* Add Food Dialog */}
-      <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="sm" fullWidth>
+      <Dialog 
+        open={dialogOpen} 
+        onClose={() => setDialogOpen(false)} 
+        maxWidth="sm" 
+        fullWidth
+        PaperProps={{
+          sx: { maxHeight: '80vh' }
+        }}
+      >
         <DialogTitle>Add Food to {mealTypes.find(m => m.key === selectedMeal)?.label}</DialogTitle>
         <DialogContent>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2 }}>
-            <FormControl fullWidth>
-              <InputLabel>Select Food</InputLabel>
-              <Select
-                value={selectedFood}
-                onChange={(e) => setSelectedFood(e.target.value)}
-                label="Select Food"
-              >
-                {foods.map(food => (
-                  <MenuItem key={food.id} value={food.id}>
-                    {food.name} ({food.group}) - {food.calories} cal/100g
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
             <TextField
               fullWidth
-              label="Quantity"
-              type="number"
-              value={quantity}
-              onChange={(e) => setQuantity(e.target.value)}
-              helperText="Enter quantity in grams"
+              label="Search Foods"
+              placeholder="Type to search foods..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon />
+                  </InputAdornment>
+                ),
+              }}
             />
+            
+            {!selectedFood ? (
+              <Box>
+                {filteredFoods.length > 0 ? (
+                  <List>
+                    {filteredFoods.map(food => (
+                      <ListItem key={food.id} disablePadding>
+                        <ListItemButton 
+                          onClick={() => setSelectedFood(food.id)}
+                          sx={{ 
+                            border: '1px solid #e0e0e0', 
+                            borderRadius: 1, 
+                            mb: 1,
+                            '&:hover': { backgroundColor: '#f5f5f5' }
+                          }}
+                        >
+                          <ListItemText 
+                            primary={food.name}
+                            secondary={`${food.group} - ${food.calories} cal/100g`}
+                          />
+                        </ListItemButton>
+                      </ListItem>
+                    ))}
+                  </List>
+                ) : (
+                  <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 2 }}>
+                    {searchTerm ? 'No foods found matching your search' : 'Start typing to search foods'}
+                  </Typography>
+                )}
+              </Box>
+            ) : (
+              <Box sx={{ p: 2, backgroundColor: '#f5f5f5', borderRadius: 1 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                  <Typography variant="subtitle2">
+                    Selected Food: {foods.find(f => f.id === selectedFood)?.name}
+                  </Typography>
+                  <Button 
+                    size="small" 
+                    onClick={() => {
+                      setSelectedFood('')
+                      setSearchTerm('')
+                    }}
+                  >
+                    Change
+                  </Button>
+                </Box>
+                <TextField
+                  fullWidth
+                  label="Quantity"
+                  type="number"
+                  value={quantity}
+                  onChange={(e) => setQuantity(e.target.value)}
+                  helperText="Enter quantity in grams"
+                />
+              </Box>
+            )}
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setDialogOpen(false)}>Cancel</Button>
-          <Button onClick={handleAddMeal} variant="contained">
-            Add Food
+          <Button onClick={() => {
+            setDialogOpen(false)
+            setSelectedFood('')
+            setSearchTerm('')
+            setQuantity('')
+          }}>
+            Cancel
           </Button>
+          {selectedFood && (
+            <Button onClick={handleAddMeal} variant="contained" disabled={!quantity}>
+              Add Food
+            </Button>
+          )}
         </DialogActions>
       </Dialog>
     </Box>
