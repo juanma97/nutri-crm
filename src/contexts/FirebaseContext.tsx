@@ -108,6 +108,8 @@ export const FirebaseProvider: React.FC<{ children: ReactNode }> = ({ children }
         dietsData.push({
           id: doc.id,
           ...data,
+          // Asegurar compatibilidad con dietas existentes que no tienen suplementos
+          supplements: data.supplements || [],
           createdAt: data.createdAt?.toDate() || new Date()
         } as Diet)
       })
@@ -304,6 +306,8 @@ export const FirebaseProvider: React.FC<{ children: ReactNode }> = ({ children }
         return {
           id: doc.id,
           ...data,
+          // Asegurar compatibilidad con dietas existentes que no tienen suplementos
+          supplements: data.supplements || [],
           createdAt: data.createdAt?.toDate() || new Date()
         } as Diet
       }

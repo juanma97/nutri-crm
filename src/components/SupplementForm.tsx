@@ -26,8 +26,6 @@ const SupplementForm = ({ supplement, onUpdate, onDelete, index }: SupplementFor
     })
   }
 
-  const isFormValid = supplement.name.trim() !== '' && supplement.quantity.trim() !== ''
-
   return (
     <Paper elevation={1} sx={{ p: 2, mb: 2 }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>

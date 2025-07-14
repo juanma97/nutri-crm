@@ -158,6 +158,50 @@ const SharedDiet = () => {
       {/* Diet Charts */}
       <DietCharts meals={diet.meals} tmb={diet.tmb} />
 
+      {/* Supplements */}
+      {diet.supplements && diet.supplements.length > 0 && (
+        <Paper elevation={3} sx={{ p: 4, mt: 3 }}>
+          <Typography variant="h5" gutterBottom sx={{ color: '#2e7d32', fontWeight: 'bold' }}>
+            💊 Suplementación
+          </Typography>
+          <Grid container spacing={2}>
+            {diet.supplements.map((supplement) => (
+              <Grid item xs={12} md={6} lg={4} key={supplement.id}>
+                <Card variant="outlined">
+                  <CardContent>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
+                      <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+                        {supplement.name}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        {supplement.quantity}
+                      </Typography>
+                    </Box>
+                    {(supplement.time || supplement.comments) && (
+                      <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                        {supplement.time && (
+                          <Chip 
+                            label={`⏰ ${supplement.time}`} 
+                            size="small" 
+                            color="primary" 
+                            variant="outlined"
+                          />
+                        )}
+                        {supplement.comments && (
+                          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                            {supplement.comments}
+                          </Typography>
+                        )}
+                      </Box>
+                    )}
+                  </CardContent>
+                </Card>
+              </Grid>
+            ))}
+          </Grid>
+        </Paper>
+      )}
+
       {/* Weekly Meal Plan */}
       <Paper elevation={3} sx={{ p: 4, mt: 3 }}>
         <Typography variant="h5" gutterBottom sx={{ color: '#2e7d32', fontWeight: 'bold' }}>
