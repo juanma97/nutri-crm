@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Box, Button, Typography, Paper, CircularProgress } from '@mui/material'
+import { Box, Button, Typography, Paper, CircularProgress, TextField } from '@mui/material'
 import { useNavigate, useParams } from 'react-router-dom'
 import TMBStep from '../components/TMBStep'
 import DietBuilder from '../components/DietBuilder'
@@ -14,6 +14,7 @@ const EditDiet = () => {
   const [activeStep, setActiveStep] = useState(1)
   const [diet, setDiet] = useState<Diet | null>(null)
   const [tmbData, setTmbData] = useState({ tmb: 0, clientName: '' })
+  const [dietName, setDietName] = useState('')
 
   // Buscar la dieta por ID
   useEffect(() => {
@@ -26,12 +27,16 @@ const EditDiet = () => {
           tmb: foundDiet.tmb,
           clientName: foundDiet.clientName
         })
+        setDietName(foundDiet.name || `Diet for ${foundDiet.clientName}`)
       }
     }
   }, [id, diets])
 
-  const handleTMBComplete = (clientName: string, tmb: number, clientData?: Client) => {
+  const handleTMBComplete = (clientName: string, tmb: number, clientData?: Client, newDietName?: string) => {
     setTmbData({ tmb, clientName })
+    if (newDietName) {
+      setDietName(newDietName)
+    }
     if (diet) {
       // Limpiar el objeto clientData para eliminar campos undefined
       let cleanClientData = undefined
@@ -56,6 +61,7 @@ const EditDiet = () => {
 
     const updatedDiet = {
       ...diet,
+      name: dietName,
       meals
     }
 
@@ -88,6 +94,7 @@ const EditDiet = () => {
             tmb={diet.tmb}
             onSave={handleDietSave}
             initialMeals={diet.meals}
+            dietName={dietName}
           />
         )
       default:
@@ -128,6 +135,18 @@ const EditDiet = () => {
         <Typography variant="body1" sx={{ mb: 3, color: 'text.secondary' }}>
           Editando la dieta para {diet.clientName} (TMB: {diet.tmb} kcal)
         </Typography>
+
+        <Box sx={{ mb: 3 }}>
+          <TextField
+            fullWidth
+            label="Diet Name"
+            variant="outlined"
+            value={dietName}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDietName(e.target.value)}
+            placeholder="Enter diet name"
+            sx={{ maxWidth: '400px' }}
+          />
+        </Box>
 
         {activeStep === 2 ? (
           <Box sx={{ textAlign: 'center' }}>

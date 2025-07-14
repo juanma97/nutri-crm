@@ -35,6 +35,7 @@ interface DietBuilderProps {
   tmb: number
   onSave: (meals: Diet['meals']) => Promise<void>
   initialMeals?: Diet['meals']
+  dietName?: string
 }
 
 const daysOfWeek: { key: DayOfWeek; label: string }[] = [
@@ -55,7 +56,7 @@ const mealTypes: { key: MealType; label: string }[] = [
   { key: 'dinner', label: 'Dinner' }
 ]
 
-const DietBuilder = ({ tmb, onSave, initialMeals }: DietBuilderProps) => {
+const DietBuilder = ({ tmb, onSave, initialMeals, dietName }: DietBuilderProps) => {
   const { foods } = useFirebase()
   
   const [meals, setMeals] = useState<Diet['meals']>(initialMeals || {
@@ -162,6 +163,11 @@ const DietBuilder = ({ tmb, onSave, initialMeals }: DietBuilderProps) => {
       <Typography variant="h5" gutterBottom>
         Step 2: Build Weekly Diet
       </Typography>
+      {dietName && (
+        <Typography variant="h6" sx={{ mb: 2, color: 'text.secondary' }}>
+          {dietName}
+        </Typography>
+      )}
       <Typography variant="body1" sx={{ mb: 3 }}>
         TMB: {Math.round(tmb)} calories
       </Typography>

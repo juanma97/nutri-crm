@@ -39,7 +39,7 @@ const CreateDiet = () => {
   const { addDiet } = useFirebase()
   const navigate = useNavigate()
 
-  const handleTMBComplete = (clientName: string, tmb: number, client?: Client) => {
+  const handleTMBComplete = (clientName: string, tmb: number, client?: Client, dietName?: string) => {
     setTmbData({ tmb, clientName })
     setClientData(client || null)
     
@@ -56,7 +56,7 @@ const CreateDiet = () => {
       tmb,
       clientName,
       clientData: cleanClientData,
-      name: `Diet for ${clientName}`
+      name: dietName || `Diet for ${clientName}`
     }
     
     setDietData(updatedDietData)
@@ -88,6 +88,8 @@ const CreateDiet = () => {
             initialClientName={tmbData.clientName}
             initialTMB={tmbData.tmb}
             initialClientData={clientData}
+            showDietNameField={true}
+            initialDietName={dietData.name}
           />
         )
       case 1:
@@ -96,6 +98,7 @@ const CreateDiet = () => {
             tmb={tmbData.tmb}
             onSave={handleDietSave}
             initialMeals={dietData.meals}
+            dietName={dietData.name}
           />
         )
       default:
