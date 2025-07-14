@@ -56,7 +56,7 @@ const FoodForm = ({ food, onSave, onCancel }: FoodFormProps) => {
         name: food?.name,
         group: food?.group,
         portion: food?.portion,
-        unitOfMeasure: food?.unitOfMeasure,
+        unitOfMeasure: food?.unitOfMeasure || 'unit',
         calories: food?.calories?.toString(),
         proteins: food?.proteins?.toString(),
         fats: food?.fats?.toString(),
@@ -79,7 +79,7 @@ const FoodForm = ({ food, onSave, onCancel }: FoodFormProps) => {
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault()
     
-    if (!formData.name || !formData.group || !formData.portion) {
+    if (!formData.name || !formData.group || !formData.portion || !formData.unitOfMeasure) {
       return
     }
 
