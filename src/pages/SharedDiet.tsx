@@ -15,7 +15,41 @@ import {
 } from '@mui/material'
 import { useFirebase } from '../contexts/FirebaseContext'
 import DietCharts from '../components/DietCharts'
-import type { Diet } from '../types'
+import type { Diet, DayOfWeek, DynamicMeal } from '../types'
+
+// Función para ordenar los datos de la dieta
+const getOrderedDietData = (diet: Diet) => {
+  // Orden fijo de días de la semana
+  const dayOrder: DayOfWeek[] = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
+  
+  // Ordenar días según el orden fijo
+  const orderedDays = dayOrder.map(day => ({
+    day,
+    dayMeals: diet.meals[day]
+  }))
+  
+  // Para cada día, ordenar las comidas según el orden guardado en mealDefinitions
+  const orderedDaysWithMeals = orderedDays.map(({ day, dayMeals }) => {
+    const orderedMeals = Object.entries(dayMeals)
+      .map(([mealType, meals]) => {
+        const mealDefinition = diet.mealDefinitions?.find(m => m.id === mealType)
+        return {
+          mealType,
+          mealName: mealDefinition?.name || mealType,
+          order: mealDefinition?.order || 999, // Fallback para comidas sin orden
+          meals
+        }
+      })
+      .sort((a, b) => a.order - b.order) // Ordenar por el campo 'order'
+    
+    return {
+      day,
+      dayMeals: orderedMeals
+    }
+  })
+  
+  return orderedDaysWithMeals
+}
 
 const SharedDiet = () => {
   const { shareId } = useParams<{ shareId: string }>()
@@ -209,7 +243,7 @@ const SharedDiet = () => {
         </Typography>
         
         <Grid container spacing={2}>
-          {Object.entries(diet.meals).map(([day, dayMeals]) => (
+          {getOrderedDietData(diet).map(({ day, dayMeals }) => (
             <Grid item xs={12} md={6} lg={4} key={day}>
               <Card variant="outlined">
                 <CardContent>
@@ -217,34 +251,31 @@ const SharedDiet = () => {
                     {day.charAt(0).toUpperCase() + day.slice(1)}
                   </Typography>
                   
-                  {Object.entries(dayMeals).map(([mealType, meals]) => (
+                  {dayMeals.map(({ mealType, mealName, meals }) => (
                     <Box key={mealType} sx={{ mb: 2 }}>
                       <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                        {mealType === 'breakfast' ? '🌅 Desayuno' :
-                         mealType === 'morningSnack' ? '☕ Merienda AM' :
-                         mealType === 'lunch' ? '🍽️ Almuerzo' :
-                         mealType === 'afternoonSnack' ? '🍎 Merienda PM' : '🌙 Cena'}
+                        {mealName}
                       </Typography>
-                      
-                      {meals.length > 0 ? (
-                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                          {meals.map((meal, index) => (
-                            <Chip
-                              key={index}
-                              label={`${meal.foodName} (${meal.quantity}${meal.unit})`}
-                              size="small"
-                              variant="outlined"
-                              sx={{ fontSize: '0.75rem' }}
-                            />
-                          ))}
-                        </Box>
-                      ) : (
-                        <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic' }}>
-                          Sin alimentos programados
-                        </Typography>
-                      )}
-                    </Box>
-                  ))}
+                    
+                    {meals.length > 0 ? (
+                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                        {meals.map((meal, index) => (
+                          <Chip
+                            key={index}
+                            label={`${meal.foodName} (${meal.quantity}${meal.unit})`}
+                            size="small"
+                            variant="outlined"
+                            sx={{ fontSize: '0.75rem' }}
+                          />
+                        ))}
+                      </Box>
+                    ) : (
+                      <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic' }}>
+                        Sin alimentos programados
+                      </Typography>
+                    )}
+                  </Box>
+                ))}
                 </CardContent>
               </Card>
             </Grid>
