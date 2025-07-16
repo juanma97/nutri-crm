@@ -17,15 +17,17 @@ import { useFirebase } from '../contexts/FirebaseContext'
 import type { Client } from '../types'
 
 interface TMBStepProps {
-  onComplete?: (name: string, tmb: number, clientData?: Client) => void
+  onComplete?: (name: string, tmb: number, clientData?: Client, dietName?: string) => void
   onNext?: () => void
   onUpdate?: (tmb: number, clientName: string) => void
   initialClientName?: string
   initialTMB?: number
   initialClientData?: Client | null
+  initialDietName?: string
+  showDietNameField?: boolean
 }
 
-const TMBStep = ({ onComplete, onNext, onUpdate, initialClientName = '', initialTMB = 0, initialClientData }: TMBStepProps) => {
+const TMBStep = ({ onComplete, onNext, onUpdate, initialClientName = '', initialTMB = 0, initialClientData, initialDietName = '', showDietNameField = false }: TMBStepProps) => {
   const { clients } = useFirebase()
   const [tabValue, setTabValue] = useState(0) // 0: Select client, 1: Create new
   const [selectedClientId, setSelectedClientId] = useState<string>('')
@@ -36,6 +38,7 @@ const TMBStep = ({ onComplete, onNext, onUpdate, initialClientName = '', initial
     height: initialClientData?.height?.toString() || '',
     gender: initialClientData?.gender || 'male'
   })
+  const [dietName, setDietName] = useState(initialDietName || `Diet for ${initialClientName || 'Client'}`)
   const [tmb, setTmb] = useState<number | null>(initialTMB || null)
   const [errors, setErrors] = useState<string[]>([])
 
@@ -87,6 +90,10 @@ const TMBStep = ({ onComplete, onNext, onUpdate, initialClientName = '', initial
       if (!client.height || Number(client.height) <= 0) newErrors.push('Valid height is required')
     }
     
+    if (showDietNameField && !dietName.trim()) {
+      newErrors.push('Diet name is required')
+    }
+    
     setErrors(newErrors)
     return newErrors.length === 0
   }
@@ -121,7 +128,7 @@ const TMBStep = ({ onComplete, onNext, onUpdate, initialClientName = '', initial
     }
     
     if (onComplete && tmb && clientName) {
-      onComplete(clientName, tmb, clientData)
+      onComplete(clientName, tmb, clientData, dietName)
     } else if (onUpdate && tmb && clientName) {
       onUpdate(tmb, clientName)
     }
@@ -242,6 +249,21 @@ const TMBStep = ({ onComplete, onNext, onUpdate, initialClientName = '', initial
               </Typography>
             </Alert>
           )}
+        </Box>
+      )}
+      
+      {showDietNameField && (
+        <Box sx={{ mt: 3 }}>
+          <TextField
+            fullWidth
+            label="Diet Name"
+            variant="outlined"
+            value={dietName}
+            onChange={(e) => setDietName(e.target.value)}
+            required
+            placeholder="Enter a name for this diet"
+            sx={{ mb: 2 }}
+          />
         </Box>
       )}
       

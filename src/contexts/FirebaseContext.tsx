@@ -105,9 +105,35 @@ export const FirebaseProvider: React.FC<{ children: ReactNode }> = ({ children }
       const dietsData: Diet[] = []
       querySnapshot.forEach((doc) => {
         const data = doc.data()
+        
+        // Migrar dietas existentes al nuevo formato de comidas dinámicas
+        let meals = data.meals
+        let mealDefinitions = data.mealDefinitions
+        
+        // Si no hay mealDefinitions, crear las por defecto basadas en la estructura existente
+        if (!mealDefinitions && meals) {
+          const defaultMeals = [
+            { id: 'breakfast', name: 'Breakfast', order: 1 },
+            { id: 'morningSnack', name: 'Morning Snack', order: 2 },
+            { id: 'lunch', name: 'Lunch', order: 3 },
+            { id: 'afternoonSnack', name: 'Afternoon Snack', order: 4 },
+            { id: 'dinner', name: 'Dinner', order: 5 }
+          ]
+          
+          // Verificar si la dieta usa el formato antiguo
+          const hasOldFormat = meals.monday && meals.monday.breakfast !== undefined
+          
+          if (hasOldFormat) {
+            mealDefinitions = defaultMeals
+          }
+        }
+        
         dietsData.push({
           id: doc.id,
           ...data,
+          // Asegurar compatibilidad con dietas existentes que no tienen suplementos
+          supplements: data.supplements || [],
+          mealDefinitions: mealDefinitions || [],
           createdAt: data.createdAt?.toDate() || new Date()
         } as Diet)
       })
@@ -301,9 +327,35 @@ export const FirebaseProvider: React.FC<{ children: ReactNode }> = ({ children }
       if (!querySnapshot.empty) {
         const doc = querySnapshot.docs[0]
         const data = doc.data()
+        
+        // Migrar dietas existentes al nuevo formato de comidas dinámicas
+        let meals = data.meals
+        let mealDefinitions = data.mealDefinitions
+        
+        // Si no hay mealDefinitions, crear las por defecto basadas en la estructura existente
+        if (!mealDefinitions && meals) {
+          const defaultMeals = [
+            { id: 'breakfast', name: 'Breakfast', order: 1 },
+            { id: 'morningSnack', name: 'Morning Snack', order: 2 },
+            { id: 'lunch', name: 'Lunch', order: 3 },
+            { id: 'afternoonSnack', name: 'Afternoon Snack', order: 4 },
+            { id: 'dinner', name: 'Dinner', order: 5 }
+          ]
+          
+          // Verificar si la dieta usa el formato antiguo
+          const hasOldFormat = meals.monday && meals.monday.breakfast !== undefined
+          
+          if (hasOldFormat) {
+            mealDefinitions = defaultMeals
+          }
+        }
+        
         return {
           id: doc.id,
           ...data,
+          // Asegurar compatibilidad con dietas existentes que no tienen suplementos
+          supplements: data.supplements || [],
+          mealDefinitions: mealDefinitions || [],
           createdAt: data.createdAt?.toDate() || new Date()
         } as Diet
       }

@@ -12,7 +12,7 @@ import {
 import TMBStep from '../components/TMBStep'
 import DietBuilder from '../components/DietBuilder'
 import { useFirebase } from '../contexts/FirebaseContext'
-import type { Diet, Client } from '../types'
+import type { Diet, Client, Supplement, DynamicMeal } from '../types'
 
 const steps = ['Calculate TMB', 'Build Diet']
 
@@ -26,20 +26,20 @@ const CreateDiet = () => {
     tmb: 0,
     clientData: undefined,
     meals: {
-      monday: { breakfast: [], morningSnack: [], lunch: [], afternoonSnack: [], dinner: [] },
-      tuesday: { breakfast: [], morningSnack: [], lunch: [], afternoonSnack: [], dinner: [] },
-      wednesday: { breakfast: [], morningSnack: [], lunch: [], afternoonSnack: [], dinner: [] },
-      thursday: { breakfast: [], morningSnack: [], lunch: [], afternoonSnack: [], dinner: [] },
-      friday: { breakfast: [], morningSnack: [], lunch: [], afternoonSnack: [], dinner: [] },
-      saturday: { breakfast: [], morningSnack: [], lunch: [], afternoonSnack: [], dinner: [] },
-      sunday: { breakfast: [], morningSnack: [], lunch: [], afternoonSnack: [], dinner: [] }
+      monday: {},
+      tuesday: {},
+      wednesday: {},
+      thursday: {},
+      friday: {},
+      saturday: {},
+      sunday: {}
     }
   })
   
   const { addDiet } = useFirebase()
   const navigate = useNavigate()
 
-  const handleTMBComplete = (clientName: string, tmb: number, client?: Client) => {
+  const handleTMBComplete = (clientName: string, tmb: number, client?: Client, dietName?: string) => {
     setTmbData({ tmb, clientName })
     setClientData(client || null)
     
@@ -56,17 +56,19 @@ const CreateDiet = () => {
       tmb,
       clientName,
       clientData: cleanClientData,
-      name: `Diet for ${clientName}`
+      name: dietName || `Diet for ${clientName}`
     }
     
     setDietData(updatedDietData)
     setActiveStep(1)
   }
 
-  const handleDietSave = async (meals: Diet['meals']) => {
+  const handleDietSave = async (meals: Diet['meals'], supplements?: Supplement[], mealDefinitions?: DynamicMeal[]) => {
     const currentDietData = {
       ...dietData,
-      meals
+      meals,
+      supplements: supplements || [],
+      mealDefinitions: mealDefinitions || []
     }
     
     const success = await addDiet(currentDietData)
@@ -88,6 +90,8 @@ const CreateDiet = () => {
             initialClientName={tmbData.clientName}
             initialTMB={tmbData.tmb}
             initialClientData={clientData}
+            showDietNameField={true}
+            initialDietName={dietData.name}
           />
         )
       case 1:
@@ -95,7 +99,9 @@ const CreateDiet = () => {
           <DietBuilder
             tmb={tmbData.tmb}
             onSave={handleDietSave}
+            onBack={handleBack}
             initialMeals={dietData.meals}
+            dietName={dietData.name}
           />
         )
       default:
@@ -130,15 +136,6 @@ const CreateDiet = () => {
         ) : (
           <Box>
             {renderStepContent(activeStep)}
-            
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
-              <Button
-                disabled={activeStep === 0}
-                onClick={handleBack}
-              >
-                Back
-              </Button>
-            </Box>
           </Box>
         )}
       </Paper>
