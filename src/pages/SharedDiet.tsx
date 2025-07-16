@@ -14,7 +14,7 @@ import {
   Grid
 } from '@mui/material'
 import { useFirebase } from '../contexts/FirebaseContext'
-import DietCharts from '../components/DietCharts'
+import LazyCharts from '../components/LazyCharts'
 import type { Diet, DayOfWeek, DynamicMeal } from '../types'
 
 // Función para ordenar los datos de la dieta
@@ -190,7 +190,7 @@ const SharedDiet = () => {
       </Paper>
 
       {/* Diet Charts */}
-      <DietCharts meals={diet.meals} tmb={diet.tmb} />
+      <LazyCharts meals={diet.meals} tmb={diet.tmb} />
 
       {/* Supplements */}
       {diet.supplements && diet.supplements.length > 0 && (

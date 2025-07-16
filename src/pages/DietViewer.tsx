@@ -16,7 +16,7 @@ import {
   CircularProgress,
 } from '@mui/material'
 import { useFirebase } from '../contexts/FirebaseContext'
-import DietCharts from '../components/DietCharts'
+import LazyCharts from '../components/LazyCharts'
 import type { DayOfWeek, MealType, Diet, DietMeal } from '../types'
 
 const daysOfWeek: { key: DayOfWeek; label: string }[] = [
@@ -142,7 +142,7 @@ const DietViewer = () => {
         <Typography variant="h5" gutterBottom>
           Nutrition Analysis
         </Typography>
-        <DietCharts meals={diet.meals as unknown as Record<DayOfWeek, Record<string, DietMeal[]>>} tmb={diet.tmb} />
+        <LazyCharts meals={diet.meals as unknown as Record<DayOfWeek, Record<string, DietMeal[]>>} tmb={diet.tmb} />
       </Paper>
 
       {/* Supplements */}

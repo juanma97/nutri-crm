@@ -2,22 +2,13 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { ThemeProvider, createTheme } from '@mui/material/styles'
 import CssBaseline from '@mui/material/CssBaseline'
 import { SnackbarProvider } from 'notistack'
+import { Suspense, lazy } from 'react'
 import { AuthProvider } from './contexts/AuthContext'
 import { FirebaseProvider } from './contexts/FirebaseContext'
 import ProtectedRoute from './components/ProtectedRoute'
 import TopNav from './components/TopNav'
 import Login from './pages/Login'
-import Dashboard from './pages/Dashboard'
-import ClientList from './pages/ClientList'
-import ClientForm from './pages/ClientForm'
-import FoodList from './pages/FoodList'
-import FoodFormPage from './pages/FoodFormPage'
-import DietList from './pages/DietList'
-import CreateDiet from './pages/CreateDiet'
-import EditDiet from './pages/EditDiet'
-import DietViewer from './pages/DietViewer'
-import SharedDiet from './pages/SharedDiet'
-import Reports from './pages/Reports'
+import { CircularProgress, Box } from '@mui/material'
 import './App.css'
 
 const theme = createTheme({
@@ -30,6 +21,26 @@ const theme = createTheme({
     },
   },
 })
+
+// Lazy load heavy pages
+const Dashboard = lazy(() => import('./pages/Dashboard'))
+const Reports = lazy(() => import('./pages/Reports'))
+const DietList = lazy(() => import('./pages/DietList'))
+const DietViewer = lazy(() => import('./pages/DietViewer'))
+const CreateDiet = lazy(() => import('./pages/CreateDiet'))
+const EditDiet = lazy(() => import('./pages/EditDiet'))
+const ClientList = lazy(() => import('./pages/ClientList'))
+const ClientForm = lazy(() => import('./pages/ClientForm'))
+const FoodList = lazy(() => import('./pages/FoodList'))
+const FoodFormPage = lazy(() => import('./pages/FoodFormPage'))
+const SharedDiet = lazy(() => import('./pages/SharedDiet'))
+
+// Loading component
+const PageLoader = () => (
+  <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
+    <CircularProgress size={60} sx={{ color: '#2e7d32' }} />
+  </Box>
+)
 
 function App() {
   return (
@@ -51,20 +62,72 @@ function App() {
                   <Route path="/login" element={<Login />} />
                   <Route path="/" element={<ProtectedRoute><TopNav /></ProtectedRoute>}>
                     <Route index element={<Navigate to="/dashboard" replace />} />
-                    <Route path="dashboard" element={<Dashboard />} />
-                    <Route path="clients" element={<ClientList />} />
-                    <Route path="clients/new" element={<ClientForm />} />
-                    <Route path="clients/edit/:id" element={<ClientForm />} />
-                    <Route path="foods" element={<FoodList />} />
-                    <Route path="foods/new" element={<FoodFormPage />} />
-                    <Route path="foods/edit/:id" element={<FoodFormPage />} />
-                    <Route path="diets" element={<DietList />} />
-                    <Route path="diets/new" element={<CreateDiet />} />
-                    <Route path="diets/edit/:id" element={<EditDiet />} />
-                    <Route path="diets/view/:id" element={<DietViewer />} />
-                    <Route path="reports" element={<Reports />} />
+                    <Route path="dashboard" element={
+                      <Suspense fallback={<PageLoader />}>
+                        <Dashboard />
+                      </Suspense>
+                    } />
+                    <Route path="clients" element={
+                      <Suspense fallback={<PageLoader />}>
+                        <ClientList />
+                      </Suspense>
+                    } />
+                    <Route path="clients/new" element={
+                      <Suspense fallback={<PageLoader />}>
+                        <ClientForm />
+                      </Suspense>
+                    } />
+                    <Route path="clients/edit/:id" element={
+                      <Suspense fallback={<PageLoader />}>
+                        <ClientForm />
+                      </Suspense>
+                    } />
+                    <Route path="foods" element={
+                      <Suspense fallback={<PageLoader />}>
+                        <FoodList />
+                      </Suspense>
+                    } />
+                    <Route path="foods/new" element={
+                      <Suspense fallback={<PageLoader />}>
+                        <FoodFormPage />
+                      </Suspense>
+                    } />
+                    <Route path="foods/edit/:id" element={
+                      <Suspense fallback={<PageLoader />}>
+                        <FoodFormPage />
+                      </Suspense>
+                    } />
+                    <Route path="diets" element={
+                      <Suspense fallback={<PageLoader />}>
+                        <DietList />
+                      </Suspense>
+                    } />
+                    <Route path="diets/new" element={
+                      <Suspense fallback={<PageLoader />}>
+                        <CreateDiet />
+                      </Suspense>
+                    } />
+                    <Route path="diets/edit/:id" element={
+                      <Suspense fallback={<PageLoader />}>
+                        <EditDiet />
+                      </Suspense>
+                    } />
+                    <Route path="diets/view/:id" element={
+                      <Suspense fallback={<PageLoader />}>
+                        <DietViewer />
+                      </Suspense>
+                    } />
+                    <Route path="reports" element={
+                      <Suspense fallback={<PageLoader />}>
+                        <Reports />
+                      </Suspense>
+                    } />
                   </Route>
-                  <Route path="/diet/:shareId" element={<SharedDiet />} />
+                  <Route path="/diet/:shareId" element={
+                    <Suspense fallback={<PageLoader />}>
+                      <SharedDiet />
+                    </Suspense>
+                  } />
                 </Routes>
               </div>
             </Router>
