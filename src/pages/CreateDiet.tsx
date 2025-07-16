@@ -12,7 +12,7 @@ import {
 import TMBStep from '../components/TMBStep'
 import DietBuilder from '../components/DietBuilder'
 import { useFirebase } from '../contexts/FirebaseContext'
-import type { Diet, Client, Supplement } from '../types'
+import type { Diet, Client, Supplement, DynamicMeal } from '../types'
 
 const steps = ['Calculate TMB', 'Build Diet']
 
@@ -26,13 +26,13 @@ const CreateDiet = () => {
     tmb: 0,
     clientData: undefined,
     meals: {
-      monday: { breakfast: [], morningSnack: [], lunch: [], afternoonSnack: [], dinner: [] },
-      tuesday: { breakfast: [], morningSnack: [], lunch: [], afternoonSnack: [], dinner: [] },
-      wednesday: { breakfast: [], morningSnack: [], lunch: [], afternoonSnack: [], dinner: [] },
-      thursday: { breakfast: [], morningSnack: [], lunch: [], afternoonSnack: [], dinner: [] },
-      friday: { breakfast: [], morningSnack: [], lunch: [], afternoonSnack: [], dinner: [] },
-      saturday: { breakfast: [], morningSnack: [], lunch: [], afternoonSnack: [], dinner: [] },
-      sunday: { breakfast: [], morningSnack: [], lunch: [], afternoonSnack: [], dinner: [] }
+      monday: {},
+      tuesday: {},
+      wednesday: {},
+      thursday: {},
+      friday: {},
+      saturday: {},
+      sunday: {}
     }
   })
   
@@ -63,11 +63,12 @@ const CreateDiet = () => {
     setActiveStep(1)
   }
 
-  const handleDietSave = async (meals: Diet['meals'], supplements?: Supplement[]) => {
+  const handleDietSave = async (meals: Diet['meals'], supplements?: Supplement[], mealDefinitions?: DynamicMeal[]) => {
     const currentDietData = {
       ...dietData,
       meals,
-      supplements: supplements || []
+      supplements: supplements || [],
+      mealDefinitions: mealDefinitions || []
     }
     
     const success = await addDiet(currentDietData)

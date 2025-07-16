@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { useState } from 'react'
+import React, { useState } from 'react'
 import {
   Box,
   Paper,
@@ -33,17 +33,22 @@ import {
 } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
 import SearchIcon from '@mui/icons-material/Search'
+import EditIcon from '@mui/icons-material/Edit'
+import DeleteIcon from '@mui/icons-material/Delete'
+import SaveIcon from '@mui/icons-material/Save'
+import CancelIcon from '@mui/icons-material/Cancel'
 import { useFirebase } from '../contexts/FirebaseContext'
-import type { DayOfWeek, MealType, DietMeal, Diet, Supplement } from '../types'
+import type { DayOfWeek, MealType, DietMeal, Diet, Supplement, DynamicMeal, DynamicDayMeals } from '../types'
 import DietCharts from './DietCharts'
 import SupplementForm from './SupplementForm'
 
 interface DietBuilderProps {
   tmb: number
-  onSave: (meals: Diet['meals'], supplements?: Supplement[]) => Promise<void>
+  onSave: (meals: Diet['meals'], supplements?: Supplement[], mealDefinitions?: DynamicMeal[]) => Promise<void>
   onBack?: () => void
   initialMeals?: Diet['meals']
   initialSupplements?: Supplement[]
+  initialMealDefinitions?: DynamicMeal[]
   dietName?: string
 }
 
@@ -65,17 +70,47 @@ const mealTypes: { key: MealType; label: string }[] = [
   { key: 'dinner', label: 'Dinner' }
 ]
 
-const DietBuilder = ({ tmb, onSave, onBack, initialMeals, initialSupplements, dietName }: DietBuilderProps) => {
+const DietBuilder = ({ tmb, onSave, onBack, initialMeals, initialSupplements, initialMealDefinitions, dietName }: DietBuilderProps) => {
   const { foods } = useFirebase()
   
+  // Comidas por defecto para migración
+  const defaultMeals: DynamicMeal[] = [
+    { id: 'breakfast', name: 'Breakfast', order: 1 },
+    { id: 'morningSnack', name: 'Morning Snack', order: 2 },
+    { id: 'lunch', name: 'Lunch', order: 3 },
+    { id: 'afternoonSnack', name: 'Afternoon Snack', order: 4 },
+    { id: 'dinner', name: 'Dinner', order: 5 }
+  ]
+
+  // Estado inicial dinámico
+  const [mealDefinitions, setMealDefinitions] = useState<DynamicMeal[]>(
+    initialMealDefinitions || defaultMeals
+  )
+
+  // Inicializar comidas por defecto si no hay datos iniciales
+  React.useEffect(() => {
+    if (!initialMeals) {
+      setMeals(prev => {
+        const updated = { ...prev }
+        daysOfWeek.forEach(day => {
+          updated[day.key] = {}
+          defaultMeals.forEach(meal => {
+            updated[day.key][meal.id] = []
+          })
+        })
+        return updated
+      })
+    }
+  }, [initialMeals])
+  
   const [meals, setMeals] = useState<Diet['meals']>(initialMeals || {
-    monday: { breakfast: [], morningSnack: [], lunch: [], afternoonSnack: [], dinner: [] },
-    tuesday: { breakfast: [], morningSnack: [], lunch: [], afternoonSnack: [], dinner: [] },
-    wednesday: { breakfast: [], morningSnack: [], lunch: [], afternoonSnack: [], dinner: [] },
-    thursday: { breakfast: [], morningSnack: [], lunch: [], afternoonSnack: [], dinner: [] },
-    friday: { breakfast: [], morningSnack: [], lunch: [], afternoonSnack: [], dinner: [] },
-    saturday: { breakfast: [], morningSnack: [], lunch: [], afternoonSnack: [], dinner: [] },
-    sunday: { breakfast: [], morningSnack: [], lunch: [], afternoonSnack: [], dinner: [] }
+    monday: {},
+    tuesday: {},
+    wednesday: {},
+    thursday: {},
+    friday: {},
+    saturday: {},
+    sunday: {}
   })
   
   const [supplements, setSupplements] = useState<Supplement[]>(initialSupplements || [])
@@ -88,6 +123,8 @@ const DietBuilder = ({ tmb, onSave, onBack, initialMeals, initialSupplements, di
   const [activeTab, setActiveTab] = useState(0)
   const [saving, setSaving] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
+  const [editingMealId, setEditingMealId] = useState<string | null>(null)
+  const [editingMealName, setEditingMealName] = useState('')
 
   // Filtrar alimentos basado en el término de búsqueda
   const filteredFoods = foods.filter(food => 
@@ -121,14 +158,17 @@ const DietBuilder = ({ tmb, onSave, onBack, initialMeals, initialSupplements, di
     let totalCarbs = 0
     let totalFiber = 0
 
+    // Iterar sobre todas las comidas dinámicas
     Object.values(dayMeals).forEach(mealList => {
-      mealList.forEach(meal => {
-        totalCalories += meal.calories
-        totalProteins += meal.proteins
-        totalFats += meal.fats
-        totalCarbs += meal.carbs
-        totalFiber += meal.fiber
-      })
+      if (Array.isArray(mealList)) {
+        mealList.forEach(meal => {
+          totalCalories += meal.calories
+          totalProteins += meal.proteins
+          totalFats += meal.fats
+          totalCarbs += meal.carbs
+          totalFiber += meal.fiber
+        })
+      }
     })
 
     return { totalCalories, totalProteins, totalFats, totalCarbs, totalFiber }
@@ -165,7 +205,7 @@ const DietBuilder = ({ tmb, onSave, onBack, initialMeals, initialSupplements, di
           ...prev,
           [selectedDay]: {
             ...prev[selectedDay],
-            [selectedMeal]: [...prev[selectedDay][selectedMeal], newMeal]
+            [selectedMeal]: [...(prev[selectedDay][selectedMeal] || []), newMeal]
           }
         }))
 
@@ -182,7 +222,7 @@ const DietBuilder = ({ tmb, onSave, onBack, initialMeals, initialSupplements, di
       ...prev,
       [day]: {
         ...prev[day],
-        [meal]: prev[day][meal].filter((_, i) => i !== index)
+        [meal]: (prev[day][meal] || []).filter((_, i) => i !== index)
       }
     }))
   }
@@ -200,7 +240,7 @@ const DietBuilder = ({ tmb, onSave, onBack, initialMeals, initialSupplements, di
     
     setSaving(true)
     try {
-      await onSave(meals, supplements)
+      await onSave(meals, supplements, mealDefinitions)
     } catch (error) {
       console.error('Error saving diet:', error)
     } finally {
@@ -230,6 +270,65 @@ const DietBuilder = ({ tmb, onSave, onBack, initialMeals, initialSupplements, di
     setSupplements(updatedSupplements)
   }
 
+  const addMeal = () => {
+    const newMeal: DynamicMeal = {
+      id: `meal_${Date.now()}`,
+      name: 'New Meal',
+      order: mealDefinitions.length + 1
+    }
+    setMealDefinitions([...mealDefinitions, newMeal])
+    
+    // Agregar a todos los días
+    setMeals(prev => {
+      const updated = { ...prev }
+      daysOfWeek.forEach(day => {
+        updated[day.key] = { ...updated[day.key], [newMeal.id]: [] }
+      })
+      return updated
+    })
+  }
+
+  const removeMeal = (mealId: string) => {
+    setMealDefinitions(prev => prev.filter(m => m.id !== mealId))
+    
+    // Remover de todos los días
+    setMeals(prev => {
+      const updated = { ...prev }
+      daysOfWeek.forEach(day => {
+        const { [mealId]: removed, ...rest } = updated[day.key]
+        updated[day.key] = rest
+      })
+      return updated
+    })
+  }
+
+  const handleEditMeal = (mealId: string) => {
+    const meal = mealDefinitions.find(m => m.id === mealId)
+    if (meal) {
+      setEditingMealId(mealId)
+      setEditingMealName(meal.name)
+    }
+  }
+
+  const handleSaveMealName = () => {
+    if (editingMealId && editingMealName.trim()) {
+      setMealDefinitions(prev => 
+        prev.map(meal => 
+          meal.id === editingMealId 
+            ? { ...meal, name: editingMealName.trim() }
+            : meal
+        )
+      )
+      setEditingMealId(null)
+      setEditingMealName('')
+    }
+  }
+
+  const handleCancelEdit = () => {
+    setEditingMealId(null)
+    setEditingMealName('')
+  }
+
   return (
     <Box sx={{ width: '100%' }}>
       <Typography variant="h5" gutterBottom>
@@ -255,6 +354,18 @@ const DietBuilder = ({ tmb, onSave, onBack, initialMeals, initialSupplements, di
       {activeTab === 0 && (
         <>
           <Paper elevation={3} sx={{ mb: 3 }}>
+            <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Typography variant="h6">Meal Schedule</Typography>
+              <Button
+                variant="contained"
+                startIcon={<AddIcon />}
+                onClick={addMeal}
+                size="small"
+                sx={{ backgroundColor: '#2e7d32' }}
+              >
+                Add Meal
+              </Button>
+            </Box>
             <TableContainer>
               <Table sx={{ tableLayout: 'fixed', width: '100%' }}>
                 <TableHead>
@@ -268,20 +379,47 @@ const DietBuilder = ({ tmb, onSave, onBack, initialMeals, initialSupplements, di
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {mealTypes.map(meal => (
-                    <TableRow key={meal.key}>
+                  {mealDefinitions.map(meal => (
+                    <TableRow key={meal.id}>
                       <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f9f9f9' }}>
-                        {meal.label}
+                        {editingMealId === meal.id ? (
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <TextField
+                              size="small"
+                              value={editingMealName}
+                              onChange={(e) => setEditingMealName(e.target.value)}
+                              onKeyPress={(e) => e.key === 'Enter' && handleSaveMealName()}
+                              autoFocus
+                              sx={{ minWidth: '120px' }}
+                            />
+                            <IconButton size="small" onClick={handleSaveMealName} color="primary">
+                              <SaveIcon fontSize="small" />
+                            </IconButton>
+                            <IconButton size="small" onClick={handleCancelEdit} color="error">
+                              <CancelIcon fontSize="small" />
+                            </IconButton>
+                          </Box>
+                        ) : (
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <Typography>{meal.name}</Typography>
+                            <IconButton size="small" onClick={() => handleEditMeal(meal.id)}>
+                              <EditIcon fontSize="small" />
+                            </IconButton>
+                            <IconButton size="small" onClick={() => removeMeal(meal.id)}>
+                              <DeleteIcon fontSize="small" />
+                            </IconButton>
+                          </Box>
+                        )}
                       </TableCell>
                       {daysOfWeek.map(day => (
-                        <TableCell key={`${day.key}-${meal.key}`} align="center">
+                        <TableCell key={`${day.key}-${meal.id}`} align="center">
                           <Box sx={{ minHeight: '60px', display: 'flex', flexDirection: 'column', gap: 1 }}>
-                            {meals[day.key][meal.key].map((dietMeal, index) => (
+                                                         {(meals[day.key][meal.id] || []).map((dietMeal, index) => (
                               <Chip
                                 key={index}
                                 label={`${dietMeal.foodName} (${dietMeal.quantity} ${dietMeal.unit})`}
                                 size="small"
-                                onDelete={() => handleRemoveMeal(day.key, meal.key, index)}
+                                onDelete={() => handleRemoveMeal(day.key, meal.id, index)}
                                 sx={{ fontSize: '0.7rem' }}
                               />
                             ))}
@@ -289,7 +427,7 @@ const DietBuilder = ({ tmb, onSave, onBack, initialMeals, initialSupplements, di
                               size="small"
                               onClick={() => {
                                 setSelectedDay(day.key)
-                                setSelectedMeal(meal.key)
+                                setSelectedMeal(meal.id)
                                 setSelectedFood('')
                                 setSearchTerm('')
                                 setQuantity('')
@@ -433,7 +571,7 @@ const DietBuilder = ({ tmb, onSave, onBack, initialMeals, initialSupplements, di
           sx: { maxHeight: '80vh' }
         }}
       >
-        <DialogTitle>Add Food to {mealTypes.find(m => m.key === selectedMeal)?.label}</DialogTitle>
+        <DialogTitle>Add Food to {mealDefinitions.find(m => m.id === selectedMeal)?.name}</DialogTitle>
         <DialogContent>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2 }}>
             <TextField

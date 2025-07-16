@@ -82,6 +82,19 @@ export interface DietMeal {
   fiber: number
 }
 
+// Nuevos tipos para comidas dinámicas
+export interface DynamicMeal {
+  id: string
+  name: string
+  order: number
+}
+
+// Comidas dinámicas por día - objeto con claves dinámicas
+export interface DynamicDayMeals {
+  [mealId: string]: DietMeal[]
+}
+
+// Mantener compatibilidad hacia atrás con la estructura original
 export interface DayMeals {
   breakfast: DietMeal[]
   morningSnack: DietMeal[]
@@ -105,18 +118,19 @@ export interface Diet {
   tmb: number
   clientData?: Client
   meals: {
-    monday: DayMeals
-    tuesday: DayMeals
-    wednesday: DayMeals
-    thursday: DayMeals
-    friday: DayMeals
-    saturday: DayMeals
-    sunday: DayMeals
+    monday: DynamicDayMeals
+    tuesday: DynamicDayMeals
+    wednesday: DynamicDayMeals
+    thursday: DynamicDayMeals
+    friday: DynamicDayMeals
+    saturday: DynamicDayMeals
+    sunday: DynamicDayMeals
   }
+  mealDefinitions?: DynamicMeal[] // Definición de comidas dinámicas
   supplements?: Supplement[]
   createdAt: Date
   shareId?: string
 }
 
 export type DayOfWeek = 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday' | 'sunday'
-export type MealType = 'breakfast' | 'morningSnack' | 'lunch' | 'afternoonSnack' | 'dinner'
+export type MealType = string // Ahora es dinámico, puede ser cualquier string (mealId)
