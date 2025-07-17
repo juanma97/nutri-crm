@@ -140,7 +140,7 @@ const EditDiet = () => {
         </Typography>
 
         <Typography variant="body1" sx={{ mb: 3, color: 'text.secondary' }}>
-          Editando la dieta para {diet.clientName} (TMB: {diet.tmb} kcal)
+          Editando la dieta para {diet.clientName} (TMB: {Math.round(diet.tmb)} kcal)
         </Typography>
 
         <Box sx={{ mb: 3 }}>

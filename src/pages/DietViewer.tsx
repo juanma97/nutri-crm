@@ -129,7 +129,7 @@ const DietViewer = () => {
           {diet.clientName}'s Diet Plan
         </Typography>
         <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mb: 2 }}>
-          <Chip label={`TMB: ${diet.tmb} cal`} color="primary" />
+          <Chip label={`TMB: ${Math.round(diet.tmb)} cal`} color="primary" />
           {diet.customGoal && (
             <Chip label={`Objetivo: ${diet.customGoal.calories} cal`} color="secondary" />
           )}

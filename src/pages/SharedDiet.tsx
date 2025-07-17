@@ -213,7 +213,7 @@ const SharedDiet = () => {
                 <Card variant="outlined" sx={{ borderColor: '#666', borderWidth: 1 }}>
                   <CardContent sx={{ textAlign: 'center' }}>
                     <Typography variant="h6" color="text.secondary">
-                      {diet.tmb.toLocaleString()} kcal
+                      {Math.round(diet.tmb).toLocaleString()} kcal
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
                       TMB Base
@@ -232,7 +232,7 @@ const SharedDiet = () => {
                 <Card variant="outlined" sx={{ borderColor: '#2e7d32', borderWidth: 2 }}>
                   <CardContent sx={{ textAlign: 'center' }}>
                     <Typography variant="h6" color="primary" sx={{ fontWeight: 'bold' }}>
-                      {diet.tmb.toLocaleString()} kcal
+                      {Math.round(diet.tmb).toLocaleString()} kcal
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
                       Calorías Objetivo
