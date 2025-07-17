@@ -38,17 +38,19 @@ import DeleteIcon from '@mui/icons-material/Delete'
 import SaveIcon from '@mui/icons-material/Save'
 import CancelIcon from '@mui/icons-material/Cancel'
 import { useFirebase } from '../contexts/FirebaseContext'
-import type { DayOfWeek, MealType, DietMeal, Diet, Supplement, DynamicMeal, DynamicDayMeals } from '../types'
+import type { DayOfWeek, MealType, DietMeal, Diet, Supplement, DynamicMeal, DynamicDayMeals, CustomGoal } from '../types'
 import DietCharts from './DietCharts'
 import SupplementForm from './SupplementForm'
+import CustomGoalForm from './CustomGoalForm'
 
 interface DietBuilderProps {
   tmb: number
-  onSave: (meals: Diet['meals'], supplements?: Supplement[], mealDefinitions?: DynamicMeal[]) => Promise<void>
+  onSave: (meals: Diet['meals'], supplements?: Supplement[], mealDefinitions?: DynamicMeal[], customGoal?: CustomGoal) => Promise<void>
   onBack?: () => void
   initialMeals?: Diet['meals']
   initialSupplements?: Supplement[]
   initialMealDefinitions?: DynamicMeal[]
+  initialCustomGoal?: CustomGoal
   dietName?: string
 }
 
@@ -70,7 +72,7 @@ const mealTypes: { key: MealType; label: string }[] = [
   { key: 'dinner', label: 'Dinner' }
 ]
 
-const DietBuilder = ({ tmb, onSave, onBack, initialMeals, initialSupplements, initialMealDefinitions, dietName }: DietBuilderProps) => {
+const DietBuilder = ({ tmb, onSave, onBack, initialMeals, initialSupplements, initialMealDefinitions, initialCustomGoal, dietName }: DietBuilderProps) => {
   const { foods } = useFirebase()
   
   // Comidas por defecto para migración
@@ -114,6 +116,8 @@ const DietBuilder = ({ tmb, onSave, onBack, initialMeals, initialSupplements, in
   })
   
   const [supplements, setSupplements] = useState<Supplement[]>(initialSupplements || [])
+  const [customGoal, setCustomGoal] = useState<CustomGoal | undefined>(initialCustomGoal)
+  const [showCustomGoalForm, setShowCustomGoalForm] = useState(false)
   
   const [dialogOpen, setDialogOpen] = useState(false)
   const [selectedDay, setSelectedDay] = useState<DayOfWeek>('monday')
@@ -174,12 +178,79 @@ const DietBuilder = ({ tmb, onSave, onBack, initialMeals, initialSupplements, in
     return { totalCalories, totalProteins, totalFats, totalCarbs, totalFiber }
   }
 
+  // Obtener objetivos nutricionales (customGoal o basados en TMB)
+  const getCalorieTarget = () => {
+    return customGoal ? customGoal.calories : tmb
+  }
+
+  const getProteinTarget = () => {
+    return customGoal ? customGoal.proteins : (tmb * 0.3 / 4)
+  }
+
+  const getFatTarget = () => {
+    return customGoal ? customGoal.fats : (tmb * 0.25 / 9)
+  }
+
+  const getCarbTarget = () => {
+    return customGoal ? customGoal.carbs : (tmb * 0.45 / 4)
+  }
+
+  const getFiberTarget = () => {
+    return customGoal ? customGoal.fiber : 25 // Valor recomendado por defecto
+  }
+
+  // Función helper para obtener el color de estado basado en el porcentaje
+  const getProgressColor = (percentage: number) => {
+    if (percentage < 70) return 'error'
+    if (percentage < 90) return 'warning'
+    if (percentage <= 110) return 'success'
+    return 'error'
+  }
+
+  // Función para obtener el estado detallado de un nutriente
+  const getNutrientStatus = (current: number, target: number, nutrientName: string) => {
+    const percentage = (current / target) * 100
+    const deficit = target - current
+    const excess = current - target
+    
+    if (percentage < 70) {
+      return {
+        status: 'Deficiente',
+        message: `Faltan ${Math.abs(deficit).toFixed(1)}g de ${nutrientName}`,
+        color: 'error',
+        icon: '⚠️'
+      }
+    } else if (percentage < 90) {
+      return {
+        status: 'Casi completo',
+        message: `Faltan ${Math.abs(deficit).toFixed(1)}g de ${nutrientName}`,
+        color: 'warning',
+        icon: '📊'
+      }
+    } else if (percentage <= 110) {
+      return {
+        status: 'Óptimo',
+        message: `${nutrientName} en rango ideal`,
+        color: 'success',
+        icon: '✅'
+      }
+    } else {
+      return {
+        status: 'Excede',
+        message: `Excede en ${excess.toFixed(1)}g de ${nutrientName}`,
+        color: 'error',
+        icon: '⚠️'
+      }
+    }
+  }
+
   const getCaloriesStatus = (calories: number) => {
-    const percentage = (calories / tmb) * 100
+    const target = getCalorieTarget()
+    const percentage = (calories / target) * 100
     if (percentage < 70) return { color: 'error', status: 'Necesita más alimentos' }
     if (percentage < 90) return { color: 'warning', status: 'Casi completo' }
     if (percentage <= 110) return { color: 'success', status: 'Óptimo' }
-    return { color: 'error', status: 'Excede TMB' }
+    return { color: 'error', status: 'Excede objetivo' }
   }
 
   const handleAddMeal = () => {
@@ -240,7 +311,7 @@ const DietBuilder = ({ tmb, onSave, onBack, initialMeals, initialSupplements, in
     
     setSaving(true)
     try {
-      await onSave(meals, supplements, mealDefinitions)
+      await onSave(meals, supplements, mealDefinitions, customGoal)
     } catch (error) {
       console.error('Error saving diet:', error)
     } finally {
@@ -329,6 +400,15 @@ const DietBuilder = ({ tmb, onSave, onBack, initialMeals, initialSupplements, in
     setEditingMealName('')
   }
 
+  const handleCustomGoalSave = (newCustomGoal: CustomGoal | undefined) => {
+    setCustomGoal(newCustomGoal)
+    setShowCustomGoalForm(false)
+  }
+
+  const handleCustomGoalCancel = () => {
+    setShowCustomGoalForm(false)
+  }
+
   return (
     <Box sx={{ width: '100%' }}>
       <Typography variant="h5" gutterBottom>
@@ -339,9 +419,34 @@ const DietBuilder = ({ tmb, onSave, onBack, initialMeals, initialSupplements, in
           {dietName}
         </Typography>
       )}
-      <Typography variant="body1" sx={{ mb: 3 }}>
-        TMB: {Math.round(tmb)} calories
-      </Typography>
+      <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        <Box>
+          <Typography variant="body1">
+            TMB: {Math.round(tmb)} calories
+          </Typography>
+          {customGoal ? (
+            <Box sx={{ mt: 1 }}>
+              <Typography variant="body2" color="primary" sx={{ fontWeight: 'medium' }}>
+                Objetivo personalizado: {Math.round(customGoal.calories)} calories
+              </Typography>
+              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
+                P: {Math.round(customGoal.proteins)}g | C: {Math.round(customGoal.carbs)}g | F: {Math.round(customGoal.fats)}g | Fibra: {Math.round(customGoal.fiber)}g
+              </Typography>
+            </Box>
+          ) : (
+            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
+              Objetivos basados en TMB: P: {Math.round(tmb * 0.3 / 4)}g | C: {Math.round(tmb * 0.45 / 4)}g | F: {Math.round(tmb * 0.25 / 9)}g | Fibra: 25g
+            </Typography>
+          )}
+        </Box>
+        <Button
+          variant="outlined"
+          onClick={() => setShowCustomGoalForm(true)}
+          size="small"
+        >
+          {customGoal ? 'Editar Objetivos' : 'Configurar Objetivos'}
+        </Button>
+      </Box>
 
       <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
         <Tabs value={activeTab} onChange={(_, newValue) => setActiveTab(newValue)}>
@@ -449,35 +554,331 @@ const DietBuilder = ({ tmb, onSave, onBack, initialMeals, initialSupplements, in
 
           {/* Daily Progress Summary */}
           <Paper elevation={2} sx={{ p: 3, mb: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              Daily Progress Summary
-            </Typography>
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+              <Typography variant="h6">
+                Daily Progress Summary
+              </Typography>
+              <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Box sx={{ width: 12, height: 12, borderRadius: 1, backgroundColor: '#d32f2f' }} />
+                  <Typography variant="caption">Deficiente (&lt;70%)</Typography>
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Box sx={{ width: 12, height: 12, borderRadius: 1, backgroundColor: '#ed6c02' }} />
+                  <Typography variant="caption">Casi (70-90%)</Typography>
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Box sx={{ width: 12, height: 12, borderRadius: 1, backgroundColor: '#2e7d32' }} />
+                  <Typography variant="caption">Óptimo (90-110%)</Typography>
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Box sx={{ width: 12, height: 12, borderRadius: 1, backgroundColor: '#d32f2f' }} />
+                  <Typography variant="caption">Excede (&gt;110%)</Typography>
+                </Box>
+              </Box>
+            </Box>
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
               {daysOfWeek.map(day => {
                 const totals = calculateDailyTotals(day.key)
                 const status = getCaloriesStatus(totals.totalCalories)
+                
+                // Calcular porcentajes para cada macronutriente
+                const caloriePercentage = Math.min((totals.totalCalories / getCalorieTarget()) * 100, 120)
+                const proteinPercentage = Math.min((totals.totalProteins / getProteinTarget()) * 100, 120)
+                const fatPercentage = Math.min((totals.totalFats / getFatTarget()) * 100, 120)
+                const carbPercentage = Math.min((totals.totalCarbs / getCarbTarget()) * 100, 120)
+                const fiberPercentage = Math.min((totals.totalFiber / getFiberTarget()) * 100, 120)
+
+                // Obtener estados detallados
+                const proteinStatus = getNutrientStatus(totals.totalProteins, getProteinTarget(), 'proteínas')
+                const fatStatus = getNutrientStatus(totals.totalFats, getFatTarget(), 'grasas')
+                const carbStatus = getNutrientStatus(totals.totalCarbs, getCarbTarget(), 'carbohidratos')
+                const fiberStatus = getNutrientStatus(totals.totalFiber, getFiberTarget(), 'fibra')
+
                 return (
-                  <Box key={day.key} sx={{ flex: '1 1 200px', minWidth: '200px' }}>
-                    <Typography variant="subtitle2" gutterBottom>
+                  <Box key={day.key} sx={{ 
+                    flex: '1 1 300px', 
+                    minWidth: '300px',
+                    p: 2,
+                    border: '1px solid #e0e0e0',
+                    borderRadius: 2,
+                    backgroundColor: '#fafafa'
+                  }}>
+                    <Typography variant="subtitle1" gutterBottom sx={{ 
+                      fontWeight: 'bold', 
+                      textAlign: 'center',
+                      color: '#2e7d32',
+                      mb: 2
+                    }}>
                       {day.label}
                     </Typography>
-                    <LinearProgress
-                      variant="determinate"
-                      value={Math.min((totals.totalCalories / tmb) * 100, 120)}
-                      color={status.color as 'error' | 'warning' | 'success'}
-                      sx={{ mb: 1 }}
-                    />
-                    <Typography variant="caption" color={status.color}>
-                      {status.status} - {Math.round(totals.totalCalories)} cal
-                    </Typography>
-                    <Box sx={{ mt: 1 }}>
-                      <Typography variant="caption" display="block">
-                        P: {Math.round(totals.totalProteins)}g | F: {Math.round(totals.totalFats)}g | C: {Math.round(totals.totalCarbs)}g
+                    
+                    {/* Calorías - Destacadas */}
+                    <Box sx={{ 
+                      mb: 2, 
+                      p: 1.5, 
+                      backgroundColor: 'white', 
+                      borderRadius: 1,
+                      border: '1px solid #e0e0e0'
+                    }}>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                        <Typography variant="body2" sx={{ fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                          🔥 Calorías
+                        </Typography>
+                        <Typography variant="body2" color={getProgressColor(caloriePercentage)} sx={{ fontWeight: 'medium' }}>
+                          {Math.round(totals.totalCalories)} / {Math.round(getCalorieTarget())} cal
+                        </Typography>
+                      </Box>
+                      <LinearProgress
+                        variant="determinate"
+                        value={caloriePercentage}
+                        color={getProgressColor(caloriePercentage) as 'error' | 'warning' | 'success'}
+                        sx={{ height: 10, borderRadius: 5, mb: 1 }}
+                      />
+                      <Typography variant="caption" color={status.color} sx={{ display: 'block', fontWeight: 'medium' }}>
+                        {status.status} ({caloriePercentage.toFixed(0)}%)
                       </Typography>
+                    </Box>
+
+                    {/* Macronutrientes */}
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+                      {/* Proteínas */}
+                      <Box sx={{ 
+                        p: 1, 
+                        backgroundColor: 'white', 
+                        borderRadius: 1,
+                        border: '1px solid #e0e0e0'
+                      }}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
+                          <Typography variant="caption" sx={{ fontWeight: 'medium', display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                            💪 Proteínas
+                          </Typography>
+                          <Typography variant="caption" color={getProgressColor(proteinPercentage)}>
+                            {Math.round(totals.totalProteins)} / {Math.round(getProteinTarget())}g
+                          </Typography>
+                        </Box>
+                        <LinearProgress
+                          variant="determinate"
+                          value={proteinPercentage}
+                          color={getProgressColor(proteinPercentage) as 'error' | 'warning' | 'success'}
+                          sx={{ height: 6, borderRadius: 3, mb: 0.5 }}
+                        />
+                        <Typography variant="caption" color={proteinStatus.color} sx={{ fontSize: '0.7rem' }}>
+                          {proteinStatus.icon} {proteinStatus.message}
+                        </Typography>
+                      </Box>
+
+                      {/* Carbohidratos */}
+                      <Box sx={{ 
+                        p: 1, 
+                        backgroundColor: 'white', 
+                        borderRadius: 1,
+                        border: '1px solid #e0e0e0'
+                      }}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
+                          <Typography variant="caption" sx={{ fontWeight: 'medium', display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                            🌾 Carbohidratos
+                          </Typography>
+                          <Typography variant="caption" color={getProgressColor(carbPercentage)}>
+                            {Math.round(totals.totalCarbs)} / {Math.round(getCarbTarget())}g
+                          </Typography>
+                        </Box>
+                        <LinearProgress
+                          variant="determinate"
+                          value={carbPercentage}
+                          color={getProgressColor(carbPercentage) as 'error' | 'warning' | 'success'}
+                          sx={{ height: 6, borderRadius: 3, mb: 0.5 }}
+                        />
+                        <Typography variant="caption" color={carbStatus.color} sx={{ fontSize: '0.7rem' }}>
+                          {carbStatus.icon} {carbStatus.message}
+                        </Typography>
+                      </Box>
+
+                      {/* Grasas */}
+                      <Box sx={{ 
+                        p: 1, 
+                        backgroundColor: 'white', 
+                        borderRadius: 1,
+                        border: '1px solid #e0e0e0'
+                      }}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
+                          <Typography variant="caption" sx={{ fontWeight: 'medium', display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                            🥑 Grasas
+                          </Typography>
+                          <Typography variant="caption" color={getProgressColor(fatPercentage)}>
+                            {Math.round(totals.totalFats)} / {Math.round(getFatTarget())}g
+                          </Typography>
+                        </Box>
+                        <LinearProgress
+                          variant="determinate"
+                          value={fatPercentage}
+                          color={getProgressColor(fatPercentage) as 'error' | 'warning' | 'success'}
+                          sx={{ height: 6, borderRadius: 3, mb: 0.5 }}
+                        />
+                        <Typography variant="caption" color={fatStatus.color} sx={{ fontSize: '0.7rem' }}>
+                          {fatStatus.icon} {fatStatus.message}
+                        </Typography>
+                      </Box>
+
+                      {/* Fibra */}
+                      <Box sx={{ 
+                        p: 1, 
+                        backgroundColor: 'white', 
+                        borderRadius: 1,
+                        border: '1px solid #e0e0e0'
+                      }}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
+                          <Typography variant="caption" sx={{ fontWeight: 'medium', display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                            🌿 Fibra
+                          </Typography>
+                          <Typography variant="caption" color={getProgressColor(fiberPercentage)}>
+                            {Math.round(totals.totalFiber)} / {Math.round(getFiberTarget())}g
+                          </Typography>
+                        </Box>
+                        <LinearProgress
+                          variant="determinate"
+                          value={fiberPercentage}
+                          color={getProgressColor(fiberPercentage) as 'error' | 'warning' | 'success'}
+                          sx={{ height: 6, borderRadius: 3, mb: 0.5 }}
+                        />
+                        <Typography variant="caption" color={fiberStatus.color} sx={{ fontSize: '0.7rem' }}>
+                          {fiberStatus.icon} {fiberStatus.message}
+                        </Typography>
+                      </Box>
                     </Box>
                   </Box>
                 )
               })}
+            </Box>
+          </Paper>
+
+          {/* Weekly Summary */}
+          <Paper elevation={2} sx={{ p: 3, mb: 3 }}>
+            <Typography variant="h6" gutterBottom>
+              📊 Resumen Semanal
+            </Typography>
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
+              {(() => {
+                // Calcular promedios semanales
+                const weeklyTotals = daysOfWeek.reduce((acc, day) => {
+                  const totals = calculateDailyTotals(day.key)
+                  return {
+                    calories: acc.calories + totals.totalCalories,
+                    proteins: acc.proteins + totals.totalProteins,
+                    fats: acc.fats + totals.totalFats,
+                    carbs: acc.carbs + totals.totalCarbs,
+                    fiber: acc.fiber + totals.totalFiber
+                  }
+                }, { calories: 0, proteins: 0, fats: 0, carbs: 0, fiber: 0 })
+
+                const weeklyAverages = {
+                  calories: weeklyTotals.calories / 7,
+                  proteins: weeklyTotals.proteins / 7,
+                  fats: weeklyTotals.fats / 7,
+                  carbs: weeklyTotals.carbs / 7,
+                  fiber: weeklyTotals.fiber / 7
+                }
+
+                const avgCaloriePercentage = (weeklyAverages.calories / getCalorieTarget()) * 100
+                const avgProteinPercentage = (weeklyAverages.proteins / getProteinTarget()) * 100
+                const avgFatPercentage = (weeklyAverages.fats / getFatTarget()) * 100
+                const avgCarbPercentage = (weeklyAverages.carbs / getCarbTarget()) * 100
+                const avgFiberPercentage = (weeklyAverages.fiber / getFiberTarget()) * 100
+
+                return (
+                  <>
+                    <Box sx={{ 
+                      flex: '1 1 200px', 
+                      p: 2, 
+                      backgroundColor: '#f8f9fa', 
+                      borderRadius: 1,
+                      border: '1px solid #dee2e6'
+                    }}>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1 }}>
+                        🔥 Calorías Promedio
+                      </Typography>
+                      <Typography variant="h6" color={getProgressColor(avgCaloriePercentage)}>
+                        {Math.round(weeklyAverages.calories)} cal
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {avgCaloriePercentage.toFixed(0)}% del objetivo
+                      </Typography>
+                    </Box>
+
+                    <Box sx={{ 
+                      flex: '1 1 200px', 
+                      p: 2, 
+                      backgroundColor: '#f8f9fa', 
+                      borderRadius: 1,
+                      border: '1px solid #dee2e6'
+                    }}>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1 }}>
+                        💪 Proteínas Promedio
+                      </Typography>
+                      <Typography variant="h6" color={getProgressColor(avgProteinPercentage)}>
+                        {Math.round(weeklyAverages.proteins)}g
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {avgProteinPercentage.toFixed(0)}% del objetivo
+                      </Typography>
+                    </Box>
+
+                    <Box sx={{ 
+                      flex: '1 1 200px', 
+                      p: 2, 
+                      backgroundColor: '#f8f9fa', 
+                      borderRadius: 1,
+                      border: '1px solid #dee2e6'
+                    }}>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1 }}>
+                        🌾 Carbohidratos Promedio
+                      </Typography>
+                      <Typography variant="h6" color={getProgressColor(avgCarbPercentage)}>
+                        {Math.round(weeklyAverages.carbs)}g
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {avgCarbPercentage.toFixed(0)}% del objetivo
+                      </Typography>
+                    </Box>
+
+                    <Box sx={{ 
+                      flex: '1 1 200px', 
+                      p: 2, 
+                      backgroundColor: '#f8f9fa', 
+                      borderRadius: 1,
+                      border: '1px solid #dee2e6'
+                    }}>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1 }}>
+                        🥑 Grasas Promedio
+                      </Typography>
+                      <Typography variant="h6" color={getProgressColor(avgFatPercentage)}>
+                        {Math.round(weeklyAverages.fats)}g
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {avgFatPercentage.toFixed(0)}% del objetivo
+                      </Typography>
+                    </Box>
+
+                    <Box sx={{ 
+                      flex: '1 1 200px', 
+                      p: 2, 
+                      backgroundColor: '#f8f9fa', 
+                      borderRadius: 1,
+                      border: '1px solid #dee2e6'
+                    }}>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1 }}>
+                        🌿 Fibra Promedio
+                      </Typography>
+                      <Typography variant="h6" color={getProgressColor(avgFiberPercentage)}>
+                        {Math.round(weeklyAverages.fiber)}g
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {avgFiberPercentage.toFixed(0)}% del objetivo
+                      </Typography>
+                    </Box>
+                  </>
+                )
+              })()}
             </Box>
           </Paper>
         </>
@@ -527,7 +928,7 @@ const DietBuilder = ({ tmb, onSave, onBack, initialMeals, initialSupplements, in
       )}
 
       {activeTab === 2 && (
-        <DietCharts meals={meals} tmb={tmb} />
+        <DietCharts meals={meals} tmb={tmb} customGoal={customGoal} />
       )}
 
       {/* Global Action Buttons - Available in all tabs */}
@@ -661,6 +1062,26 @@ const DietBuilder = ({ tmb, onSave, onBack, initialMeals, initialSupplements, in
             </Button>
           )}
         </DialogActions>
+      </Dialog>
+
+      {/* Custom Goal Form Dialog */}
+      <Dialog 
+        open={showCustomGoalForm} 
+        onClose={handleCustomGoalCancel} 
+        maxWidth="md" 
+        fullWidth
+        PaperProps={{
+          sx: { maxHeight: '90vh' }
+        }}
+      >
+        <DialogContent sx={{ p: 0 }}>
+          <CustomGoalForm
+            tmb={tmb}
+            initialCustomGoal={customGoal}
+            onSave={handleCustomGoalSave}
+            onCancel={handleCustomGoalCancel}
+          />
+        </DialogContent>
       </Dialog>
     </Box>
   )

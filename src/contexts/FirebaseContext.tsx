@@ -14,7 +14,11 @@ import {
 import { db } from '../firebase/config'
 import { useAuth } from './AuthContext'
 import { useNotifications } from '../hooks/useNotifications'
-import type { Diet, Food, Client } from '../types'
+import type { Diet, Food, Client, CustomGoal } from '../types'
+
+// Tipos específicos para operaciones de Firestore
+type DietCreateData = Omit<Diet, 'id' | 'createdAt' | 'shareId'>
+type DietUpdateData = Partial<Diet>
 
 interface FirebaseContextType {
   // Foods
@@ -26,9 +30,10 @@ interface FirebaseContextType {
   
   // Diets
   diets: Diet[]
-  addDiet: (diet: Omit<Diet, 'id' | 'createdAt' | 'shareId'>) => Promise<boolean>
-  updateDiet: (id: string, updates: Partial<Diet>) => Promise<boolean>
+  addDiet: (diet: DietCreateData) => Promise<boolean>
+  updateDiet: (id: string, updates: DietUpdateData) => Promise<boolean>
   deleteDiet: (id: string) => Promise<boolean>
+  removeCustomGoal: (dietId: string) => Promise<boolean>
   getDietByShareId: (shareId: string) => Diet | undefined
   loadDietByShareId: (shareId: string) => Promise<Diet | null>
   loadingDiets: boolean
@@ -59,6 +64,53 @@ export const FirebaseProvider: React.FC<{ children: ReactNode }> = ({ children }
   // Generar shareId único
   const generateShareId = (): string => {
     return Math.random().toString(36).substring(2, 8)
+  }
+
+  // Función helper para limpiar datos de Firestore y manejar customGoal
+  const cleanFirestoreData = (data: any): any => {
+    const cleaned = { ...data }
+    
+    // Si customGoal es null o undefined, no incluirlo en los datos
+    if (cleaned.customGoal === null || cleaned.customGoal === undefined) {
+      delete cleaned.customGoal
+    }
+    
+    return cleaned
+  }
+
+  // Función helper para eliminar el campo customGoal de un documento
+  const removeCustomGoal = async (dietId: string): Promise<boolean> => {
+    try {
+      const dietRef = doc(db, 'diets', dietId)
+      await updateDoc(dietRef, {
+        customGoal: null
+      })
+      return true
+    } catch (error) {
+      console.error('Error removing customGoal:', error)
+      return false
+    }
+  }
+
+  // Función helper para validar y limpiar datos de dieta leídos de Firestore
+  const validateDietData = (data: any): any => {
+    const validated = { ...data }
+    
+    // Validar que customGoal tenga la estructura correcta si existe
+    if (validated.customGoal) {
+      const requiredFields = ['calories', 'proteins', 'carbs', 'fats', 'fiber']
+      const hasAllFields = requiredFields.every(field => 
+        typeof validated.customGoal[field] === 'number' && 
+        validated.customGoal[field] >= 0
+      )
+      
+      if (!hasAllFields) {
+        console.warn('Invalid customGoal structure found, removing field:', validated.customGoal)
+        delete validated.customGoal
+      }
+    }
+    
+    return validated
   }
 
   // Cargar alimentos del usuario
@@ -128,13 +180,15 @@ export const FirebaseProvider: React.FC<{ children: ReactNode }> = ({ children }
           }
         }
         
+        const validatedData = validateDietData(data)
         dietsData.push({
           id: doc.id,
-          ...data,
+          ...validatedData,
           // Asegurar compatibilidad con dietas existentes que no tienen suplementos
-          supplements: data.supplements || [],
+          supplements: validatedData.supplements || [],
           mealDefinitions: mealDefinitions || [],
-          createdAt: data.createdAt?.toDate() || new Date()
+          // customGoal es opcional, no necesita valor por defecto
+          createdAt: validatedData.createdAt?.toDate() || new Date()
         } as Diet)
       })
       
@@ -253,17 +307,18 @@ export const FirebaseProvider: React.FC<{ children: ReactNode }> = ({ children }
   }
 
   // Funciones para dietas
-  const addDiet = async (dietData: Omit<Diet, 'id' | 'createdAt' | 'shareId'>): Promise<boolean> => {
+  const addDiet = async (dietData: DietCreateData): Promise<boolean> => {
     if (!user) return false
     
     try {
       const dietsRef = collection(db, 'diets')
-      const newDiet = {
+      
+      const newDiet = cleanFirestoreData({
         ...dietData,
         userId: user.id,
         shareId: generateShareId(),
         createdAt: serverTimestamp()
-      }
+      })
       
       const docRef = await addDoc(dietsRef, newDiet)
       const addedDiet: Diet = { 
@@ -282,10 +337,12 @@ export const FirebaseProvider: React.FC<{ children: ReactNode }> = ({ children }
     }
   }
 
-  const updateDiet = async (id: string, updates: Partial<Diet>): Promise<boolean> => {
+  const updateDiet = async (id: string, updates: DietUpdateData): Promise<boolean> => {
     try {
       const dietRef = doc(db, 'diets', id)
-      await updateDoc(dietRef, updates)
+      
+      const updateData = cleanFirestoreData(updates)
+      await updateDoc(dietRef, updateData)
       
       setDiets(prev => prev.map(diet => 
         diet.id === id ? { ...diet, ...updates } : diet
@@ -350,13 +407,15 @@ export const FirebaseProvider: React.FC<{ children: ReactNode }> = ({ children }
           }
         }
         
+        const validatedData = validateDietData(data)
         return {
           id: doc.id,
-          ...data,
+          ...validatedData,
           // Asegurar compatibilidad con dietas existentes que no tienen suplementos
-          supplements: data.supplements || [],
+          supplements: validatedData.supplements || [],
           mealDefinitions: mealDefinitions || [],
-          createdAt: data.createdAt?.toDate() || new Date()
+          // customGoal es opcional, no necesita valor por defecto
+          createdAt: validatedData.createdAt?.toDate() || new Date()
         } as Diet
       }
       return null
@@ -457,6 +516,7 @@ export const FirebaseProvider: React.FC<{ children: ReactNode }> = ({ children }
     addDiet,
     updateDiet,
     deleteDiet,
+    removeCustomGoal,
     getDietByShareId,
     loadDietByShareId,
     loadingDiets,

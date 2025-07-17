@@ -190,7 +190,7 @@ const SharedDiet = () => {
       </Paper>
 
       {/* Diet Charts */}
-      <LazyCharts meals={diet.meals} tmb={diet.tmb} />
+              <LazyCharts meals={diet.meals} tmb={diet.tmb} customGoal={diet.customGoal} />
 
       {/* Supplements */}
       {diet.supplements && diet.supplements.length > 0 && (
