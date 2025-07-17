@@ -14,7 +14,7 @@ import {
 import { db } from '../firebase/config'
 import { useAuth } from './AuthContext'
 import { useNotifications } from '../hooks/useNotifications'
-import type { Diet, Food, Client, CustomGoal } from '../types'
+import type { Diet, Food, Client } from '../types'
 
 // Tipos específicos para operaciones de Firestore
 type DietCreateData = Omit<Diet, 'id' | 'createdAt' | 'shareId'>
