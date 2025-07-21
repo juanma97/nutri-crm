@@ -137,20 +137,119 @@ const SharedDiet = () => {
           />
         </Box>
 
+        {/* Objetivos Nutricionales */}
+        <Box sx={{ mb: 3 }}>
+          <Typography variant="h6" gutterBottom sx={{ color: '#2e7d32', fontWeight: 'bold' }}>
+            🎯 Objetivos Nutricionales
+          </Typography>
+          
+          {diet.customGoal ? (
+            // Mostrar customGoal como objetivo principal
+            <Grid container spacing={2}>
+              <Grid item xs={12} md={2}>
+                <Card variant="outlined" sx={{ borderColor: '#2e7d32', borderWidth: 2 }}>
+                  <CardContent sx={{ textAlign: 'center' }}>
+                    <Typography variant="h6" color="primary" sx={{ fontWeight: 'bold' }}>
+                      {diet.customGoal.calories.toLocaleString()} kcal
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Calorías Objetivo
+                    </Typography>
+                    <Typography variant="caption" color="success.main" sx={{ fontWeight: 'bold' }}>
+                      Basado en objetivo personalizado
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+              <Grid item xs={12} md={2}>
+                <Card variant="outlined">
+                  <CardContent sx={{ textAlign: 'center' }}>
+                    <Typography variant="h6" color="primary">
+                      {diet.customGoal.proteins}g
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Proteínas
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+              <Grid item xs={12} md={2}>
+                <Card variant="outlined">
+                  <CardContent sx={{ textAlign: 'center' }}>
+                    <Typography variant="h6" color="primary">
+                      {diet.customGoal.carbs}g
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Carbohidratos
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+              <Grid item xs={12} md={2}>
+                <Card variant="outlined">
+                  <CardContent sx={{ textAlign: 'center' }}>
+                    <Typography variant="h6" color="primary">
+                      {diet.customGoal.fats}g
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Grasas
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+              <Grid item xs={12} md={2}>
+                <Card variant="outlined">
+                  <CardContent sx={{ textAlign: 'center' }}>
+                    <Typography variant="h6" color="primary">
+                      {diet.customGoal.fiber}g
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Fibra
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+              <Grid item xs={12} md={2}>
+                <Card variant="outlined" sx={{ borderColor: '#666', borderWidth: 1 }}>
+                  <CardContent sx={{ textAlign: 'center' }}>
+                    <Typography variant="h6" color="text.secondary">
+                      {Math.round(diet.tmb).toLocaleString()} kcal
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      TMB Base
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      Tasa Metabólica Basal
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+            </Grid>
+          ) : (
+            // Mostrar solo TMB como objetivo
+            <Grid container spacing={2}>
+              <Grid item xs={12} md={3}>
+                <Card variant="outlined" sx={{ borderColor: '#2e7d32', borderWidth: 2 }}>
+                  <CardContent sx={{ textAlign: 'center' }}>
+                    <Typography variant="h6" color="primary" sx={{ fontWeight: 'bold' }}>
+                      {Math.round(diet.tmb).toLocaleString()} kcal
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Calorías Objetivo
+                    </Typography>
+                    <Typography variant="caption" color="success.main" sx={{ fontWeight: 'bold' }}>
+                      Basado en TMB
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+            </Grid>
+          )}
+        </Box>
+
+        {/* Información del Cliente */}
         <Grid container spacing={3}>
-          <Grid item xs={12} md={3}>
-            <Card variant="outlined">
-              <CardContent>
-                <Typography variant="h6" color="primary">
-                  {diet.tmb.toLocaleString()} cal
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  TMB Objetivo
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-          <Grid item xs={12} md={3}>
+          <Grid item xs={12} md={4}>
             <Card variant="outlined">
               <CardContent>
                 <Typography variant="h6" color="primary">
@@ -162,7 +261,7 @@ const SharedDiet = () => {
               </CardContent>
             </Card>
           </Grid>
-          <Grid item xs={12} md={3}>
+          <Grid item xs={12} md={4}>
             <Card variant="outlined">
               <CardContent>
                 <Typography variant="h6" color="primary">
@@ -174,7 +273,7 @@ const SharedDiet = () => {
               </CardContent>
             </Card>
           </Grid>
-          <Grid item xs={12} md={3}>
+          <Grid item xs={12} md={4}>
             <Card variant="outlined">
               <CardContent>
                 <Typography variant="h6" color="primary">
@@ -190,7 +289,7 @@ const SharedDiet = () => {
       </Paper>
 
       {/* Diet Charts */}
-      <LazyCharts meals={diet.meals} tmb={diet.tmb} />
+              <LazyCharts meals={diet.meals} tmb={diet.tmb} customGoal={diet.customGoal} />
 
       {/* Supplements */}
       {diet.supplements && diet.supplements.length > 0 && (

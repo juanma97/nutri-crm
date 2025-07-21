@@ -12,7 +12,7 @@ import {
 import TMBStep from '../components/TMBStep'
 import DietBuilder from '../components/DietBuilder'
 import { useFirebase } from '../contexts/FirebaseContext'
-import type { Diet, Client, Supplement, DynamicMeal } from '../types'
+import type { Diet, Client, Supplement, DynamicMeal, CustomGoal } from '../types'
 
 const steps = ['Calculate TMB', 'Build Diet']
 
@@ -63,12 +63,13 @@ const CreateDiet = () => {
     setActiveStep(1)
   }
 
-  const handleDietSave = async (meals: Diet['meals'], supplements?: Supplement[], mealDefinitions?: DynamicMeal[]) => {
+  const handleDietSave = async (meals: Diet['meals'], supplements?: Supplement[], mealDefinitions?: DynamicMeal[], customGoal?: CustomGoal) => {
     const currentDietData = {
       ...dietData,
       meals,
       supplements: supplements || [],
-      mealDefinitions: mealDefinitions || []
+      mealDefinitions: mealDefinitions || [],
+      customGoal
     }
     
     const success = await addDiet(currentDietData)
@@ -101,6 +102,7 @@ const CreateDiet = () => {
             onSave={handleDietSave}
             onBack={handleBack}
             initialMeals={dietData.meals}
+            initialCustomGoal={dietData.customGoal}
             dietName={dietData.name}
           />
         )

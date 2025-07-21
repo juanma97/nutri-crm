@@ -25,7 +25,7 @@ import {
   ComposedChart,
   Legend
 } from 'recharts'
-import type { DayOfWeek, DietMeal } from '../types'
+import type { DayOfWeek, DietMeal, CustomGoal } from '../types'
 
 const COLORS = {
   calories: '#FF6B6B',
@@ -42,9 +42,10 @@ const COLORS = {
 interface DietChartsProps {
   meals: Record<DayOfWeek, Record<string, DietMeal[]>>
   tmb: number
+  customGoal?: CustomGoal
 }
 
-const DietCharts = ({ meals, tmb }: DietChartsProps) => {
+const DietCharts = ({ meals, tmb, customGoal }: DietChartsProps) => {
   // Calcular datos nutricionales por día
   const dailyNutrition = Object.entries(meals).map(([day, dayMeals]) => {
     const dayTotals = Object.values(dayMeals).reduce((sum, mealList) => {
@@ -58,10 +59,17 @@ const DietCharts = ({ meals, tmb }: DietChartsProps) => {
     }, { calories: 0, proteins: 0, fats: 0, carbs: 0, fiber: 0 })
 
     const dayName = day.charAt(0).toUpperCase() + day.slice(1)
-    const caloriesPercentage = (dayTotals.calories / tmb) * 100
-    const proteinPercentage = (dayTotals.proteins / (tmb * 0.3 / 4)) * 100 // 30% de TMB en proteínas
-    const fatPercentage = (dayTotals.fats / (tmb * 0.25 / 9)) * 100 // 25% de TMB en grasas
-    const carbPercentage = (dayTotals.carbs / (tmb * 0.45 / 4)) * 100 // 45% de TMB en carbohidratos
+    
+    // Usar customGoal si está disponible, sino usar TMB
+    const calorieTarget = customGoal ? customGoal.calories : tmb
+    const proteinTarget = customGoal ? customGoal.proteins : (tmb * 0.3 / 4)
+    const fatTarget = customGoal ? customGoal.fats : (tmb * 0.25 / 9)
+    const carbTarget = customGoal ? customGoal.carbs : (tmb * 0.45 / 4)
+    
+    const caloriesPercentage = (dayTotals.calories / calorieTarget) * 100
+    const proteinPercentage = (dayTotals.proteins / proteinTarget) * 100
+    const fatPercentage = (dayTotals.fats / fatTarget) * 100
+    const carbPercentage = (dayTotals.carbs / carbTarget) * 100
 
     return {
       day: dayName,
@@ -70,7 +78,7 @@ const DietCharts = ({ meals, tmb }: DietChartsProps) => {
       fats: Math.round(dayTotals.fats),
       carbs: Math.round(dayTotals.carbs),
       fiber: Math.round(dayTotals.fiber),
-      tmbTarget: Math.round(tmb),
+      tmbTarget: Math.round(calorieTarget),
       caloriesPercentage,
       proteinPercentage,
       fatPercentage,

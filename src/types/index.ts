@@ -111,12 +111,21 @@ export interface Supplement {
   comments?: string
 }
 
+export interface CustomGoal {
+  calories: number
+  proteins: number
+  carbs: number
+  fats: number
+  fiber: number
+}
+
 export interface Diet {
   id: string
   name: string
   clientName: string
   tmb: number
   clientData?: Client
+  customGoal?: CustomGoal // Objetivo personalizado opcional
   meals: {
     monday: DynamicDayMeals
     tuesday: DynamicDayMeals

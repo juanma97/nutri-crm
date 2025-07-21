@@ -136,9 +136,13 @@ const Dashboard = () => {
     const avgCarbs = totalCarbs / 7
     const avgFiber = totalFiber / 7
 
+    // Usar customGoal si está disponible, sino usar TMB
+    const calorieTarget = diet.customGoal ? diet.customGoal.calories : diet.tmb
+    const proteinTarget = diet.customGoal ? diet.customGoal.proteins : (diet.tmb * 0.3 / 4)
+    
     // Calcular score de calidad (0-100)
-    const calorieScore = Math.min(100, (avgCalories / diet.tmb) * 100)
-    const proteinScore = Math.min(100, (avgProteins / (diet.tmb * 0.3 / 4)) * 100)
+    const calorieScore = Math.min(100, (avgCalories / calorieTarget) * 100)
+    const proteinScore = Math.min(100, (avgProteins / proteinTarget) * 100)
     const fiberScore = Math.min(100, (avgFiber / 25) * 100)
     const balanceScore = 100 - Math.abs((avgProteins * 4 / avgCalories) * 100 - 30) - 
                         Math.abs((avgFats * 9 / avgCalories) * 100 - 25) - 

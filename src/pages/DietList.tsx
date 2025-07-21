@@ -277,7 +277,7 @@ const DietList = () => {
                         <Typography variant="subtitle2">{diet.name}</Typography>
                       </TableCell>
                       <TableCell>{diet.clientName}</TableCell>
-                      <TableCell>{diet.tmb.toLocaleString()} cal</TableCell>
+                      <TableCell>{Math.round(diet.tmb).toLocaleString()} cal</TableCell>
                       <TableCell>{Math.round(stats.totalCalories)} cal</TableCell>
                       <TableCell>{new Date(diet.createdAt).toLocaleDateString()}</TableCell>
                       <TableCell>
@@ -352,7 +352,7 @@ const DietList = () => {
                     
                     <Box sx={{ mb: 2 }}>
                       <Typography variant="body2" color="text.secondary">
-                        TMB: {diet.tmb.toLocaleString()} cal
+                        TMB: {Math.round(diet.tmb).toLocaleString()} cal
                       </Typography>
                       <Typography variant="body2" color="text.secondary">
                         Total: {Math.round(stats.totalCalories)} cal
@@ -439,7 +439,7 @@ const DietList = () => {
                 </Box>
                 <Box sx={{ flex: '1 1 200px', minWidth: '200px' }}>
                   <Typography variant="subtitle2">TMB:</Typography>
-                  <Typography variant="body1">{selectedDiet.tmb.toLocaleString()} cal</Typography>
+                  <Typography variant="body1">{Math.round(selectedDiet.tmb).toLocaleString()} cal</Typography>
                 </Box>
                 <Box sx={{ flex: '1 1 200px', minWidth: '200px' }}>
                   <Typography variant="subtitle2">Created:</Typography>

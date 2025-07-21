@@ -348,7 +348,7 @@ const Reports = () => {
                     <Typography variant="subtitle2">{diet.clientName}</Typography>
                   </TableCell>
                   <TableCell>{diet.name}</TableCell>
-                  <TableCell>{diet.tmb.toLocaleString()}</TableCell>
+                  <TableCell>{Math.round(diet.tmb).toLocaleString()}</TableCell>
                   <TableCell>
                     {new Date(diet.createdAt).toLocaleDateString()}
                   </TableCell>
