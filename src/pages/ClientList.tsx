@@ -52,7 +52,7 @@ import {
   FitnessCenter as FitnessIcon,
   Restaurant as RestaurantIcon
 } from '@mui/icons-material'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { useFirebase } from '../contexts/FirebaseContext'
 import { useNotifications } from '../hooks/useNotifications'
 import type { Client } from '../types'
@@ -60,7 +60,7 @@ import type { Client } from '../types'
 const ClientList = () => {
   const { clients, deleteClient, loadingClients } = useFirebase()
   const navigate = useNavigate()
-  const location = useLocation()
+
   const { showSuccess } = useNotifications()
   
   const [searchTerm, setSearchTerm] = useState('')

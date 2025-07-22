@@ -57,7 +57,7 @@ const ClientForm = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { addClient, updateClient, getClientById, loadingClients } = useFirebase()
-  const { showSuccess, showError } = useNotifications()
+  const { showError } = useNotifications()
   
   const [loading, setLoading] = useState(false)
   const [tabValue, setTabValue] = useState(0)
@@ -394,7 +394,7 @@ const ClientForm = () => {
   }
 
   return (
-    <Box sx={{ width: '100%', height: '100vw', py: 3, px: 3 }}>
+    <Box sx={{ width: '100%', py: 3, px: 3 }}>
       {/* Header */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Typography variant="h4">
