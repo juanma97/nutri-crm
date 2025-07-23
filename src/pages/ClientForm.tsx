@@ -9,11 +9,19 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  CircularProgress
+  CircularProgress,
+  Grid,
+  useTheme
 } from '@mui/material'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useFirebase } from '../contexts/FirebaseContext'
 import { useNotifications } from '../hooks/useNotifications'
+import {
+  Person as PersonIcon,
+  Save as SaveIcon,
+  Cancel as CancelIcon,
+  Add as AddIcon
+} from '@mui/icons-material'
 import type { ClientFormData, Client } from '../types'
 
 const ClientForm = () => {
@@ -21,6 +29,7 @@ const ClientForm = () => {
   const navigate = useNavigate()
   const { addClient, updateClient, getClientById, loadingClients } = useFirebase()
   const { showSuccess, showError } = useNotifications()
+  const theme = useTheme()
   
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState<ClientFormData>({
@@ -194,47 +203,108 @@ const ClientForm = () => {
   if (loadingClients) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
-        <CircularProgress size={60} sx={{ color: '#2e7d32' }} />
+        <CircularProgress size={60} sx={{ color: theme.palette.primary.main }} />
       </Box>
     )
   }
 
   return (
-    <Box sx={{ width: '100%', py: 3 }}>
-      <Typography variant="h4" sx={{ mb: 3 }}>
-        {id ? 'Editar Cliente' : 'Agregar Cliente'}
-      </Typography>
+    <Box sx={{ 
+      width: '100%', 
+      py: 4, 
+      px: 4,
+      background: theme.palette.background.gradient,
+      minHeight: '100vh'
+    }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', mb: 4 }}>
+        <PersonIcon 
+          sx={{ 
+            fontSize: 40, 
+            color: theme.palette.primary.main,
+            mr: 2
+          }} 
+        />
+        <Typography 
+          variant="h3" 
+          sx={{ 
+            color: theme.palette.primary.main,
+            fontWeight: 700
+          }}
+        >
+          {id ? 'Editar Cliente' : 'Agregar Cliente'}
+        </Typography>
+      </Box>
 
-      <Paper elevation={2} sx={{ p: 4 }}>
+      <Paper 
+        elevation={0}
+        sx={{ 
+          p: 4,
+          borderRadius: 3,
+          border: '1px solid rgba(0,0,0,0.04)',
+          background: 'rgba(255,255,255,0.8)',
+          backdropFilter: 'blur(10px)',
+          '&:hover': {
+            boxShadow: '0 4px 16px rgba(0,0,0,0.1)',
+          },
+          transition: 'all 0.3s ease-in-out'
+        }}
+      >
         <form onSubmit={handleSubmit}>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
             {/* Información Personal */}
-            <Typography variant="h6" sx={{ color: '#2e7d32' }}>
+            <Typography 
+              variant="h5" 
+              sx={{ 
+                color: theme.palette.primary.main,
+                fontWeight: 600,
+                mb: 2
+              }}
+            >
               Información Personal
             </Typography>
 
-            <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-              <TextField
-                label="Nombre completo *"
-                value={formData.name}
-                onChange={(e) => handleInputChange('name', e.target.value)}
-                error={!!errors.name}
-                helperText={errors.name}
-                required
-                sx={{ flex: '1 1 300px' }}
-              />
+            <Grid container spacing={3}>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  label="Nombre completo *"
+                  value={formData.name}
+                  onChange={(e) => handleInputChange('name', e.target.value)}
+                  error={!!errors.name}
+                  helperText={errors.name}
+                  required
+                  className="custom-input"
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      '&:hover fieldset': {
+                        borderColor: theme.palette.primary.main,
+                      },
+                    },
+                  }}
+                />
+              </Grid>
 
-              <TextField
-                label="Email *"
-                type="email"
-                value={formData.email}
-                onChange={(e) => handleInputChange('email', e.target.value)}
-                error={!!errors.email}
-                helperText={errors.email}
-                required
-                sx={{ flex: '1 1 300px' }}
-              />
-            </Box>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  label="Email *"
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => handleInputChange('email', e.target.value)}
+                  error={!!errors.email}
+                  helperText={errors.email}
+                  required
+                  className="custom-input"
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      '&:hover fieldset': {
+                        borderColor: theme.palette.primary.main,
+                      },
+                    },
+                  }}
+                />
+              </Grid>
+            </Grid>
 
             <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
               <TextField
@@ -413,11 +483,21 @@ const ClientForm = () => {
             />
 
             {/* Botones */}
-            <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end', mt: 2 }}>
+            <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end', mt: 4 }}>
               <Button
                 variant="outlined"
                 onClick={() => navigate('/clients')}
                 disabled={loading}
+                startIcon={<CancelIcon />}
+                className="custom-button"
+                sx={{
+                  borderColor: theme.palette.grey[400],
+                  color: theme.palette.text.primary,
+                  '&:hover': {
+                    borderColor: theme.palette.primary.main,
+                    backgroundColor: 'rgba(46, 125, 50, 0.04)',
+                  }
+                }}
               >
                 Cancelar
               </Button>
@@ -425,7 +505,18 @@ const ClientForm = () => {
                 type="submit"
                 variant="contained"
                 disabled={loading}
-                sx={{ backgroundColor: '#2e7d32' }}
+                startIcon={id ? <SaveIcon /> : <AddIcon />}
+                className="custom-button"
+                sx={{
+                  background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+                  '&:hover': {
+                    background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
+                    transform: 'translateY(-1px)',
+                  },
+                  '&:disabled': {
+                    background: theme.palette.grey[300],
+                  }
+                }}
               >
                 {loading ? (
                   <CircularProgress size={20} color="inherit" />

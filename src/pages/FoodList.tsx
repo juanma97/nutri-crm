@@ -22,12 +22,16 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  CircularProgress
+  CircularProgress,
+  useTheme,
+  Tooltip
 } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
 import DeleteIcon from '@mui/icons-material/Delete'
 import EditIcon from '@mui/icons-material/Edit'
 import SearchIcon from '@mui/icons-material/Search'
+import RestaurantIcon from '@mui/icons-material/Restaurant'
+import FilterListIcon from '@mui/icons-material/FilterList'
 import type { Food } from '../types'
 import { useFirebase } from '../contexts/FirebaseContext'
 import FoodForm from '../components/FoodForm'
@@ -35,6 +39,7 @@ import FoodForm from '../components/FoodForm'
 const foodGroups = ['Proteins', 'Vegetables', 'Grains', 'Fruits', 'Dairy', 'Fats', 'Others']
 
 const FoodList = () => {
+  const theme = useTheme()
   const { foods, addFood, updateFood, deleteFood, loadingFoods } = useFirebase()
   const [searchTerm, setSearchTerm] = useState('')
   const [groupFilter, setGroupFilter] = useState('all')
@@ -92,53 +97,113 @@ const FoodList = () => {
   if (loadingFoods) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
-        <CircularProgress size={60} sx={{ color: '#2e7d32' }} />
+        <CircularProgress size={60} sx={{ color: theme.palette.primary.main }} />
       </Box>
     )
   }
 
   return (
-    <Box sx={{ width: '100%', height: '100vw', py: 3, px: 3 }}>
+    <Box sx={{ 
+      width: '100%', 
+      py: 4, 
+      px: 4,
+      background: theme.palette.background.gradient,
+      minHeight: '100vh'
+    }}>
       {/* Header */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h4">Foods</Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <RestaurantIcon 
+            sx={{ 
+              fontSize: 40, 
+              color: theme.palette.primary.main,
+              mr: 2
+            }} 
+          />
+          <Typography 
+            variant="h3" 
+            sx={{ 
+              color: theme.palette.primary.main,
+              fontWeight: 700
+            }}
+          >
+            Alimentos
+          </Typography>
+        </Box>
         <Button
           variant="contained"
           startIcon={<AddIcon />}
           onClick={handleAddFood}
-          sx={{ backgroundColor: '#2e7d32' }}
+          className="custom-button"
+          sx={{
+            background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+            '&:hover': {
+              background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
+              transform: 'translateY(-1px)',
+            }
+          }}
         >
-          Add Food
+          Agregar Alimento
         </Button>
       </Box>
 
       {/* Filters and Search */}
-      <Paper elevation={2} sx={{ p: 3, mb: 3 }}>
-        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, alignItems: 'center' }}>
+      <Paper 
+        elevation={0}
+        sx={{ 
+          p: 3, 
+          mb: 4,
+          borderRadius: 3,
+          border: '1px solid rgba(0,0,0,0.04)',
+          background: 'rgba(255,255,255,0.8)',
+          backdropFilter: 'blur(10px)',
+          '&:hover': {
+            boxShadow: '0 4px 16px rgba(0,0,0,0.1)',
+          },
+          transition: 'all 0.3s ease-in-out'
+        }}
+      >
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3, alignItems: 'center' }}>
           <Box sx={{ flex: '1 1 300px', minWidth: '250px' }}>
             <TextField
               fullWidth
-              placeholder="Search foods..."
+              placeholder="Buscar alimentos..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
+              className="custom-input"
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <SearchIcon />
+                    <SearchIcon sx={{ color: theme.palette.text.secondary }} />
                   </InputAdornment>
                 ),
+              }}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  '&:hover fieldset': {
+                    borderColor: theme.palette.primary.main,
+                  },
+                },
               }}
             />
           </Box>
           <Box sx={{ flex: '1 1 200px', minWidth: '150px' }}>
             <FormControl fullWidth>
-              <InputLabel>Group</InputLabel>
+              <InputLabel>Grupo</InputLabel>
               <Select
                 value={groupFilter}
                 onChange={(e) => setGroupFilter(e.target.value)}
-                label="Group"
+                label="Grupo"
+                className="custom-input"
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    '&:hover fieldset': {
+                      borderColor: theme.palette.primary.main,
+                    },
+                  },
+                }}
               >
-                <MenuItem value="all">All Groups</MenuItem>
+                <MenuItem value="all">Todos los Grupos</MenuItem>
                 {foodGroups.map(group => (
                   <MenuItem key={group} value={group}>{group}</MenuItem>
                 ))}
@@ -149,27 +214,47 @@ const FoodList = () => {
       </Paper>
 
       {/* Results Count */}
-      <Box sx={{ mb: 2 }}>
-        <Typography variant="body2" color="text.secondary">
-          {filteredFoods.length} food{filteredFoods.length !== 1 ? 's' : ''} found
+      <Box sx={{ mb: 3 }}>
+        <Typography variant="body1" color="text.secondary" sx={{ fontWeight: 500 }}>
+          {filteredFoods.length} alimento{filteredFoods.length !== 1 ? 's' : ''} encontrado{filteredFoods.length !== 1 ? 's' : ''}
         </Typography>
       </Box>
 
       {/* Table */}
-      <Paper elevation={3}>
+      <Paper 
+        elevation={0}
+        sx={{ 
+          borderRadius: 3,
+          border: '1px solid rgba(0,0,0,0.04)',
+          background: 'rgba(255,255,255,0.8)',
+          backdropFilter: 'blur(10px)',
+          overflow: 'hidden',
+          '&:hover': {
+            boxShadow: '0 4px 16px rgba(0,0,0,0.1)',
+          },
+          transition: 'all 0.3s ease-in-out'
+        }}
+      >
         <TableContainer>
           <Table sx={{ tableLayout: 'fixed', width: '100%' }}>
             <TableHead>
-              <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
-                <TableCell>Name</TableCell>
-                <TableCell>Group</TableCell>
-                <TableCell>Portion</TableCell>
-                <TableCell>Calories</TableCell>
-                <TableCell>Proteins</TableCell>
-                <TableCell>Fats</TableCell>
-                <TableCell>Carbs</TableCell>
-                <TableCell>Fiber</TableCell>
-                <TableCell align="center">Actions</TableCell>
+              <TableRow sx={{ 
+                backgroundColor: theme.palette.primary.main,
+                '& .MuiTableCell-root': {
+                  color: 'white',
+                  fontWeight: 600,
+                  fontSize: '0.875rem'
+                }
+              }}>
+                <TableCell>Nombre</TableCell>
+                <TableCell>Grupo</TableCell>
+                <TableCell>Porción</TableCell>
+                <TableCell>Calorías</TableCell>
+                <TableCell>Proteínas</TableCell>
+                <TableCell>Grasas</TableCell>
+                <TableCell>Carbohidratos</TableCell>
+                <TableCell>Fibra</TableCell>
+                <TableCell align="center">Acciones</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -193,20 +278,40 @@ const FoodList = () => {
                   <TableCell>{food.carbs}g</TableCell>
                   <TableCell>{food.fiber}g</TableCell>
                   <TableCell align="center">
-                    <IconButton 
-                      size="small" 
-                      color="primary"
-                      onClick={() => handleEditFood(food)}
-                    >
-                      <EditIcon />
-                    </IconButton>
-                    <IconButton 
-                      size="small" 
-                      color="error"
-                      onClick={() => handleDeleteFood(food)}
-                    >
-                      <DeleteIcon />
-                    </IconButton>
+                    <Tooltip title="Editar alimento" arrow>
+                      <IconButton 
+                        size="small" 
+                        color="primary"
+                        onClick={() => handleEditFood(food)}
+                        className="custom-icon"
+                        sx={{
+                          '&:hover': {
+                            backgroundColor: 'rgba(46, 125, 50, 0.1)',
+                            transform: 'scale(1.1)',
+                          },
+                          transition: 'all 0.2s ease-in-out'
+                        }}
+                      >
+                        <EditIcon />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Eliminar alimento" arrow>
+                      <IconButton 
+                        size="small" 
+                        color="error"
+                        onClick={() => handleDeleteFood(food)}
+                        className="custom-icon"
+                        sx={{
+                          '&:hover': {
+                            backgroundColor: 'rgba(244, 67, 54, 0.1)',
+                            transform: 'scale(1.1)',
+                          },
+                          transition: 'all 0.2s ease-in-out'
+                        }}
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    </Tooltip>
                   </TableCell>
                 </TableRow>
               ))}
@@ -217,14 +322,36 @@ const FoodList = () => {
 
       {/* Empty State */}
       {filteredFoods.length === 0 && (
-        <Paper elevation={3} sx={{ p: 4, textAlign: 'center' }}>
-          <Typography variant="h6" color="text.secondary" gutterBottom>
-            No foods found
+        <Paper 
+          elevation={0}
+          sx={{ 
+            p: 6, 
+            textAlign: 'center',
+            borderRadius: 3,
+            border: '1px solid rgba(0,0,0,0.04)',
+            background: 'rgba(255,255,255,0.8)',
+            backdropFilter: 'blur(10px)',
+            '&:hover': {
+              boxShadow: '0 4px 16px rgba(0,0,0,0.1)',
+            },
+            transition: 'all 0.3s ease-in-out'
+          }}
+        >
+          <RestaurantIcon 
+            sx={{ 
+              fontSize: 64, 
+              color: theme.palette.text.secondary,
+              mb: 2,
+              opacity: 0.5
+            }} 
+          />
+          <Typography variant="h5" color="text.secondary" gutterBottom sx={{ fontWeight: 600 }}>
+            No se encontraron alimentos
           </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+          <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
             {searchTerm || groupFilter !== 'all' 
-              ? 'Try adjusting your search or filters'
-              : 'Add your first food to get started'
+              ? 'Intenta ajustar tu búsqueda o filtros'
+              : 'Agrega tu primer alimento para comenzar'
             }
           </Typography>
           {!searchTerm && groupFilter === 'all' && (
@@ -232,9 +359,16 @@ const FoodList = () => {
               variant="contained"
               startIcon={<AddIcon />}
               onClick={handleAddFood}
-              sx={{ backgroundColor: '#2e7d32' }}
+              className="custom-button"
+              sx={{
+                background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+                '&:hover': {
+                  background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
+                  transform: 'translateY(-1px)',
+                }
+              }}
             >
-              Add First Food
+              Agregar Primer Alimento
             </Button>
           )}
         </Paper>
@@ -246,9 +380,20 @@ const FoodList = () => {
         onClose={() => setDialogOpen(false)}
         maxWidth="md"
         fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: 3,
+            background: 'rgba(255,255,255,0.95)',
+            backdropFilter: 'blur(10px)',
+          }
+        }}
       >
-        <DialogTitle>
-          {editingFood ? 'Edit Food' : 'Add New Food'}
+        <DialogTitle sx={{ 
+          color: theme.palette.primary.main,
+          fontWeight: 600,
+          fontSize: '1.25rem'
+        }}>
+          {editingFood ? 'Editar Alimento' : 'Agregar Nuevo Alimento'}
         </DialogTitle>
         <DialogContent>
           <FoodForm
@@ -260,17 +405,58 @@ const FoodList = () => {
       </Dialog>
 
       {/* Delete Confirmation Dialog */}
-      <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
-        <DialogTitle>Delete Food</DialogTitle>
+      <Dialog 
+        open={deleteDialogOpen} 
+        onClose={() => setDeleteDialogOpen(false)}
+        PaperProps={{
+          sx: {
+            borderRadius: 3,
+            background: 'rgba(255,255,255,0.95)',
+            backdropFilter: 'blur(10px)',
+          }
+        }}
+      >
+        <DialogTitle sx={{ 
+          color: theme.palette.error.main,
+          fontWeight: 600,
+          fontSize: '1.25rem'
+        }}>
+          Eliminar Alimento
+        </DialogTitle>
         <DialogContent>
-          <Typography>
-            Are you sure you want to delete "{foodToDelete?.name}"? This action cannot be undone.
+          <Typography variant="body1" sx={{ mt: 1 }}>
+            ¿Estás seguro de que quieres eliminar "{foodToDelete?.name}"? Esta acción no se puede deshacer.
           </Typography>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
-          <Button onClick={confirmDelete} color="error" variant="contained">
-            Delete
+        <DialogActions sx={{ p: 3 }}>
+          <Button 
+            onClick={() => setDeleteDialogOpen(false)}
+            className="custom-button"
+            sx={{
+              borderColor: theme.palette.grey[400],
+              color: theme.palette.text.primary,
+              '&:hover': {
+                borderColor: theme.palette.primary.main,
+                backgroundColor: 'rgba(46, 125, 50, 0.04)',
+              }
+            }}
+          >
+            Cancelar
+          </Button>
+          <Button 
+            onClick={confirmDelete} 
+            color="error" 
+            variant="contained"
+            className="custom-button"
+            sx={{
+              background: `linear-gradient(135deg, ${theme.palette.error.main} 0%, ${theme.palette.error.dark} 100%)`,
+              '&:hover': {
+                background: `linear-gradient(135deg, ${theme.palette.error.dark} 0%, ${theme.palette.error.main} 100%)`,
+                transform: 'translateY(-1px)',
+              }
+            }}
+          >
+            Eliminar
           </Button>
         </DialogActions>
       </Dialog>

@@ -8,7 +8,13 @@ import {
   Step,
   StepLabel,
   Button,
+  useTheme,
 } from '@mui/material'
+import {
+  Restaurant as RestaurantIcon,
+  ArrowBack as ArrowBackIcon,
+  ArrowForward as ArrowForwardIcon
+} from '@mui/icons-material'
 import TMBStep from '../components/TMBStep'
 import DietBuilder from '../components/DietBuilder'
 import { useFirebase } from '../contexts/FirebaseContext'
@@ -17,6 +23,7 @@ import type { Diet, Client, Supplement, DynamicMeal, CustomGoal } from '../types
 const steps = ['Calculate TMB', 'Build Diet']
 
 const CreateDiet = () => {
+  const theme = useTheme()
   const [activeStep, setActiveStep] = useState(0)
   const [tmbData, setTmbData] = useState({ tmb: 0, clientName: '' })
   const [clientData, setClientData] = useState<Client | null>(null)
@@ -112,13 +119,58 @@ const CreateDiet = () => {
   }
 
   return (
-    <Box sx={{ width: '100%' }}>
-      <Paper elevation={3} sx={{ p: 4 }}>
-        <Typography variant="h4" gutterBottom>
-          Create New Diet
-        </Typography>
+    <Box sx={{ 
+      width: '100%', 
+      py: 4, 
+      px: 4,
+      background: theme.palette.background.gradient,
+      minHeight: '100vh'
+    }}>
+      <Paper 
+        elevation={0}
+        sx={{ 
+          p: 4,
+          borderRadius: 3,
+          border: '1px solid rgba(0,0,0,0.04)',
+          background: 'rgba(255,255,255,0.8)',
+          backdropFilter: 'blur(10px)',
+          '&:hover': {
+            boxShadow: '0 4px 16px rgba(0,0,0,0.1)',
+          },
+          transition: 'all 0.3s ease-in-out'
+        }}
+      >
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: 4 }}>
+          <RestaurantIcon 
+            sx={{ 
+              fontSize: 40, 
+              color: theme.palette.primary.main,
+              mr: 2
+            }} 
+          />
+          <Typography 
+            variant="h3" 
+            sx={{ 
+              color: theme.palette.primary.main,
+              fontWeight: 700
+            }}
+          >
+            Crear Nueva Dieta
+          </Typography>
+        </Box>
         
-        <Stepper activeStep={activeStep} sx={{ mb: 4 }}>
+        <Stepper 
+          activeStep={activeStep} 
+          sx={{ 
+            mb: 4,
+            '& .MuiStepLabel-root .Mui-completed': {
+              color: theme.palette.primary.main,
+            },
+            '& .MuiStepLabel-root .Mui-active': {
+              color: theme.palette.primary.main,
+            },
+          }}
+        >
           {steps.map((label) => (
             <Step key={label}>
               <StepLabel>{label}</StepLabel>
@@ -128,11 +180,21 @@ const CreateDiet = () => {
 
         {activeStep === steps.length ? (
           <Box sx={{ textAlign: 'center' }}>
-            <Typography variant="h6" gutterBottom>
-              All steps completed
+            <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
+              ¡Todos los pasos completados!
             </Typography>
-            <Button onClick={() => navigate('/diets')}>
-              Go to Diets
+            <Button 
+              onClick={() => navigate('/diets')}
+              className="custom-button"
+              sx={{
+                background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+                '&:hover': {
+                  background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
+                  transform: 'translateY(-1px)',
+                }
+              }}
+            >
+              Ir a Dietas
             </Button>
           </Box>
         ) : (

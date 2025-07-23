@@ -6,10 +6,14 @@ import {
   Grid, 
   Typography, 
   Box,
-  MenuItem 
+  MenuItem,
+  Paper,
+  useTheme
 } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
 import SaveIcon from '@mui/icons-material/Save'
+import CancelIcon from '@mui/icons-material/Cancel'
+import RestaurantIcon from '@mui/icons-material/Restaurant'
 import type { Food, FoodFormData } from '../types'
 
 const foodGroups = [
@@ -35,6 +39,7 @@ interface FoodFormProps {
 }
 
 const FoodForm = ({ food, onSave, onCancel }: FoodFormProps) => {
+  const theme = useTheme()
   const [formData, setFormData] = useState<FoodFormData>({
     name: '',
     group: '',
@@ -124,35 +129,80 @@ const FoodForm = ({ food, onSave, onCancel }: FoodFormProps) => {
   }
 
   return (
-    <Box>
-      <Typography variant="h6" gutterBottom>
-        {food ? 'Edit Food' : 'Add New Food'}
-      </Typography>
+    <Paper 
+      elevation={0}
+      sx={{ 
+        p: 4,
+        borderRadius: 3,
+        border: '1px solid rgba(0,0,0,0.04)',
+        background: 'rgba(255,255,255,0.8)',
+        backdropFilter: 'blur(10px)',
+        '&:hover': {
+          boxShadow: '0 4px 16px rgba(0,0,0,0.1)',
+        },
+        transition: 'all 0.3s ease-in-out'
+      }}
+    >
+      <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+        <RestaurantIcon 
+          sx={{ 
+            fontSize: 32, 
+            color: theme.palette.primary.main,
+            mr: 2
+          }} 
+        />
+        <Typography 
+          variant="h5" 
+          sx={{ 
+            color: theme.palette.primary.main,
+            fontWeight: 700
+          }}
+        >
+          {food ? 'Editar Alimento' : 'Agregar Nuevo Alimento'}
+        </Typography>
+      </Box>
+      
       <Box component="form" onSubmit={handleSubmit}>
-        <Grid container spacing={2}>
+        <Grid container spacing={3}>
           <Grid item xs={12} md={6}>
             <TextField
               fullWidth
-              label="Food Name"
+              label="Nombre del Alimento"
               variant="outlined"
-              size="small"
+              size="medium"
               value={formData.name}
               onChange={handleInputChange('name')}
               required
               disabled={loading}
+              className="custom-input"
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  '&:hover fieldset': {
+                    borderColor: theme.palette.primary.main,
+                  },
+                },
+              }}
             />
           </Grid>
           <Grid item xs={12} md={6}>
             <TextField
               fullWidth
               select
-              label="Food Group"
+              label="Grupo Alimenticio"
               variant="outlined"
-              size="small"
+              size="medium"
               value={formData.group}
               onChange={handleInputChange('group')}
               required
               disabled={loading}
+              className="custom-input"
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  '&:hover fieldset': {
+                    borderColor: theme.palette.primary.main,
+                  },
+                },
+              }}
             >
               {foodGroups.map((group) => (
                 <MenuItem key={group} value={group}>
@@ -164,26 +214,42 @@ const FoodForm = ({ food, onSave, onCancel }: FoodFormProps) => {
           <Grid item xs={12} md={3}>
             <TextField
               fullWidth
-              label="Portion"
+              label="Porción"
               variant="outlined"
-              size="small"
+              size="medium"
               value={formData.portion}
               onChange={handleInputChange('portion')}
               required
               disabled={loading}
+              className="custom-input"
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  '&:hover fieldset': {
+                    borderColor: theme.palette.primary.main,
+                  },
+                },
+              }}
             />
           </Grid>
           <Grid item xs={12} md={6}>
             <TextField
               fullWidth
               select
-              label="Unit of measure"
+              label="Unidad de Medida"
               variant="outlined"
-              size="small"
+              size="medium"
               value={formData.unitOfMeasure}
               onChange={handleInputChange('unitOfMeasure')}
               required
               disabled={loading}
+              className="custom-input"
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  '&:hover fieldset': {
+                    borderColor: theme.palette.primary.main,
+                  },
+                },
+              }}
             >
               {unit.map((ut) => (
                 <MenuItem key={ut} value={ut}>
@@ -195,97 +261,165 @@ const FoodForm = ({ food, onSave, onCancel }: FoodFormProps) => {
           <Grid item xs={12} md={3}>
             <TextField
               fullWidth
-              label="Calories"
+              label="Calorías"
               variant="outlined"
-              size="small"
+              size="medium"
               type="number"
               value={formData.calories}
               onChange={handleInputChange('calories')}
               disabled={loading}
+              className="custom-input"
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  '&:hover fieldset': {
+                    borderColor: theme.palette.primary.main,
+                  },
+                },
+              }}
             />
           </Grid>
           <Grid item xs={12} md={3}>
             <TextField
               fullWidth
-              label="Proteins (g)"
+              label="Proteínas (g)"
               variant="outlined"
-              size="small"
+              size="medium"
               type="number"
               value={formData.proteins}
               onChange={handleInputChange('proteins')}
               disabled={loading}
+              className="custom-input"
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  '&:hover fieldset': {
+                    borderColor: theme.palette.primary.main,
+                  },
+                },
+              }}
             />
           </Grid>
           <Grid item xs={12} md={3}>
             <TextField
               fullWidth
-              label="Fats (g)"
+              label="Grasas (g)"
               variant="outlined"
-              size="small"
+              size="medium"
               type="number"
               value={formData.fats}
               onChange={handleInputChange('fats')}
               disabled={loading}
+              className="custom-input"
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  '&:hover fieldset': {
+                    borderColor: theme.palette.primary.main,
+                  },
+                },
+              }}
             />
           </Grid>
           <Grid item xs={12} md={4}>
             <TextField
               fullWidth
-              label="Carbohydrates (g)"
+              label="Carbohidratos (g)"
               variant="outlined"
-              size="small"
+              size="medium"
               type="number"
               value={formData.carbs}
               onChange={handleInputChange('carbs')}
               disabled={loading}
+              className="custom-input"
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  '&:hover fieldset': {
+                    borderColor: theme.palette.primary.main,
+                  },
+                },
+              }}
             />
           </Grid>
           <Grid item xs={12} md={4}>
             <TextField
               fullWidth
-              label="Fiber (g)"
+              label="Fibra (g)"
               variant="outlined"
-              size="small"
+              size="medium"
               type="number"
               value={formData.fiber}
               onChange={handleInputChange('fiber')}
               disabled={loading}
+              className="custom-input"
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  '&:hover fieldset': {
+                    borderColor: theme.palette.primary.main,
+                  },
+                },
+              }}
             />
           </Grid>
           <Grid item xs={12} md={4}>
             <TextField
               fullWidth
-              label="Product Link (optional)"
+              label="Enlace del Producto (opcional)"
               variant="outlined"
-              size="small"
+              size="medium"
               value={formData.link}
               onChange={handleInputChange('link')}
               disabled={loading}
+              className="custom-input"
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  '&:hover fieldset': {
+                    borderColor: theme.palette.primary.main,
+                  },
+                },
+              }}
             />
           </Grid>
           <Grid item xs={12}>
-            <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
+            <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end', mt: 3 }}>
               <Button
                 variant="outlined"
                 onClick={onCancel}
                 disabled={loading}
+                startIcon={<CancelIcon />}
+                className="custom-button"
+                sx={{
+                  borderColor: theme.palette.grey[400],
+                  color: theme.palette.text.primary,
+                  '&:hover': {
+                    borderColor: theme.palette.primary.main,
+                    backgroundColor: 'rgba(46, 125, 50, 0.04)',
+                  }
+                }}
               >
-                Cancel
+                Cancelar
               </Button>
               <Button
                 type="submit"
                 variant="contained"
                 startIcon={food ? <SaveIcon /> : <AddIcon />}
                 disabled={loading}
-                sx={{ backgroundColor: '#2e7d32' }}
+                className="custom-button"
+                sx={{
+                  background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+                  '&:hover': {
+                    background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
+                    transform: 'translateY(-1px)',
+                  },
+                  '&:disabled': {
+                    background: theme.palette.grey[300],
+                  }
+                }}
               >
-                {loading ? 'Saving...' : (food ? 'Save Changes' : 'Add Food')}
+                {loading ? 'Guardando...' : (food ? 'Guardar Cambios' : 'Agregar Alimento')}
               </Button>
             </Box>
           </Grid>
         </Grid>
       </Box>
-    </Box>
+    </Paper>
   )
 }
 
