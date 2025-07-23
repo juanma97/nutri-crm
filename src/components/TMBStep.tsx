@@ -14,6 +14,7 @@ import {
   Paper
 } from '@mui/material'
 import { useFirebase } from '../contexts/FirebaseContext'
+import { calculateTMB } from '../utils/tmbCalculator'
 import type { Client } from '../types'
 
 interface TMBStepProps {
@@ -44,15 +45,7 @@ const TMBStep = ({ onComplete, onNext, onUpdate, initialClientName = '', initial
 
 
 
-  const calculateTMB = (clientData: Client): number => {
-    const { weight, height, gender, age } = clientData
-    
-    if (gender === 'male') {
-      return 88.362 + (13.397 * (weight || 0)) + (4.799 * (height || 0)) - (5.677 * (age || 0))
-    } else {
-      return 447.593 + (9.247 * (weight || 0)) + (3.098 * (height || 0)) - (4.330 * (age || 0))
-    }
-  }
+
 
   const handleInputChange = (field: keyof typeof client) => (
     event: React.ChangeEvent<HTMLInputElement>
@@ -68,7 +61,7 @@ const TMBStep = ({ onComplete, onNext, onUpdate, initialClientName = '', initial
     const selectedClient = clients.find(c => c.id === clientId)
     if (selectedClient) {
       // Verificar que todos los datos necesarios estén presentes
-      if (selectedClient.weight && selectedClient.height && selectedClient.age) {
+      if (selectedClient.weight && selectedClient.height && selectedClient.age && selectedClient.gender) {
         const calculatedTMB = calculateTMB(selectedClient)
         setTmb(calculatedTMB)
       } else {

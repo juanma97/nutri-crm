@@ -16,7 +16,9 @@ import {
   Chip,
   Alert,
   CircularProgress,
-  Divider
+  Divider,
+  FormControlLabel,
+  Checkbox
 } from '@mui/material'
 import {
   ArrowBack as ArrowBackIcon,
@@ -26,6 +28,7 @@ import {
 } from '@mui/icons-material'
 import { useFirebase } from '../contexts/FirebaseContext'
 import { useNotifications } from '../hooks/useNotifications'
+import { calculateTMB } from '../utils/tmbCalculator'
 import type { DietTemplate, Client, DayOfWeek } from '../types'
 
 const AssignTemplate = () => {
@@ -36,6 +39,8 @@ const AssignTemplate = () => {
 
   const [selectedClientId, setSelectedClientId] = useState('')
   const [tmb, setTmb] = useState<number>(0)
+  const [useCustomGoal, setUseCustomGoal] = useState(false)
+  const [customGoal, setCustomGoal] = useState<number>(0)
   const [template, setTemplate] = useState<DietTemplate | null>(null)
   const [selectedClient, setSelectedClient] = useState<Client | null>(null)
 
@@ -53,35 +58,26 @@ const AssignTemplate = () => {
       const foundClient = clients.find(c => c.id === selectedClientId)
       if (foundClient) {
         setSelectedClient(foundClient)
-        // Calcular TMB básico si no está establecido
-        if (tmb === 0 && foundClient.weight && foundClient.height && foundClient.age && foundClient.gender) {
+        // Calcular TMB siempre que se seleccione un cliente
+        if (foundClient.weight && foundClient.height && foundClient.age && foundClient.gender) {
           const calculatedTMB = calculateTMB(foundClient)
           setTmb(calculatedTMB)
+          setCustomGoal(calculatedTMB) // Inicializar objetivo personalizado con TMB
+        } else {
+          setTmb(0)
+          setCustomGoal(0)
+          console.warn('Cliente no tiene todos los datos necesarios para calcular TMB:', {
+            weight: foundClient.weight,
+            height: foundClient.height,
+            age: foundClient.age,
+            gender: foundClient.gender
+          })
         }
       }
     }
-  }, [selectedClientId, clients, tmb])
+  }, [selectedClientId, clients])
 
-  const calculateTMB = (client: Client): number => {
-    if (!client.weight || !client.height || !client.age || !client.gender) {
-      return 0
-    }
 
-    // Fórmula de Mifflin-St Jeor
-    let tmb = 10 * client.weight + 6.25 * client.height - 5 * client.age
-    tmb = client.gender === 'male' ? tmb + 5 : tmb - 161
-
-    // Aplicar factor de actividad
-    const activityFactors = {
-      sedentary: 1.2,
-      lightly_active: 1.375,
-      moderately_active: 1.55,
-      very_active: 1.725,
-      extremely_active: 1.9
-    }
-
-    return Math.round(tmb * activityFactors[client.activityLevel])
-  }
 
   const handleAssign = async () => {
     if (!template || !selectedClient) {
@@ -89,8 +85,10 @@ const AssignTemplate = () => {
       return
     }
 
-    if (tmb <= 0) {
-      showError('Por favor ingresa un TMB válido')
+    const targetCalories = useCustomGoal ? customGoal : tmb
+
+    if (targetCalories <= 0) {
+      showError('Por favor ingresa un objetivo calórico válido')
       return
     }
 
@@ -98,7 +96,7 @@ const AssignTemplate = () => {
       template.id,
       selectedClient.id,
       selectedClient.name,
-      tmb
+      targetCalories
     )
 
     if (success) {
@@ -132,6 +130,17 @@ const AssignTemplate = () => {
       case 'health': return 'Salud'
       case 'custom': return 'Personalizada'
       default: return 'Sin Categoría'
+    }
+  }
+
+  const getGoalLabel = (goal: string) => {
+    switch (goal) {
+      case 'lose_weight': return 'Pérdida de Peso'
+      case 'gain_weight': return 'Ganancia de Peso'
+      case 'muscle_gain': return 'Ganancia Muscular'
+      case 'maintain': return 'Mantenimiento'
+      case 'health': return 'Salud'
+      default: return 'Sin Objetivo'
     }
   }
 
@@ -224,7 +233,7 @@ const AssignTemplate = () => {
                   Calorías objetivo
                 </Typography>
                 <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-                  {template.targetCalories || stats.totalCalories} cal/día
+                  {stats.totalCalories} cal/día
                 </Typography>
               </Grid>
               <Grid item xs={6}>
@@ -311,7 +320,7 @@ const AssignTemplate = () => {
                         Objetivo
                       </Typography>
                       <Typography variant="body1">
-                        {selectedClient.goal}
+                        {getGoalLabel(selectedClient.goal)}
                       </Typography>
                     </Grid>
                     {selectedClient.weight && (
@@ -349,15 +358,43 @@ const AssignTemplate = () => {
               </Card>
             )}
 
-            <TextField
-              fullWidth
-              label="TMB (Calorías por día)"
-              type="number"
-              value={tmb}
-              onChange={(e) => setTmb(Number(e.target.value))}
-              sx={{ mb: 3 }}
-              helperText="Metabolismo Basal Total - ajusta según las necesidades del cliente"
+            <Card variant="outlined" sx={{ mb: 2 }}>
+              <CardContent sx={{ py: 2 }}>
+                <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                  TMB Calculado
+                </Typography>
+                <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#2e7d32' }}>
+                  {tmb > 0 ? `${tmb} calorías/día` : 'No disponible'}
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  Calculado automáticamente según los datos del cliente
+                </Typography>
+              </CardContent>
+            </Card>
+
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={useCustomGoal}
+                  onChange={(e) => setUseCustomGoal(e.target.checked)}
+                  color="primary"
+                />
+              }
+              label="Usar objetivo personalizado"
+              sx={{ mb: 2 }}
             />
+
+            {useCustomGoal && (
+              <TextField
+                fullWidth
+                label="Objetivo personalizado (calorías/día)"
+                type="number"
+                value={customGoal}
+                onChange={(e) => setCustomGoal(Number(e.target.value))}
+                sx={{ mb: 2 }}
+                helperText="Define un objetivo calórico personalizado para este cliente"
+              />
+            )}
 
             <Divider sx={{ my: 2 }} />
 
@@ -374,7 +411,7 @@ const AssignTemplate = () => {
                 startIcon={<AssignIcon />}
                 onClick={handleAssign}
                 fullWidth
-                disabled={!selectedClientId || tmb <= 0}
+                disabled={!selectedClientId || (useCustomGoal ? customGoal <= 0 : tmb <= 0)}
                 sx={{ backgroundColor: '#2e7d32' }}
               >
                 Asignar Plantilla
