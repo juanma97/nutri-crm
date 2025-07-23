@@ -51,6 +51,7 @@ const TopNav = () => {
     { path: '/dashboard', label: 'Dashboard', icon: <DashboardIcon /> },
     { path: '/foods', label: 'Alimentos', icon: <FoodIcon /> },
     { path: '/diets', label: 'Dietas', icon: <DietIcon /> },
+    { path: '/templates', label: 'Plantillas', icon: <DietIcon /> },
     { path: '/clients', label: 'Clientes', icon: <ClientIcon /> },
     { path: '/reports', label: 'Reportes', icon: <ReportIcon /> }
   ]

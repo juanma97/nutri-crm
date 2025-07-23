@@ -15,7 +15,7 @@ import {
 import type { CustomGoal } from '../types'
 
 interface CustomGoalFormProps {
-  tmb: number
+  tmb?: number
   initialCustomGoal?: CustomGoal
   onSave: (customGoal: CustomGoal | undefined) => void
   onCancel: () => void
@@ -29,23 +29,35 @@ const CustomGoalForm: React.FC<CustomGoalFormProps> = ({
 }) => {
   const [useCustomGoal, setUseCustomGoal] = useState(!!initialCustomGoal)
   const [customGoal, setCustomGoal] = useState<CustomGoal>(
-    initialCustomGoal || {
+    initialCustomGoal || (tmb ? {
       calories: Math.round(tmb),
       proteins: Math.round((tmb * 0.3) / 4), // 30% de TMB en proteínas
       carbs: Math.round((tmb * 0.45) / 4),   // 45% de TMB en carbohidratos
       fats: Math.round((tmb * 0.25) / 9),    // 25% de TMB en grasas
       fiber: 25 // Valor recomendado por defecto
-    }
+    } : {
+      calories: 0,
+      proteins: 0,
+      carbs: 0,
+      fats: 0,
+      fiber: 0
+    })
   )
   const [errors, setErrors] = useState<string[]>([])
 
   // Calcular objetivos basados en TMB
-  const tmbBasedGoals = {
+  const tmbBasedGoals = tmb ? {
     calories: Math.round(tmb),
     proteins: Math.round((tmb * 0.3) / 4),
     carbs: Math.round((tmb * 0.45) / 4),
     fats: Math.round((tmb * 0.25) / 9),
     fiber: 25
+  } : {
+    calories: 0,
+    proteins: 0,
+    carbs: 0,
+    fats: 0,
+    fiber: 0
   }
 
   // Validar que las calorías coincidan con los macronutrientes
@@ -122,10 +134,10 @@ const CustomGoalForm: React.FC<CustomGoalFormProps> = ({
       {!useCustomGoal ? (
         <Alert severity="info" sx={{ mb: 2 }}>
           <Typography variant="body1" gutterBottom>
-            <strong>Objetivo actual:</strong> TMB ({Math.round(tmb)} calorías)
+            <strong>Objetivo actual:</strong> {tmb ? `TMB (${Math.round(tmb)} calorías)` : 'Sin objetivos definidos'}
           </Typography>
           <Typography variant="body2">
-            Los cálculos se basarán en la Tasa Metabólica Basal calculada automáticamente.
+            {tmb ? 'Los cálculos se basarán en la Tasa Metabólica Basal calculada automáticamente.' : 'Define objetivos personalizados para calcular el progreso nutricional.'}
           </Typography>
         </Alert>
       ) : (

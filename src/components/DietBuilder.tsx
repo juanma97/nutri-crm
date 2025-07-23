@@ -44,7 +44,7 @@ import SupplementForm from './SupplementForm'
 import CustomGoalForm from './CustomGoalForm'
 
 interface DietBuilderProps {
-  tmb: number
+  tmb?: number // Opcional para plantillas
   onSave: (meals: Diet['meals'], supplements?: Supplement[], mealDefinitions?: DynamicMeal[], customGoal?: CustomGoal) => Promise<void>
   onBack?: () => void
   initialMeals?: Diet['meals']
@@ -52,6 +52,7 @@ interface DietBuilderProps {
   initialMealDefinitions?: DynamicMeal[]
   initialCustomGoal?: CustomGoal
   dietName?: string
+  isTemplate?: boolean // Flag para identificar si es una plantilla
 }
 
 const daysOfWeek: { key: DayOfWeek; label: string }[] = [
@@ -72,7 +73,7 @@ const mealTypes: { key: MealType; label: string }[] = [
   { key: 'dinner', label: 'Dinner' }
 ]
 
-const DietBuilder = ({ tmb, onSave, onBack, initialMeals, initialSupplements, initialMealDefinitions, initialCustomGoal, dietName }: DietBuilderProps) => {
+const DietBuilder = ({ tmb, onSave, onBack, initialMeals, initialSupplements, initialMealDefinitions, initialCustomGoal, dietName, isTemplate = false }: DietBuilderProps) => {
   const { foods } = useFirebase()
   
   // Comidas por defecto para migración
@@ -180,23 +181,33 @@ const DietBuilder = ({ tmb, onSave, onBack, initialMeals, initialSupplements, in
 
   // Obtener objetivos nutricionales (customGoal o basados en TMB)
   const getCalorieTarget = () => {
-    return customGoal ? customGoal.calories : tmb
+    if (customGoal) return customGoal.calories
+    if (tmb) return tmb
+    return 2000 // Valor por defecto para plantillas sin TMB
   }
 
   const getProteinTarget = () => {
-    return customGoal ? customGoal.proteins : (tmb * 0.3 / 4)
+    if (customGoal) return customGoal.proteins
+    if (tmb) return (tmb * 0.3 / 4)
+    return 150 // Valor por defecto para plantillas sin TMB
   }
 
   const getFatTarget = () => {
-    return customGoal ? customGoal.fats : (tmb * 0.25 / 9)
+    if (customGoal) return customGoal.fats
+    if (tmb) return (tmb * 0.25 / 9)
+    return 55 // Valor por defecto para plantillas sin TMB
   }
 
   const getCarbTarget = () => {
-    return customGoal ? customGoal.carbs : (tmb * 0.45 / 4)
+    if (customGoal) return customGoal.carbs
+    if (tmb) return (tmb * 0.45 / 4)
+    return 225 // Valor por defecto para plantillas sin TMB
   }
 
   const getFiberTarget = () => {
-    return customGoal ? customGoal.fiber : 25 // Valor recomendado por defecto
+    if (customGoal) return customGoal.fiber
+    if (tmb) return 25 // Valor recomendado por defecto cuando hay TMB
+    return 0 // Sin valor por defecto para plantillas sin TMB
   }
 
   // Función helper para obtener el color de estado basado en el porcentaje
@@ -422,7 +433,7 @@ const DietBuilder = ({ tmb, onSave, onBack, initialMeals, initialSupplements, in
       <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <Box>
           <Typography variant="body1">
-            TMB: {Math.round(tmb)} calories
+            {tmb ? `TMB: ${Math.round(tmb)} calories` : 'Sin TMB definido'}
           </Typography>
           {customGoal ? (
             <Box sx={{ mt: 1 }}>
@@ -435,7 +446,7 @@ const DietBuilder = ({ tmb, onSave, onBack, initialMeals, initialSupplements, in
             </Box>
           ) : (
             <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
-              Objetivos basados en TMB: P: {Math.round(tmb * 0.3 / 4)}g | C: {Math.round(tmb * 0.45 / 4)}g | F: {Math.round(tmb * 0.25 / 9)}g | Fibra: 25g
+              Objetivos basados en TMB: P: {Math.round(getProteinTarget())}g | C: {Math.round(getCarbTarget())}g | F: {Math.round(getFatTarget())}g | Fibra: {Math.round(getFiberTarget())}g
             </Typography>
           )}
         </Box>

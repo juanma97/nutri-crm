@@ -22,7 +22,8 @@ import {
   Assessment as AnalyticsIcon,
   Star as StarIcon,
   Schedule as ScheduleIcon,
-  CheckCircle as CheckIcon
+  CheckCircle as CheckIcon,
+  ViewModule as TemplateIcon
 } from '@mui/icons-material'
 import { 
   BarChart, 
@@ -64,7 +65,7 @@ const COLORS = {
 }
 
 const Dashboard = () => {
-  const { diets, foods, clients } = useFirebase()
+  const { diets, foods, clients, dietTemplates } = useFirebase()
   const navigate = useNavigate()
 
   // === MÉTRICAS NUTRICIONALES PROFESIONALES ===
@@ -177,6 +178,7 @@ const Dashboard = () => {
   const nutritionMetrics = {
     totalClients: clients.length,
     totalDiets: diets.length,
+    totalTemplates: dietTemplates.length,
     totalFoods: foods.length,
     averageQuality: Math.round(dietQualityAnalysis.reduce((sum, diet) => sum + diet.quality, 0) / dietQualityAnalysis.length) || 0,
     highQualityDiets: dietQualityAnalysis.filter(diet => diet.quality >= 80).length,
@@ -186,7 +188,8 @@ const Dashboard = () => {
       const weekAgo = new Date()
       weekAgo.setDate(weekAgo.getDate() - 7)
       return new Date(diet.createdAt) > weekAgo
-    }).length
+    }).length,
+    totalTemplateUsage: dietTemplates.reduce((sum, template) => sum + template.usageCount, 0)
   }
 
   // Datos para gráfico de tendencias mensuales
@@ -287,6 +290,34 @@ const Dashboard = () => {
               <LinearProgress 
                 variant="determinate" 
                 value={Math.min((nutritionMetrics.totalDiets / 30) * 100, 100)} 
+                sx={{ height: 8, borderRadius: 4, bgcolor: 'rgba(255,255,255,0.2)' }}
+              />
+            </CardContent>
+          </Card>
+        </Grid>
+
+        <Grid item xs={12} sm={6} md={3}>
+          <Card elevation={4} sx={{ 
+            background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+            color: 'white'
+          }}>
+            <CardContent>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                <Avatar sx={{ bgcolor: 'rgba(255,255,255,0.2)', mr: 2 }}>
+                  <TemplateIcon />
+                </Avatar>
+                <Box>
+                  <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                    {nutritionMetrics.totalTemplates}
+                  </Typography>
+                  <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                    Plantillas
+                  </Typography>
+                </Box>
+              </Box>
+              <LinearProgress 
+                variant="determinate" 
+                value={Math.min((nutritionMetrics.totalTemplates / 10) * 100, 100)} 
                 sx={{ height: 8, borderRadius: 4, bgcolor: 'rgba(255,255,255,0.2)' }}
               />
             </CardContent>

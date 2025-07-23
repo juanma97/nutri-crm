@@ -274,7 +274,17 @@ const DietList = () => {
                   return (
                     <TableRow key={diet.id} hover>
                       <TableCell>
-                        <Typography variant="subtitle2">{diet.name}</Typography>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <Typography variant="subtitle2">{diet.name}</Typography>
+                          {diet.isTemplate && (
+                            <Chip 
+                              label="Plantilla" 
+                              color="secondary" 
+                              size="small" 
+                              variant="outlined"
+                            />
+                          )}
+                        </Box>
                       </TableCell>
                       <TableCell>{diet.clientName}</TableCell>
                       <TableCell>{Math.round(diet.tmb).toLocaleString()} cal</TableCell>
@@ -344,9 +354,20 @@ const DietList = () => {
                 <Card elevation={3} sx={{ height: '100%' }}>
                   <CardContent>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
-                      <Typography variant="h6" component="div">
-                        {diet.name}
-                      </Typography>
+                      <Box>
+                        <Typography variant="h6" component="div">
+                          {diet.name}
+                        </Typography>
+                        {diet.isTemplate && (
+                          <Chip 
+                            label="Plantilla" 
+                            color="secondary" 
+                            size="small" 
+                            variant="outlined"
+                            sx={{ mt: 0.5 }}
+                          />
+                        )}
+                      </Box>
                       <Chip label="Active" color="success" size="small" />
                     </Box>
                     

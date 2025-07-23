@@ -14,8 +14,19 @@ import {
   TableRow,
   Alert,
   CircularProgress,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from '@mui/material'
 import { useFirebase } from '../contexts/FirebaseContext'
+import { useNotifications } from '../hooks/useNotifications'
+import { convertDietToTemplate } from '../utils/templateUtils'
 import LazyCharts from '../components/LazyCharts'
 import type { DayOfWeek, MealType, Diet, DietMeal } from '../types'
 
@@ -39,11 +50,18 @@ const mealTypes: { key: MealType; label: string }[] = [
 
 const DietViewer = () => {
   const { shareId } = useParams<{ shareId: string }>()
-  const { loadDietByShareId } = useFirebase()
+  const { loadDietByShareId, addDietTemplate } = useFirebase()
   const navigate = useNavigate()
+  const { showSuccess, showError } = useNotifications()
   const [diet, setDiet] = useState<Diet | null>(null)
   const [notFound, setNotFound] = useState(false)
   const [loading, setLoading] = useState(true)
+  
+  // Estados para el diálogo de guardar como plantilla
+  const [saveAsTemplateDialog, setSaveAsTemplateDialog] = useState(false)
+  const [templateName, setTemplateName] = useState('')
+  const [templateDescription, setTemplateDescription] = useState('')
+  const [templateCategory, setTemplateCategory] = useState('custom')
 
   useEffect(() => {
     const loadDiet = async () => {
@@ -83,6 +101,41 @@ const DietViewer = () => {
       total += calculateDayCalories(day.key)
     })
     return total
+  }
+
+  const handleSaveAsTemplate = () => {
+    if (diet) {
+      setTemplateName(`${diet.name} - Plantilla`)
+      setTemplateDescription(`Plantilla basada en la dieta de ${diet.clientName}`)
+      setSaveAsTemplateDialog(true)
+    }
+  }
+
+  const confirmSaveAsTemplate = async () => {
+    if (!diet || !templateName.trim()) {
+      showError('Por favor ingresa un nombre para la plantilla')
+      return
+    }
+
+    try {
+      const templateData = convertDietToTemplate(
+        diet, 
+        templateName, 
+        templateDescription, 
+        templateCategory
+      )
+
+      const success = await addDietTemplate(templateData)
+      if (success) {
+        showSuccess('Dieta guardada como plantilla correctamente')
+        setSaveAsTemplateDialog(false)
+        setTemplateName('')
+        setTemplateDescription('')
+        setTemplateCategory('custom')
+      }
+    } catch (error) {
+      showError('Error al guardar la plantilla')
+    }
   }
 
   if (loading) {
@@ -125,9 +178,19 @@ const DietViewer = () => {
     <Box sx={{ width: '100%' }}>
       {/* Header */}
       <Paper elevation={3} sx={{ p: 4, mb: 3 }}>
-        <Typography variant="h3" gutterBottom sx={{ color: '#2e7d32' }}>
-          {diet.clientName}'s Diet Plan
-        </Typography>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+          <Typography variant="h3" sx={{ color: '#2e7d32' }}>
+            {diet.clientName}'s Diet Plan
+          </Typography>
+          <Button
+            variant="outlined"
+            color="secondary"
+            onClick={handleSaveAsTemplate}
+            sx={{ whiteSpace: 'nowrap' }}
+          >
+            Guardar como Plantilla
+          </Button>
+        </Box>
         <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mb: 2 }}>
           <Chip label={`TMB: ${Math.round(diet.tmb)} cal`} color="primary" />
           {diet.customGoal && (
@@ -253,6 +316,58 @@ const DietViewer = () => {
           For questions or modifications, please contact your nutritionist.
         </Typography>
       </Paper>
+
+      {/* Diálogo para guardar como plantilla */}
+      <Dialog open={saveAsTemplateDialog} onClose={() => setSaveAsTemplateDialog(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>Guardar como Plantilla</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+            Esta acción creará una plantilla reutilizable basada en la dieta actual de {diet?.clientName}.
+          </Typography>
+          
+          <TextField
+            fullWidth
+            label="Nombre de la Plantilla"
+            value={templateName}
+            onChange={(e) => setTemplateName(e.target.value)}
+            sx={{ mb: 2 }}
+            required
+          />
+          
+          <TextField
+            fullWidth
+            label="Descripción (opcional)"
+            value={templateDescription}
+            onChange={(e) => setTemplateDescription(e.target.value)}
+            multiline
+            rows={3}
+            sx={{ mb: 2 }}
+          />
+          
+          <FormControl fullWidth>
+            <InputLabel>Categoría</InputLabel>
+            <Select
+              value={templateCategory}
+              label="Categoría"
+              onChange={(e) => setTemplateCategory(e.target.value)}
+            >
+              <MenuItem value="weight_loss">Pérdida de Peso</MenuItem>
+              <MenuItem value="muscle_gain">Ganancia Muscular</MenuItem>
+              <MenuItem value="maintenance">Mantenimiento</MenuItem>
+              <MenuItem value="health">Salud</MenuItem>
+              <MenuItem value="custom">Personalizada</MenuItem>
+            </Select>
+          </FormControl>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setSaveAsTemplateDialog(false)}>
+            Cancelar
+          </Button>
+          <Button onClick={confirmSaveAsTemplate} variant="contained" color="primary">
+            Guardar Plantilla
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   )
 }
