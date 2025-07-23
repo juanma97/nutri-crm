@@ -1,1 +1,475 @@
-/* Estilos globales */
+/* Estilos globales para NutriCRM */
+
+/* Importar fuente Inter */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* Reset y estilos base */
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  margin: 0;
+  padding: 0;
+  background-color: #fafafa;
+}
+
+/* Scrollbar personalizada */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* Animaciones globales */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Clases de utilidad */
+.fade-in {
+  animation: fadeIn 0.6s ease-out;
+}
+
+.slide-in {
+  animation: slideIn 0.4s ease-out;
+}
+
+.pulse {
+  animation: pulse 2s infinite;
+}
+
+/* Mejoras para Material-UI */
+.MuiCard-root {
+  transition: all 0.3s ease-in-out !important;
+}
+
+.MuiButton-root {
+  transition: all 0.2s ease-in-out !important;
+}
+
+.MuiPaper-root {
+  transition: all 0.3s ease-in-out !important;
+}
+
+/* Estilos para tooltips */
+.MuiTooltip-tooltip {
+  background-color: rgba(0, 0, 0, 0.87) !important;
+  font-size: 0.875rem !important;
+  border-radius: 6px !important;
+}
+
+/* Estilos para notificaciones */
+.MuiSnackbar-root {
+  z-index: 1400 !important;
+}
+
+/* Mejoras para formularios */
+.MuiTextField-root .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+  border-color: #2e7d32 !important;
+}
+
+.MuiTextField-root .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: #2e7d32 !important;
+  border-width: 2px !important;
+}
+
+/* Estilos para tablas */
+.MuiTableRow-root:hover {
+  background-color: rgba(46, 125, 50, 0.04) !important;
+}
+
+/* Estilos para chips */
+.MuiChip-root {
+  transition: all 0.2s ease-in-out !important;
+}
+
+.MuiChip-root:hover {
+  transform: translateY(-1px) !important;
+}
+
+/* Estilos para avatares */
+.MuiAvatar-root {
+  transition: all 0.2s ease-in-out !important;
+}
+
+/* Estilos para iconos */
+.MuiSvgIcon-root {
+  transition: all 0.2s ease-in-out !important;
+}
+
+/* Estilos para loading */
+.MuiCircularProgress-root {
+  transition: all 0.2s ease-in-out !important;
+}
+
+/* Estilos para alertas */
+.MuiAlert-root {
+  border-radius: 8px !important;
+  font-weight: 500 !important;
+}
+
+/* Estilos para diálogos */
+.MuiDialog-paper {
+  border-radius: 12px !important;
+}
+
+/* Estilos para menús */
+.MuiMenu-paper {
+  border-radius: 8px !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Estilos para tabs */
+.MuiTabs-root .MuiTabs-indicator {
+  height: 3px !important;
+  border-radius: 2px !important;
+}
+
+/* Estilos para steppers */
+.MuiStepConnector-root .MuiStepConnector-line {
+  border-color: #e0e0e0 !important;
+}
+
+.MuiStepConnector-root.Mui-active .MuiStepConnector-line {
+  border-color: #2e7d32 !important;
+}
+
+.MuiStepConnector-root.Mui-completed .MuiStepConnector-line {
+  border-color: #2e7d32 !important;
+}
+
+/* Estilos para sliders */
+.MuiSlider-root .MuiSlider-thumb {
+  transition: all 0.2s ease-in-out !important;
+}
+
+.MuiSlider-root .MuiSlider-thumb:hover {
+  transform: scale(1.2) !important;
+}
+
+/* Estilos para switches */
+.MuiSwitch-root .MuiSwitch-switchBase.Mui-checked {
+  color: #2e7d32 !important;
+}
+
+.MuiSwitch-root .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track {
+  background-color: #2e7d32 !important;
+}
+
+/* Estilos para checkboxes */
+.MuiCheckbox-root.Mui-checked {
+  color: #2e7d32 !important;
+}
+
+/* Estilos para radio buttons */
+.MuiRadio-root.Mui-checked {
+  color: #2e7d32 !important;
+}
+
+/* Estilos para select */
+.MuiSelect-select:focus {
+  background-color: transparent !important;
+}
+
+/* Estilos para autocomplete */
+.MuiAutocomplete-paper {
+  border-radius: 8px !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Estilos para date picker */
+.MuiPickersDay-root.Mui-selected {
+  background-color: #2e7d32 !important;
+}
+
+.MuiPickersDay-root.Mui-selected:hover {
+  background-color: #1b5e20 !important;
+}
+
+/* Estilos para time picker */
+.MuiClock-root .MuiClockNumber-root.Mui-selected {
+  background-color: #2e7d32 !important;
+}
+
+/* Estilos para rating */
+.MuiRating-root .MuiRating-iconFilled {
+  color: #ff9800 !important;
+}
+
+/* Estilos para skeleton */
+.MuiSkeleton-root {
+  background-color: #f0f0f0 !important;
+}
+
+/* Estilos para speed dial */
+.MuiSpeedDial-root .MuiFab-primary {
+  background-color: #2e7d32 !important;
+}
+
+.MuiSpeedDial-root .MuiFab-primary:hover {
+  background-color: #1b5e20 !important;
+}
+
+/* Estilos para bottom navigation */
+.MuiBottomNavigation-root .MuiBottomNavigationAction-root.Mui-selected {
+  color: #2e7d32 !important;
+}
+
+/* Estilos para breadcrumbs */
+.MuiBreadcrumbs-root .MuiLink-root {
+  color: #2e7d32 !important;
+}
+
+.MuiBreadcrumbs-root .MuiLink-root:hover {
+  color: #1b5e20 !important;
+}
+
+/* Estilos para pagination */
+.MuiPagination-root .MuiPaginationItem-root.Mui-selected {
+  background-color: #2e7d32 !important;
+  color: white !important;
+}
+
+/* Estilos para tree view */
+.MuiTreeView-root .MuiTreeItem-root.Mui-selected {
+  background-color: rgba(46, 125, 50, 0.08) !important;
+}
+
+/* Estilos para timeline */
+.MuiTimeline-root .MuiTimelineDot-root.MuiTimelineDot-filled {
+  background-color: #2e7d32 !important;
+}
+
+/* Estilos para accordion */
+.MuiAccordion-root .MuiAccordionSummary-root.Mui-expanded {
+  background-color: rgba(46, 125, 50, 0.04) !important;
+}
+
+/* Estilos para tabs personalizados */
+.custom-tab {
+  min-height: 48px !important;
+  font-weight: 600 !important;
+  text-transform: none !important;
+}
+
+.custom-tab.Mui-selected {
+  color: #2e7d32 !important;
+}
+
+/* Estilos para cards personalizados */
+.custom-card {
+  border-radius: 16px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+  border: 1px solid rgba(0, 0, 0, 0.04) !important;
+  transition: all 0.3s ease-in-out !important;
+}
+
+.custom-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12) !important;
+  transform: translateY(-2px) !important;
+}
+
+/* Estilos para botones personalizados */
+.custom-button {
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  text-transform: none !important;
+  padding: 10px 24px !important;
+  transition: all 0.2s ease-in-out !important;
+}
+
+.custom-button:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Estilos para inputs personalizados */
+.custom-input .MuiOutlinedInput-root {
+  border-radius: 8px !important;
+}
+
+.custom-input .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+  border-color: #2e7d32 !important;
+}
+
+.custom-input .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: #2e7d32 !important;
+  border-width: 2px !important;
+}
+
+/* Estilos para chips personalizados */
+.custom-chip {
+  border-radius: 8px !important;
+  font-weight: 500 !important;
+  transition: all 0.2s ease-in-out !important;
+}
+
+.custom-chip:hover {
+  transform: translateY(-1px) !important;
+}
+
+/* Estilos para avatares personalizados */
+.custom-avatar {
+  transition: all 0.2s ease-in-out !important;
+}
+
+.custom-avatar:hover {
+  transform: scale(1.05) !important;
+}
+
+/* Estilos para iconos personalizados */
+.custom-icon {
+  transition: all 0.2s ease-in-out !important;
+}
+
+.custom-icon:hover {
+  transform: scale(1.1) !important;
+}
+
+/* Estilos para loading personalizado */
+.custom-loading {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  min-height: 200px !important;
+}
+
+/* Estilos para empty state */
+.empty-state {
+  text-align: center !important;
+  padding: 40px 20px !important;
+  color: #757575 !important;
+}
+
+.empty-state .MuiSvgIcon-root {
+  font-size: 64px !important;
+  margin-bottom: 16px !important;
+  opacity: 0.5 !important;
+}
+
+/* Estilos para error state */
+.error-state {
+  text-align: center !important;
+  padding: 40px 20px !important;
+  color: #f44336 !important;
+}
+
+.error-state .MuiSvgIcon-root {
+  font-size: 64px !important;
+  margin-bottom: 16px !important;
+}
+
+/* Estilos para success state */
+.success-state {
+  text-align: center !important;
+  padding: 40px 20px !important;
+  color: #4caf50 !important;
+}
+
+.success-state .MuiSvgIcon-root {
+  font-size: 64px !important;
+  margin-bottom: 16px !important;
+}
+
+/* Estilos para responsive */
+@media (max-width: 600px) {
+  .custom-card {
+    margin: 8px !important;
+  }
+  
+  .custom-button {
+    width: 100% !important;
+    margin-bottom: 8px !important;
+  }
+  
+  .MuiGrid-container {
+    margin: 0 !important;
+  }
+  
+  .MuiGrid-item {
+    padding: 8px !important;
+  }
+}
+
+/* Estilos para modo oscuro (futuro) */
+@media (prefers-color-scheme: dark) {
+  /* Aquí se pueden agregar estilos para modo oscuro */
+}
+
+/* Estilos para accesibilidad */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Estilos para impresión */
+@media print {
+  .MuiAppBar-root,
+  .MuiToolbar-root,
+  .MuiFab-root,
+  .MuiSpeedDial-root {
+    display: none !important;
+  }
+  
+  .MuiCard-root,
+  .MuiPaper-root {
+    box-shadow: none !important;
+    border: 1px solid #e0e0e0 !important;
+  }
+}

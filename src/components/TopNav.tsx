@@ -10,7 +10,9 @@ import {
   MenuItem,
   IconButton,
   ListItemIcon,
-  ListItemText
+  ListItemText,
+  useTheme,
+  Tooltip
 } from '@mui/material'
 import {
   Dashboard as DashboardIcon,
@@ -19,7 +21,8 @@ import {
   People as ClientIcon,
   Assessment as ReportIcon,
   AccountCircle as AccountIcon,
-  Logout as LogoutIcon
+  Logout as LogoutIcon,
+  Restaurant as RestaurantIcon
 } from '@mui/icons-material'
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
@@ -29,6 +32,7 @@ const TopNav = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
+  const theme = useTheme()
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget)
@@ -57,43 +61,88 @@ const TopNav = () => {
 
   return (
     <>
-      <AppBar position="static" sx={{ backgroundColor: '#2e7d32' }}>
-        <Toolbar>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 0, mr: 4 }}>
-            NutriCRM
-          </Typography>
+      <AppBar 
+        position="static" 
+        sx={{ 
+          background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+          boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
+        }}
+      >
+        <Toolbar sx={{ px: 3 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 0, mr: 4 }}>
+            <RestaurantIcon sx={{ mr: 1, fontSize: 28 }} />
+            <Typography 
+              variant="h5" 
+              component="div" 
+              sx={{ 
+                fontWeight: 700,
+                letterSpacing: '-0.5px'
+              }}
+            >
+              NutriCRM
+            </Typography>
+          </Box>
           
           <Box sx={{ flexGrow: 1, display: 'flex', gap: 1 }}>
             {navItems.map((item) => (
-              <Button
-                key={item.path}
-                color="inherit"
-                startIcon={item.icon}
-                onClick={() => navigate(item.path)}
-                sx={{
-                  backgroundColor: isActive(item.path) ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
-                  '&:hover': {
-                    backgroundColor: 'rgba(255, 255, 255, 0.1)'
-                  }
-                }}
-              >
-                {item.label}
-              </Button>
+              <Tooltip key={item.path} title={item.label} arrow>
+                <Button
+                  color="inherit"
+                  startIcon={item.icon}
+                  onClick={() => navigate(item.path)}
+                  sx={{
+                    backgroundColor: isActive(item.path) ? 'rgba(255, 255, 255, 0.15)' : 'transparent',
+                    borderRadius: 2,
+                    px: 2,
+                    py: 1,
+                    fontWeight: isActive(item.path) ? 600 : 500,
+                    '&:hover': {
+                      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                      transform: 'translateY(-1px)',
+                    },
+                    transition: 'all 0.2s ease-in-out'
+                  }}
+                >
+                  {item.label}
+                </Button>
+              </Tooltip>
             ))}
           </Box>
 
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Typography variant="body2">
+            <Typography 
+              variant="body2" 
+              sx={{ 
+                fontWeight: 500,
+                opacity: 0.9
+              }}
+            >
               {user?.email}
             </Typography>
-            <IconButton
-              color="inherit"
-              onClick={handleMenuOpen}
-            >
-              <Avatar sx={{ width: 32, height: 32, bgcolor: 'rgba(255, 255, 255, 0.2)' }}>
-                <AccountIcon />
-              </Avatar>
-            </IconButton>
+            <Tooltip title="Menú de usuario" arrow>
+              <IconButton
+                color="inherit"
+                onClick={handleMenuOpen}
+                sx={{
+                  '&:hover': {
+                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                    transform: 'scale(1.05)',
+                  },
+                  transition: 'all 0.2s ease-in-out'
+                }}
+              >
+                <Avatar 
+                  sx={{ 
+                    width: 36, 
+                    height: 36, 
+                    bgcolor: 'rgba(255, 255, 255, 0.2)',
+                    border: '2px solid rgba(255, 255, 255, 0.3)'
+                  }}
+                >
+                  <AccountIcon />
+                </Avatar>
+              </IconButton>
+            </Tooltip>
           </Box>
         </Toolbar>
       </AppBar>

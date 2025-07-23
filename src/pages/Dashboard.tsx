@@ -49,23 +49,27 @@ import {
 } from 'recharts'
 import { useFirebase } from '../contexts/FirebaseContext'
 import { useNavigate } from 'react-router-dom'
-
-const COLORS = {
-  primary: '#2e7d32',
-  secondary: '#1976d2',
-  success: '#4caf50',
-  warning: '#ff9800',
-  error: '#f44336',
-  info: '#2196f3',
-  purple: '#9c27b0',
-  orange: '#ff5722',
-  teal: '#009688',
-  pink: '#e91e63'
-}
+import { useTheme } from '@mui/material/styles'
+import { colorPalette } from '../styles/theme'
 
 const Dashboard = () => {
   const { diets, foods, clients } = useFirebase()
   const navigate = useNavigate()
+  const theme = useTheme()
+
+  // Usar la paleta de colores centralizada
+  const COLORS = {
+    primary: colorPalette.primary[500],
+    secondary: colorPalette.secondary[500],
+    success: colorPalette.success.main,
+    warning: colorPalette.warning.main,
+    error: colorPalette.error.main,
+    info: colorPalette.info.main,
+    purple: '#9c27b0',
+    orange: colorPalette.accent[500],
+    teal: '#009688',
+    pink: '#e91e63'
+  }
 
   // === MÉTRICAS NUTRICIONALES PROFESIONALES ===
   
@@ -224,34 +228,73 @@ const Dashboard = () => {
   ]
 
   return (
-    <Box sx={{ width: '100%', py: 3, px: 3 }}>
+    <Box sx={{ 
+      width: '100%', 
+      py: 4, 
+      px: 4,
+      background: theme.palette.background.gradient,
+      minHeight: '100vh'
+    }}>
       {/* Header */}
-      <Box sx={{ mb: 4 }}>
-        <Typography variant="h3" gutterBottom sx={{ color: COLORS.primary, fontWeight: 'bold' }}>
+      <Box sx={{ mb: 5 }}>
+        <Typography 
+          variant="h2" 
+          gutterBottom 
+          sx={{ 
+            color: theme.palette.primary.main, 
+            fontWeight: 700,
+            mb: 2,
+            background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%)`,
+            backgroundClip: 'text',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent'
+          }}
+        >
           📊 Panel Nutricional
         </Typography>
-        <Typography variant="h6" color="text.secondary">
+        <Typography 
+          variant="h5" 
+          color="text.secondary"
+          sx={{ fontWeight: 400 }}
+        >
           Análisis profesional de tu práctica nutricional
         </Typography>
       </Box>
 
       {/* Métricas Principales */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
+      <Grid container spacing={3} sx={{ mb: 5 }}>
         <Grid item xs={12} sm={6} md={3}>
-          <Card elevation={4} sx={{ 
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            color: 'white'
-          }}>
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <Avatar sx={{ bgcolor: 'rgba(255,255,255,0.2)', mr: 2 }}>
+          <Card 
+            elevation={0}
+            sx={{ 
+              background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+              color: 'white',
+              borderRadius: 3,
+              border: '1px solid rgba(255,255,255,0.1)',
+              '&:hover': {
+                transform: 'translateY(-4px)',
+                boxShadow: '0 8px 25px rgba(0,0,0,0.15)',
+              },
+              transition: 'all 0.3s ease-in-out'
+            }}
+          >
+            <CardContent sx={{ p: 3 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+                <Avatar 
+                  sx={{ 
+                    bgcolor: 'rgba(255,255,255,0.2)', 
+                    mr: 2,
+                    width: 48,
+                    height: 48
+                  }}
+                >
                   <PeopleIcon />
                 </Avatar>
                 <Box>
-                  <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                  <Typography variant="h3" sx={{ fontWeight: 700, mb: 0.5 }}>
                     {nutritionMetrics.totalClients}
                   </Typography>
-                  <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                  <Typography variant="body1" sx={{ opacity: 0.9, fontWeight: 500 }}>
                     Clientes Activos
                   </Typography>
                 </Box>
@@ -259,27 +302,52 @@ const Dashboard = () => {
               <LinearProgress 
                 variant="determinate" 
                 value={Math.min((nutritionMetrics.totalClients / 20) * 100, 100)} 
-                sx={{ height: 8, borderRadius: 4, bgcolor: 'rgba(255,255,255,0.2)' }}
+                sx={{ 
+                  height: 8, 
+                  borderRadius: 4, 
+                  bgcolor: 'rgba(255,255,255,0.2)',
+                  '& .MuiLinearProgress-bar': {
+                    borderRadius: 4,
+                    background: 'rgba(255,255,255,0.8)'
+                  }
+                }}
               />
             </CardContent>
           </Card>
         </Grid>
 
         <Grid item xs={12} sm={6} md={3}>
-          <Card elevation={4} sx={{ 
-            background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-            color: 'white'
-          }}>
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <Avatar sx={{ bgcolor: 'rgba(255,255,255,0.2)', mr: 2 }}>
+          <Card 
+            elevation={0}
+            sx={{ 
+              background: `linear-gradient(135deg, ${theme.palette.secondary.main} 0%, ${theme.palette.secondary.dark} 100%)`,
+              color: 'white',
+              borderRadius: 3,
+              border: '1px solid rgba(255,255,255,0.1)',
+              '&:hover': {
+                transform: 'translateY(-4px)',
+                boxShadow: '0 8px 25px rgba(0,0,0,0.15)',
+              },
+              transition: 'all 0.3s ease-in-out'
+            }}
+          >
+            <CardContent sx={{ p: 3 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+                <Avatar 
+                  sx={{ 
+                    bgcolor: 'rgba(255,255,255,0.2)', 
+                    mr: 2,
+                    width: 48,
+                    height: 48
+                  }}
+                >
                   <DietIcon />
                 </Avatar>
                 <Box>
-                  <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                  <Typography variant="h3" sx={{ fontWeight: 700, mb: 0.5 }}>
                     {nutritionMetrics.totalDiets}
                   </Typography>
-                  <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                  <Typography variant="body1" sx={{ opacity: 0.9, fontWeight: 500 }}>
                     Dietas Creadas
                   </Typography>
                 </Box>
@@ -287,27 +355,52 @@ const Dashboard = () => {
               <LinearProgress 
                 variant="determinate" 
                 value={Math.min((nutritionMetrics.totalDiets / 30) * 100, 100)} 
-                sx={{ height: 8, borderRadius: 4, bgcolor: 'rgba(255,255,255,0.2)' }}
+                sx={{ 
+                  height: 8, 
+                  borderRadius: 4, 
+                  bgcolor: 'rgba(255,255,255,0.2)',
+                  '& .MuiLinearProgress-bar': {
+                    borderRadius: 4,
+                    background: 'rgba(255,255,255,0.8)'
+                  }
+                }}
               />
             </CardContent>
           </Card>
         </Grid>
 
         <Grid item xs={12} sm={6} md={3}>
-          <Card elevation={4} sx={{ 
-            background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-            color: 'white'
-          }}>
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <Avatar sx={{ bgcolor: 'rgba(255,255,255,0.2)', mr: 2 }}>
+          <Card 
+            elevation={0}
+            sx={{ 
+              background: `linear-gradient(135deg, ${colorPalette.accent[500]} 0%, ${colorPalette.accent[700]} 100%)`,
+              color: 'white',
+              borderRadius: 3,
+              border: '1px solid rgba(255,255,255,0.1)',
+              '&:hover': {
+                transform: 'translateY(-4px)',
+                boxShadow: '0 8px 25px rgba(0,0,0,0.15)',
+              },
+              transition: 'all 0.3s ease-in-out'
+            }}
+          >
+            <CardContent sx={{ p: 3 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+                <Avatar 
+                  sx={{ 
+                    bgcolor: 'rgba(255,255,255,0.2)', 
+                    mr: 2,
+                    width: 48,
+                    height: 48
+                  }}
+                >
                   <StarIcon />
                 </Avatar>
                 <Box>
-                  <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                  <Typography variant="h3" sx={{ fontWeight: 700, mb: 0.5 }}>
                     {nutritionMetrics.averageQuality}%
                   </Typography>
-                  <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                  <Typography variant="body1" sx={{ opacity: 0.9, fontWeight: 500 }}>
                     Calidad Promedio
                   </Typography>
                 </Box>
@@ -315,27 +408,52 @@ const Dashboard = () => {
               <LinearProgress 
                 variant="determinate" 
                 value={nutritionMetrics.averageQuality} 
-                sx={{ height: 8, borderRadius: 4, bgcolor: 'rgba(255,255,255,0.2)' }}
+                sx={{ 
+                  height: 8, 
+                  borderRadius: 4, 
+                  bgcolor: 'rgba(255,255,255,0.2)',
+                  '& .MuiLinearProgress-bar': {
+                    borderRadius: 4,
+                    background: 'rgba(255,255,255,0.8)'
+                  }
+                }}
               />
             </CardContent>
           </Card>
         </Grid>
 
         <Grid item xs={12} sm={6} md={3}>
-          <Card elevation={4} sx={{ 
-            background: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
-            color: 'white'
-          }}>
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <Avatar sx={{ bgcolor: 'rgba(255,255,255,0.2)', mr: 2 }}>
+          <Card 
+            elevation={0}
+            sx={{ 
+              background: `linear-gradient(135deg, ${colorPalette.success.main} 0%, ${colorPalette.success.dark} 100%)`,
+              color: 'white',
+              borderRadius: 3,
+              border: '1px solid rgba(255,255,255,0.1)',
+              '&:hover': {
+                transform: 'translateY(-4px)',
+                boxShadow: '0 8px 25px rgba(0,0,0,0.15)',
+              },
+              transition: 'all 0.3s ease-in-out'
+            }}
+          >
+            <CardContent sx={{ p: 3 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+                <Avatar 
+                  sx={{ 
+                    bgcolor: 'rgba(255,255,255,0.2)', 
+                    mr: 2,
+                    width: 48,
+                    height: 48
+                  }}
+                >
                   <CheckIcon />
                 </Avatar>
                 <Box>
-                  <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                  <Typography variant="h3" sx={{ fontWeight: 700, mb: 0.5 }}>
                     {nutritionMetrics.highQualityDiets}
                   </Typography>
-                  <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                  <Typography variant="body1" sx={{ opacity: 0.9, fontWeight: 500 }}>
                     Dietas Excelentes
                   </Typography>
                 </Box>
@@ -343,7 +461,15 @@ const Dashboard = () => {
               <LinearProgress 
                 variant="determinate" 
                 value={Math.round((nutritionMetrics.highQualityDiets / nutritionMetrics.totalDiets) * 100)} 
-                sx={{ height: 8, borderRadius: 4, bgcolor: 'rgba(255,255,255,0.2)' }}
+                sx={{ 
+                  height: 8, 
+                  borderRadius: 4, 
+                  bgcolor: 'rgba(255,255,255,0.2)',
+                  '& .MuiLinearProgress-bar': {
+                    borderRadius: 4,
+                    background: 'rgba(255,255,255,0.8)'
+                  }
+                }}
               />
             </CardContent>
           </Card>
@@ -351,14 +477,40 @@ const Dashboard = () => {
       </Grid>
 
       {/* Gráficos Principales */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
+      <Grid container spacing={4} sx={{ mb: 5 }}>
         {/* Análisis de Objetivos de Clientes */}
         <Grid item xs={12} md={6}>
-          <Paper elevation={4} sx={{ p: 3, height: 400 }}>
-            <Typography variant="h6" gutterBottom sx={{ color: COLORS.primary, fontWeight: 'bold' }}>
+          <Paper 
+            elevation={0}
+            sx={{ 
+              p: 4, 
+              height: 450,
+              borderRadius: 3,
+              border: '1px solid rgba(0,0,0,0.04)',
+              background: 'rgba(255,255,255,0.8)',
+              backdropFilter: 'blur(10px)',
+              '&:hover': {
+                boxShadow: '0 8px 25px rgba(0,0,0,0.1)',
+                transform: 'translateY(-2px)',
+              },
+              transition: 'all 0.3s ease-in-out'
+            }}
+          >
+            <Typography 
+              variant="h5" 
+              gutterBottom 
+              sx={{ 
+                color: theme.palette.primary.main, 
+                fontWeight: 700,
+                mb: 3,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1
+              }}
+            >
               🎯 Objetivos de Clientes
             </Typography>
-            <ResponsiveContainer width="100%" height={300}>
+            <ResponsiveContainer width="100%" height={350}>
               <PieChart>
                 <Pie
                   data={goalData}
@@ -366,14 +518,22 @@ const Dashboard = () => {
                   cy="50%"
                   labelLine={false}
                   label={({ name, percent }) => `${name}\n${(percent * 100).toFixed(0)}%`}
-                  outerRadius={100}
+                  outerRadius={120}
                   dataKey="value"
                 >
                   {goalData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
-                <Tooltip formatter={(value) => [`${value} clientes`, 'Cantidad']} />
+                <Tooltip 
+                  formatter={(value) => [`${value} clientes`, 'Cantidad']}
+                  contentStyle={{
+                    backgroundColor: 'rgba(255,255,255,0.95)',
+                    border: 'none',
+                    borderRadius: 8,
+                    boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
+                  }}
+                />
               </PieChart>
             </ResponsiveContainer>
           </Paper>
