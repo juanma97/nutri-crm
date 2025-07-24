@@ -1,1 +1,329 @@
-/* Estilos globales */
+/* ===== PALETA DE COLORES OPTIMIZADA PARA NEUROMARKETING ===== */
+
+:root {
+  /* Colores principales - Verde Saludable */
+  --primary-green: #2E7D32;
+  --primary-green-light: #4CAF50;
+  --primary-green-lighter: #81C784;
+  --primary-green-dark: #1B5E20;
+  --primary-green-darker: #0D4A14;
+
+  /* Colores de acento */
+  --accent-orange: #FF9800;
+  --accent-orange-light: #FFB74D;
+  --accent-orange-dark: #F57C00;
+  --accent-blue: #2196F3;
+  --accent-blue-light: #64B5F6;
+  --accent-blue-dark: #1976D2;
+
+  /* Grises neutros */
+  --neutral-gray: #757575;
+  --neutral-gray-light: #9E9E9E;
+  --neutral-gray-lighter: #E0E0E0;
+  --neutral-gray-dark: #424242;
+  --neutral-gray-darker: #212121;
+
+  /* Estados y feedback */
+  --success-color: #4CAF50;
+  --warning-color: #FF9800;
+  --error-color: #F44336;
+  --info-color: #2196F3;
+
+  /* Fondos y superficies */
+  --background-primary: #FAFAFA;
+  --background-secondary: #FFFFFF;
+  --background-tertiary: #F5F5F5;
+  --surface-elevated: #FFFFFF;
+  --surface-overlay: rgba(0, 0, 0, 0.05);
+
+  /* Texto */
+  --text-primary: #212121;
+  --text-secondary: #757575;
+  --text-disabled: #BDBDBD;
+  --text-on-primary: #FFFFFF;
+  --text-on-accent: #FFFFFF;
+
+  /* Sombras y efectos */
+  --shadow-light: 0 2px 4px rgba(0, 0, 0, 0.1);
+  --shadow-medium: 0 4px 8px rgba(0, 0, 0, 0.15);
+  --shadow-heavy: 0 8px 16px rgba(0, 0, 0, 0.2);
+  --shadow-green: 0 4px 12px rgba(46, 125, 50, 0.3);
+}
+
+/* ===== ESTILOS GLOBALES ===== */
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  background-color: var(--background-primary);
+  color: var(--text-primary);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ===== COMPONENTES MATERIAL-UI PERSONALIZADOS ===== */
+
+/* Botones principales */
+.MuiButton-containedPrimary {
+  background: linear-gradient(135deg, var(--primary-green) 0%, var(--primary-green-dark) 100%) !important;
+  box-shadow: var(--shadow-green) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.MuiButton-containedPrimary:hover {
+  background: linear-gradient(135deg, var(--primary-green-dark) 0%, var(--primary-green) 100%) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 20px rgba(46, 125, 50, 0.4) !important;
+}
+
+.MuiButton-containedPrimary:active {
+  transform: translateY(0) !important;
+}
+
+/* Botones de acento */
+.MuiButton-containedSecondary {
+  background: linear-gradient(135deg, var(--accent-orange) 0%, var(--accent-orange-dark) 100%) !important;
+  box-shadow: 0 4px 12px rgba(255, 152, 0, 0.3) !important;
+}
+
+.MuiButton-containedSecondary:hover {
+  background: linear-gradient(135deg, var(--accent-orange-dark) 0%, var(--accent-orange) 100%) !important;
+  transform: translateY(-2px) !important;
+}
+
+/* Campos de texto */
+.MuiOutlinedInput-root {
+  transition: all 0.3s ease !important;
+}
+
+.MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+  border-color: var(--primary-green) !important;
+}
+
+.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: var(--primary-green) !important;
+  border-width: 2px !important;
+}
+
+.MuiInputLabel-root.Mui-focused {
+  color: var(--primary-green) !important;
+}
+
+/* Tarjetas y superficies */
+.MuiPaper-root {
+  border-radius: 12px !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.MuiPaper-elevation1 {
+  box-shadow: var(--shadow-light) !important;
+}
+
+.MuiPaper-elevation2 {
+  box-shadow: var(--shadow-medium) !important;
+}
+
+.MuiPaper-elevation3 {
+  box-shadow: var(--shadow-heavy) !important;
+}
+
+.MuiCard-root:hover {
+  transform: translateY(-4px) !important;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Chips y badges */
+.MuiChip-colorPrimary {
+  background-color: var(--primary-green) !important;
+  color: var(--text-on-primary) !important;
+}
+
+.MuiChip-colorSecondary {
+  background-color: var(--accent-orange) !important;
+  color: var(--text-on-accent) !important;
+}
+
+/* Iconos */
+.MuiIconButton-root {
+  transition: all 0.2s ease !important;
+}
+
+.MuiIconButton-root:hover {
+  background-color: rgba(46, 125, 50, 0.1) !important;
+  transform: scale(1.1) !important;
+}
+
+/* Tabs */
+.MuiTab-root {
+  font-weight: 600 !important;
+  transition: all 0.3s ease !important;
+}
+
+.MuiTab-root.Mui-selected {
+  color: var(--primary-green) !important;
+}
+
+.MuiTabs-indicator {
+  background-color: var(--primary-green) !important;
+  height: 3px !important;
+}
+
+/* Alertas */
+.MuiAlert-standardSuccess {
+  background-color: rgba(76, 175, 80, 0.1) !important;
+  border: 1px solid var(--success-color) !important;
+  color: var(--success-color) !important;
+}
+
+.MuiAlert-standardWarning {
+  background-color: rgba(255, 152, 0, 0.1) !important;
+  border: 1px solid var(--warning-color) !important;
+  color: var(--warning-color) !important;
+}
+
+.MuiAlert-standardError {
+  background-color: rgba(244, 67, 54, 0.1) !important;
+  border: 1px solid var(--error-color) !important;
+  color: var(--error-color) !important;
+}
+
+.MuiAlert-standardInfo {
+  background-color: rgba(33, 150, 243, 0.1) !important;
+  border: 1px solid var(--info-color) !important;
+  color: var(--info-color) !important;
+}
+
+/* ===== CLASES UTILITARIAS ===== */
+
+.text-primary {
+  color: var(--primary-green) !important;
+}
+
+.text-accent {
+  color: var(--accent-orange) !important;
+}
+
+.text-success {
+  color: var(--success-color) !important;
+}
+
+.text-warning {
+  color: var(--warning-color) !important;
+}
+
+.text-error {
+  color: var(--error-color) !important;
+}
+
+.bg-primary {
+  background-color: var(--primary-green) !important;
+}
+
+.bg-accent {
+  background-color: var(--accent-orange) !important;
+}
+
+.bg-success {
+  background-color: var(--success-color) !important;
+}
+
+.bg-warning {
+  background-color: var(--warning-color) !important;
+}
+
+.bg-error {
+  background-color: var(--error-color) !important;
+}
+
+/* ===== ANIMACIONES Y TRANSICIONES ===== */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.6s ease-out;
+}
+
+.slide-in {
+  animation: slideIn 0.5s ease-out;
+}
+
+.pulse {
+  animation: pulse 2s infinite;
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+
+@media (max-width: 768px) {
+  .MuiPaper-root {
+    border-radius: 8px !important;
+  }
+  
+  .MuiCard-root:hover {
+    transform: translateY(-2px) !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .MuiPaper-root {
+    border-radius: 6px !important;
+  }
+}
+
+/* ===== ACCESIBILIDAD ===== */
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ===== DARK MODE SUPPORT (FUTURO) ===== */
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background-primary: #121212;
+    --background-secondary: #1E1E1E;
+    --background-tertiary: #2D2D2D;
+    --text-primary: #FFFFFF;
+    --text-secondary: #B0B0B0;
+    --surface-elevated: #2D2D2D;
+  }
+}

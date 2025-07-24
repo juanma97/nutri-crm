@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
-import { ThemeProvider, createTheme } from '@mui/material/styles'
+import { ThemeProvider } from '@mui/material/styles'
 import CssBaseline from '@mui/material/CssBaseline'
 import { SnackbarProvider } from 'notistack'
 import { Suspense, lazy } from 'react'
@@ -9,18 +9,8 @@ import ProtectedRoute from './components/ProtectedRoute'
 import TopNav from './components/TopNav'
 import Login from './pages/Login'
 import { CircularProgress, Box } from '@mui/material'
+import theme from './styles/theme'
 import './App.css'
-
-const theme = createTheme({
-  palette: {
-    primary: {
-      main: '#2e7d32',
-    },
-    secondary: {
-      main: '#1976d2',
-    },
-  },
-})
 
 // Lazy load heavy pages
 const Dashboard = lazy(() => import('./pages/Dashboard'))
