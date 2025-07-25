@@ -78,6 +78,53 @@ export const FirebaseProvider: React.FC<{ children: ReactNode }> = ({ children }
     return cleaned
   }
 
+  // Función helper para limpiar datos del cliente antes de enviar a Firestore
+  const cleanClientData = (data: any): any => {
+    const cleaned = { ...data }
+    
+    // Eliminar campos undefined que Firestore no acepta
+    Object.keys(cleaned).forEach(key => {
+      if (cleaned[key] === undefined) {
+        delete cleaned[key]
+      }
+    })
+    
+    // Manejar campos anidados
+    if (cleaned.personalData) {
+      Object.keys(cleaned.personalData).forEach(key => {
+        if (cleaned.personalData[key] === undefined) {
+          delete cleaned.personalData[key]
+        }
+      })
+    }
+    
+    if (cleaned.healthInfo) {
+      Object.keys(cleaned.healthInfo).forEach(key => {
+        if (cleaned.healthInfo[key] === undefined) {
+          delete cleaned.healthInfo[key]
+        }
+      })
+    }
+    
+    if (cleaned.trainingAndGoals) {
+      Object.keys(cleaned.trainingAndGoals).forEach(key => {
+        if (cleaned.trainingAndGoals[key] === undefined) {
+          delete cleaned.trainingAndGoals[key]
+        }
+      })
+    }
+    
+    if (cleaned.lifestyleData) {
+      Object.keys(cleaned.lifestyleData).forEach(key => {
+        if (cleaned.lifestyleData[key] === undefined) {
+          delete cleaned.lifestyleData[key]
+        }
+      })
+    }
+    
+    return cleaned
+  }
+
   // Función helper para eliminar el campo customGoal de un documento
   const removeCustomGoal = async (dietId: string): Promise<boolean> => {
     try {
@@ -432,9 +479,12 @@ export const FirebaseProvider: React.FC<{ children: ReactNode }> = ({ children }
     try {
       const clientsRef = collection(db, 'clients')
       
+      // Limpiar datos antes de enviar a Firestore
+      const cleanedClientData = cleanClientData(clientData)
+      
       // Asegurar que birthDate se guarde correctamente
       const clientToSave = {
-        ...clientData,
+        ...cleanedClientData,
         userId: user.id,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
@@ -462,8 +512,12 @@ export const FirebaseProvider: React.FC<{ children: ReactNode }> = ({ children }
   const updateClient = async (id: string, updates: Partial<Client>): Promise<boolean> => {
     try {
       const clientRef = doc(db, 'clients', id)
+      
+      // Limpiar datos antes de enviar a Firestore
+      const cleanedUpdates = cleanClientData(updates)
+      
       const updateData = {
-        ...updates,
+        ...cleanedUpdates,
         updatedAt: serverTimestamp()
       }
       await updateDoc(clientRef, updateData)

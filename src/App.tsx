@@ -7,6 +7,7 @@ import { AuthProvider } from './contexts/AuthContext'
 import { FirebaseProvider } from './contexts/FirebaseContext'
 import ProtectedRoute from './components/ProtectedRoute'
 import TopNav from './components/TopNav'
+import ScrollToTop from './components/ScrollToTop'
 import Login from './pages/Login'
 import { CircularProgress, Box } from '@mui/material'
 import theme from './styles/theme'
@@ -47,6 +48,7 @@ function App() {
         <AuthProvider>
           <FirebaseProvider>
             <Router>
+              <ScrollToTop />
               <div className="App">
                 <Routes>
                   <Route path="/login" element={<Login />} />

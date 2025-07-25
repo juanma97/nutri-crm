@@ -1,28 +1,70 @@
 import React, { useState, useEffect } from 'react'
 import {
   Box,
-  Typography,
-  TextField,
   Button,
+  CircularProgress,
+  Tabs,
+  Tab,
+  Alert,
+  Typography,
   Paper,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  CircularProgress
+  Divider,
+  useTheme,
+  alpha
 } from '@mui/material'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useFirebase } from '../contexts/FirebaseContext'
 import { useNotifications } from '../hooks/useNotifications'
 import type { ClientFormData, Client } from '../types'
+import ClientInfoTab from '../components/ClientInfoTab'
+import HealthTab from '../components/HealthTab'
+import TrainingTab from '../components/TrainingTab'
+import NutritionTab from '../components/NutritionTab'
+import { buildClientData, validateClientData, optimizeClientData } from '../utils/clientDataBuilder'
+import { motion } from 'framer-motion'
+
+interface TabPanelProps {
+  children?: React.ReactNode
+  index: number
+  value: number
+}
+
+function TabPanel(props: TabPanelProps) {
+  const { children, value, index, ...other } = props
+
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`client-tabpanel-${index}`}
+      aria-labelledby={`client-tab-${index}`}
+      {...other}
+    >
+      {value === index && (
+        <Box sx={{ py: 2 }}>
+          {children}
+        </Box>
+      )}
+    </div>
+  )
+}
+
+function a11yProps(index: number) {
+  return {
+    id: `client-tab-${index}`,
+    'aria-controls': `client-tabpanel-${index}`,
+  }
+}
 
 const ClientForm = () => {
+  const theme = useTheme()
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { addClient, updateClient, getClientById, loadingClients } = useFirebase()
-  const { showSuccess, showError } = useNotifications()
+  const { showError } = useNotifications()
   
   const [loading, setLoading] = useState(false)
+  const [tabValue, setTabValue] = useState(0)
   const [formData, setFormData] = useState<ClientFormData>({
     name: '',
     email: '',
@@ -41,6 +83,63 @@ const ClientForm = () => {
       name: '',
       phone: '',
       relationship: ''
+    },
+    personalData: {
+      firstName: '',
+      lastName: '',
+      birthDate: '',
+      address: '',
+      city: '',
+      howDidYouKnow: '',
+      whyChooseServices: ''
+    },
+    healthInfo: {
+      parqQuestions: {
+        respiratoryHeartDisease: { question: '¿Padeces alguna enfermedad respiratoria o de corazón?', answer: null },
+        muscleJointInjuries: { question: '¿Tienes lesiones o problemas musculares o articulares?', answer: null },
+        herniasLoadWork: { question: '¿Tienes hernias u otras afecciones similares que puedan dificultar el trabajo con cargas?', answer: null },
+        sleepProblems: { question: '¿Tienes problemas para conciliar el sueño?', answer: null },
+        smoking: { question: '¿Fumas? Si es así, ¿cuánto?', answer: null },
+        alcoholConsumption: { question: '¿Bebes alcohol? Si es así, ¿qué bebidas y qué cantidad consumes?', answer: null },
+        chronicDiseases: { question: '¿Padeces de hipertensión, diabetes o alguna enfermedad crónica?', answer: null },
+        highCholesterol: { question: '¿Tienes el colesterol alto?', answer: null }
+      },
+      additionalComments: '',
+      diseases: '',
+      bloodType: '',
+      isSmoker: false,
+      isDiabetic: false,
+      isCeliac: false,
+      foodIntolerances: '',
+      workStressLevel: 5,
+      personalStressLevel: 5
+    },
+    trainingAndGoals: {
+      currentTrainingHistory: '',
+      dislikedExercises: '',
+      preferredExercises: '',
+      preferredTrainingDays: '',
+      realisticTrainingDays: '',
+      currentCardio: '',
+      trainingTimeOfDay: '',
+      sportsPracticed: '',
+      injuryHistory: '',
+      mainGoals: ''
+    },
+    lifestyleData: {
+      hasTakenSupplements: '',
+      currentSupplements: '',
+      wouldLikeSupplements: '',
+      currentDiet: '',
+      dietEffectiveness: '',
+      hungerExperience: '',
+      appetiteTiming: '',
+      eatingOutHabits: '',
+      foodAllergies: '',
+      likedFoods: '',
+      dislikedFoods: '',
+      usualDrinks: '',
+      workDescription: ''
     }
   })
 
@@ -75,11 +174,73 @@ const ClientForm = () => {
             name: '',
             phone: '',
             relationship: ''
+          },
+          personalData: {
+            firstName: client.personalData?.firstName || '',
+            lastName: client.personalData?.lastName || '',
+            birthDate: client.personalData?.birthDate || '',
+            phone: client.personalData?.phone || client.phone || '',
+            address: client.personalData?.address || '',
+            city: client.personalData?.city || '',
+            howDidYouKnow: client.personalData?.howDidYouKnow || '',
+            whyChooseServices: client.personalData?.whyChooseServices || ''
+          },
+          healthInfo: client.healthInfo || {
+            parqQuestions: {
+              respiratoryHeartDisease: { question: '¿Padeces alguna enfermedad respiratoria o de corazón?', answer: null },
+              muscleJointInjuries: { question: '¿Tienes lesiones o problemas musculares o articulares?', answer: null },
+              herniasLoadWork: { question: '¿Tienes hernias u otras afecciones similares que puedan dificultar el trabajo con cargas?', answer: null },
+              sleepProblems: { question: '¿Tienes problemas para conciliar el sueño?', answer: null },
+              smoking: { question: '¿Fumas? Si es así, ¿cuánto?', answer: null },
+              alcoholConsumption: { question: '¿Bebes alcohol? Si es así, ¿qué bebidas y qué cantidad consumes?', answer: null },
+              chronicDiseases: { question: '¿Padeces de hipertensión, diabetes o alguna enfermedad crónica?', answer: null },
+              highCholesterol: { question: '¿Tienes el colesterol alto?', answer: null }
+            },
+            additionalComments: '',
+            diseases: '',
+            bloodType: '',
+            isSmoker: false,
+            isDiabetic: false,
+            isCeliac: false,
+            foodIntolerances: '',
+            workStressLevel: 5,
+            personalStressLevel: 5
+          },
+          trainingAndGoals: client.trainingAndGoals || {
+            currentTrainingHistory: '',
+            dislikedExercises: '',
+            preferredExercises: '',
+            preferredTrainingDays: '',
+            realisticTrainingDays: '',
+            currentCardio: '',
+            trainingTimeOfDay: '',
+            sportsPracticed: '',
+            injuryHistory: '',
+            mainGoals: ''
+          },
+          lifestyleData: client.lifestyleData || {
+            hasTakenSupplements: '',
+            currentSupplements: '',
+            wouldLikeSupplements: '',
+            currentDiet: '',
+            dietEffectiveness: '',
+            hungerExperience: '',
+            appetiteTiming: '',
+            eatingOutHabits: '',
+            foodAllergies: '',
+            likedFoods: '',
+            dislikedFoods: '',
+            usualDrinks: '',
+            workDescription: ''
           }
         })
       }
     }
   }, [id, getClientById])
+
+  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
+    setTabValue(newValue)
+  }
 
   const validateForm = (): boolean => {
     const newErrors: Partial<ClientFormData> = {}
@@ -94,16 +255,24 @@ const ClientForm = () => {
       newErrors.email = 'Email inválido'
     }
 
-    // Edad es obligatoria en creación
-    if (!id && !formData.age) {
+    // Edad es obligatoria
+    if (!formData.age || !formData.age.trim()) {
       newErrors.age = 'La edad es requerida'
+    } else if (isNaN(Number(formData.age)) || Number(formData.age) <= 0) {
+      newErrors.age = 'Edad inválida'
     }
 
-    if (formData.height && (isNaN(Number(formData.height)) || Number(formData.height) <= 0)) {
+    // Altura es obligatoria
+    if (!formData.height || !formData.height.trim()) {
+      newErrors.height = 'La altura es requerida'
+    } else if (isNaN(Number(formData.height)) || Number(formData.height) <= 0) {
       newErrors.height = 'Altura inválida'
     }
 
-    if (formData.weight && (isNaN(Number(formData.weight)) || Number(formData.weight) <= 0)) {
+    // Peso es obligatorio
+    if (!formData.weight || !formData.weight.trim()) {
+      newErrors.weight = 'El peso es requerido'
+    } else if (isNaN(Number(formData.weight)) || Number(formData.weight) <= 0) {
       newErrors.weight = 'Peso inválido'
     }
 
@@ -114,53 +283,34 @@ const ClientForm = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    if (!validateForm()) return
+    if (!validateForm()) {
+      setTabValue(0) // Ir a la primera tab si hay errores
+      return
+    }
 
     setLoading(true)
     try {
-      // Preparar los datos del cliente
-      const clientData: Omit<Client, 'id' | 'createdAt' | 'updatedAt'> = {
-        name: formData.name,
-        email: formData.email,
-        phone: formData.phone || '',
-        gender: (formData.gender || '') as 'male' | 'female' | '',
-        height: formData.height ? Number(formData.height) : undefined,
-        weight: formData.weight ? Number(formData.weight) : undefined,
-        activityLevel: formData.activityLevel,
-        goal: formData.goal,
-        medicalConditions: formData.medicalConditions || '',
-        allergies: formData.allergies || '',
-        notes: formData.notes || '',
-        status: formData.status,
-        emergencyContact: formData.emergencyContact
+      // Obtener datos del cliente anterior si estamos editando
+      const previousClient = id ? getClientById(id) : undefined
+      
+      // Construir el objeto ClientData usando las funciones modulares
+      let clientData = buildClientData(formData, previousClient, !!id)
+      
+      // Validar que los datos sean consistentes
+      if (!validateClientData(clientData)) {
+        throw new Error('Los datos del cliente no son válidos')
       }
-
-      // Manejar la edad de manera especial
-      if (formData.age) {
-        const parsedAge = Number(formData.age)
-        if (!isNaN(parsedAge) && parsedAge > 0) {
-          clientData.age = parsedAge
-        }
-      } else if (id) {
-        // En edición, si no hay edad en el formulario, mantener la original
-        const originalClient = getClientById(id)
-        if (originalClient?.age) {
-          clientData.age = originalClient.age
-        }
-      } else {
-        // En creación, la edad es obligatoria (ya validada arriba)
-        throw new Error('La edad es requerida')
-      }
+      
+      // Optimizar el objeto eliminando campos vacíos innecesarios
+      clientData = optimizeClientData(clientData)
 
       let success = false
       if (id) {
         // Para actualización, usar Partial<Client>
         const updateData: Partial<Client> = { ...clientData }
         success = await updateClient(id, updateData)
-        if (success) showSuccess('Cliente actualizado correctamente')
       } else {
         success = await addClient(clientData)
-        if (success) showSuccess('Cliente agregado correctamente')
       }
 
       if (success) {
@@ -181,264 +331,389 @@ const ClientForm = () => {
     }
   }
 
-  const handleEmergencyContactChange = (field: keyof typeof formData.emergencyContact, value: string) => {
+  const handlePersonalDataChange = (field: string, value: string) => {
     setFormData(prev => ({
       ...prev,
-      emergencyContact: {
-        ...prev.emergencyContact,
+      personalData: {
+        ...prev.personalData,
         [field]: value
       }
     }))
   }
 
+  const handleHealthQuestionChange = (questionKey: string, field: 'answer' | 'comments', value: 'yes' | 'no' | null | string) => {
+    setFormData(prev => ({
+      ...prev,
+      healthInfo: {
+        ...prev.healthInfo,
+        parqQuestions: {
+          ...prev.healthInfo.parqQuestions,
+          [questionKey]: {
+            ...prev.healthInfo.parqQuestions[questionKey as keyof typeof prev.healthInfo.parqQuestions],
+            [field]: value
+          }
+        }
+      }
+    }))
+  }
+
+  const handleHealthInfoChange = (field: string, value: string | number | boolean) => {
+    setFormData(prev => ({
+      ...prev,
+      healthInfo: {
+        ...prev.healthInfo,
+        [field]: value
+      }
+    }))
+  }
+
+  const handleTrainingAndGoalsChange = (field: string, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      trainingAndGoals: {
+        ...prev.trainingAndGoals,
+        [field]: value
+      }
+    }))
+  }
+
+  const handleLifestyleDataChange = (field: string, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      lifestyleData: {
+        ...prev.lifestyleData,
+        [field]: value
+      }
+    }))
+  }
+
+
+
   if (loadingClients) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
-        <CircularProgress size={60} sx={{ color: '#2e7d32' }} />
+      <Box sx={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        minHeight: '50vh',
+        background: `linear-gradient(135deg, ${alpha(theme.palette.background.default, 0.8)} 0%, ${alpha(theme.palette.background.paper, 0.6)} 100%)`
+      }}>
+        <CircularProgress size={60} sx={{ 
+          color: theme.palette.primary.main,
+          filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.1))'
+        }} />
       </Box>
     )
   }
 
   return (
-    <Box sx={{ width: '100%', py: 3 }}>
-      <Typography variant="h4" sx={{ mb: 3 }}>
-        {id ? 'Editar Cliente' : 'Agregar Cliente'}
-      </Typography>
+    <Box sx={{ 
+      width: '100%', 
+      py: 3, 
+      px: 3,
+      background: `linear-gradient(135deg, ${alpha(theme.palette.background.default, 0.8)} 0%, ${alpha(theme.palette.background.paper, 0.6)} 100%)`,
+      minHeight: '100vh'
+    }}>
+      {/* Header */}
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+      >
+        <Box sx={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center', 
+          mb: 3,
+          p: 3,
+          background: `linear-gradient(135deg, ${alpha(theme.palette.background.paper, 0.9)} 0%, ${alpha(theme.palette.background.paper, 0.7)} 100%)`,
+          border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+          borderRadius: 3,
+          backdropFilter: 'blur(10px)',
+          boxShadow: `0 8px 32px ${alpha(theme.palette.common.black, 0.1)}`
+        }}>
+          <Typography variant="h4" sx={{ 
+            fontWeight: 700,
+            background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+            backgroundClip: 'text',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            letterSpacing: '-0.5px'
+          }}>
+            {id ? 'Editar Cliente' : 'Agregar Cliente'}
+          </Typography>
+          <Button
+            variant="outlined"
+            onClick={() => navigate('/clients')}
+            disabled={loading}
+            sx={{
+              border: `2px solid ${alpha(theme.palette.primary.main, 0.3)}`,
+              color: theme.palette.primary.main,
+              borderRadius: 2,
+              fontWeight: 600,
+              textTransform: 'none',
+              fontSize: '0.9rem',
+              py: 1.5,
+              px: 3,
+              '&:hover': {
+                backgroundColor: alpha(theme.palette.primary.main, 0.1),
+                border: `2px solid ${theme.palette.primary.main}`,
+                transform: 'translateY(-2px)',
+                boxShadow: `0 8px 25px ${alpha(theme.palette.primary.main, 0.2)}`
+              }
+            }}
+          >
+            Volver
+          </Button>
+        </Box>
+      </motion.div>
 
-      <Paper elevation={2} sx={{ p: 4 }}>
+      {/* Error Alert */}
+      {Object.keys(errors).length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, ease: "easeOut" }}
+        >
+          <Paper
+            elevation={0}
+            sx={{
+              p: 3,
+              mb: 3,
+              background: `linear-gradient(135deg, ${alpha(theme.palette.error.main, 0.1)} 0%, ${alpha(theme.palette.error.main, 0.05)} 100%)`,
+              border: `1px solid ${alpha(theme.palette.error.main, 0.2)}`,
+              borderRadius: 3,
+              backdropFilter: 'blur(10px)',
+              boxShadow: `0 8px 32px ${alpha(theme.palette.error.main, 0.1)}`
+            }}
+          >
+            <Alert severity="error" sx={{
+              backgroundColor: 'transparent',
+              '& .MuiAlert-icon': {
+                color: theme.palette.error.main
+              }
+            }}>
+              <Typography variant="body2" fontWeight={500}>
+                Por favor, completa los campos requeridos en la sección "Información del Cliente"
+              </Typography>
+            </Alert>
+          </Paper>
+        </motion.div>
+      )}
+
+      {/* Main Form Container */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+      >
+        <Paper
+          elevation={0}
+          sx={{
+            p: 3,
+            mb: 3,
+            background: `linear-gradient(135deg, ${alpha(theme.palette.background.paper, 0.9)} 0%, ${alpha(theme.palette.background.paper, 0.7)} 100%)`,
+            border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+            borderRadius: 3,
+            backdropFilter: 'blur(10px)',
+            boxShadow: `0 8px 32px ${alpha(theme.palette.common.black, 0.1)}`
+          }}
+        >
+        {/* Tabs Navigation */}
+        <Box sx={{ 
+          borderBottom: 1, 
+          borderColor: alpha(theme.palette.divider, 0.2), 
+          mb: 3 
+        }}>
+          <Tabs
+            value={tabValue}
+            onChange={handleTabChange}
+            aria-label="Client form tabs"
+            sx={{
+              '& .MuiTab-root': {
+                textTransform: 'none',
+                fontWeight: 600,
+                minHeight: 48,
+                fontSize: '0.9rem',
+                color: theme.palette.text.secondary,
+                borderRadius: '8px 8px 0 0',
+                marginRight: 1,
+                '&.Mui-selected': {
+                  color: theme.palette.primary.main,
+                  fontWeight: 700,
+                  backgroundColor: alpha(theme.palette.primary.main, 0.05)
+                },
+                '&:hover': {
+                  backgroundColor: alpha(theme.palette.primary.main, 0.02),
+                  color: theme.palette.primary.main
+                }
+              },
+              '& .MuiTabs-indicator': {
+                height: 3,
+                background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+                borderRadius: '2px 2px 0 0'
+              }
+            }}
+          >
+            <Tab 
+              label="Información del Cliente"
+              {...a11yProps(0)} 
+            />
+            <Tab 
+              label="Salud"
+              {...a11yProps(1)} 
+            />
+            <Tab 
+              label="Entrenamiento"
+              {...a11yProps(2)} 
+            />
+            <Tab 
+              label="Nutrición"
+              {...a11yProps(3)} 
+            />
+          </Tabs>
+        </Box>
+
+        {/* Form Content */}
         <form onSubmit={handleSubmit}>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-            {/* Información Personal */}
-            <Typography variant="h6" sx={{ color: '#2e7d32' }}>
-              Información Personal
-            </Typography>
-
-            <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-              <TextField
-                label="Nombre completo *"
-                value={formData.name}
-                onChange={(e) => handleInputChange('name', e.target.value)}
-                error={!!errors.name}
-                helperText={errors.name}
-                required
-                sx={{ flex: '1 1 300px' }}
-              />
-
-              <TextField
-                label="Email *"
-                type="email"
-                value={formData.email}
-                onChange={(e) => handleInputChange('email', e.target.value)}
-                error={!!errors.email}
-                helperText={errors.email}
-                required
-                sx={{ flex: '1 1 300px' }}
-              />
-            </Box>
-
-            <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-              <TextField
-                label="Teléfono"
-                value={formData.phone}
-                onChange={(e) => handleInputChange('phone', e.target.value)}
-                sx={{ flex: '1 1 300px' }}
-              />
-
-              <TextField
-                label={id ? "Edad" : "Edad *"}
-                type="number"
-                value={formData.age}
-                onChange={(e) => handleInputChange('age', e.target.value)}
-                error={!!errors.age}
-                helperText={errors.age}
-                required={!id}
-                inputProps={{ min: 1, max: 120 }}
-                sx={{ flex: '1 1 300px' }}
-              />
-            </Box>
-
-            <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-              <FormControl sx={{ flex: '1 1 300px' }}>
-                <InputLabel>Género</InputLabel>
-                <Select
-                  value={formData.gender}
-                  onChange={(e) => handleInputChange('gender', e.target.value)}
-                  label="Género"
-                >
-                  <MenuItem value="">No especificado</MenuItem>
-                  <MenuItem value="male">Masculino</MenuItem>
-                  <MenuItem value="female">Femenino</MenuItem>
-                </Select>
-              </FormControl>
-
-              <FormControl sx={{ flex: '1 1 300px' }}>
-                <InputLabel>Estado</InputLabel>
-                <Select
-                  value={formData.status}
-                  onChange={(e) => handleInputChange('status', e.target.value)}
-                  label="Estado"
-                >
-                  <MenuItem value="active">Activo</MenuItem>
-                  <MenuItem value="inactive">Inactivo</MenuItem>
-                  <MenuItem value="completed">Completado</MenuItem>
-                </Select>
-              </FormControl>
-            </Box>
-
-            {/* Medidas */}
-            <Typography variant="h6" sx={{ color: '#2e7d32', mt: 2 }}>
-              Medidas
-            </Typography>
-
-            <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-              <TextField
-                label="Altura (cm)"
-                type="number"
-                value={formData.height}
-                onChange={(e) => handleInputChange('height', e.target.value)}
-                error={!!errors.height}
-                helperText={errors.height}
-                inputProps={{ min: 0, max: 300 }}
-                sx={{ flex: '1 1 300px' }}
-              />
-
-              <TextField
-                label="Peso (kg)"
-                type="number"
-                value={formData.weight}
-                onChange={(e) => handleInputChange('weight', e.target.value)}
-                error={!!errors.weight}
-                helperText={errors.weight}
-                inputProps={{ min: 0, max: 500 }}
-                sx={{ flex: '1 1 300px' }}
-              />
-            </Box>
-
-            {/* Objetivos y Actividad */}
-            <Typography variant="h6" sx={{ color: '#2e7d32', mt: 2 }}>
-              Objetivos y Actividad
-            </Typography>
-
-            <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-              <FormControl sx={{ flex: '1 1 300px' }}>
-                <InputLabel>Nivel de actividad</InputLabel>
-                <Select
-                  value={formData.activityLevel}
-                  onChange={(e) => handleInputChange('activityLevel', e.target.value)}
-                  label="Nivel de actividad"
-                >
-                  <MenuItem value="sedentary">Sedentario</MenuItem>
-                  <MenuItem value="lightly_active">Ligeramente activo</MenuItem>
-                  <MenuItem value="moderately_active">Moderadamente activo</MenuItem>
-                  <MenuItem value="very_active">Muy activo</MenuItem>
-                  <MenuItem value="extremely_active">Extremadamente activo</MenuItem>
-                </Select>
-              </FormControl>
-
-              <FormControl sx={{ flex: '1 1 300px' }}>
-                <InputLabel>Objetivo</InputLabel>
-                <Select
-                  value={formData.goal}
-                  onChange={(e) => handleInputChange('goal', e.target.value)}
-                  label="Objetivo"
-                >
-                  <MenuItem value="lose_weight">Perder peso</MenuItem>
-                  <MenuItem value="maintain">Mantener peso</MenuItem>
-                  <MenuItem value="gain_weight">Ganar peso</MenuItem>
-                  <MenuItem value="muscle_gain">Ganar músculo</MenuItem>
-                  <MenuItem value="health">Mejorar salud</MenuItem>
-                </Select>
-              </FormControl>
-            </Box>
-
-            {/* Información Médica */}
-            <Typography variant="h6" sx={{ color: '#2e7d32', mt: 2 }}>
-              Información Médica
-            </Typography>
-
-            <TextField
-              label="Condiciones médicas"
-              multiline
-              rows={3}
-              value={formData.medicalConditions}
-              onChange={(e) => handleInputChange('medicalConditions', e.target.value)}
-              placeholder="Describe cualquier condición médica relevante..."
+          {/* Tab 1: Información del Cliente */}
+          <TabPanel value={tabValue} index={0}>
+            <ClientInfoTab
+              formData={formData}
+              onFormDataChange={handleInputChange}
+              onPersonalDataChange={handlePersonalDataChange}
+              errors={errors}
+              isEditMode={!!id}
             />
+          </TabPanel>
 
-            <TextField
-              label="Alergias"
-              multiline
-              rows={2}
-              value={formData.allergies}
-              onChange={(e) => handleInputChange('allergies', e.target.value)}
-              placeholder="Lista de alergias alimentarias..."
+          {/* Tab 2: Salud */}
+          <TabPanel value={tabValue} index={1}>
+            <HealthTab
+              formData={formData}
+              onHealthQuestionChange={handleHealthQuestionChange}
+              onHealthInfoChange={handleHealthInfoChange}
             />
+          </TabPanel>
 
-            {/* Contacto de Emergencia */}
-            <Typography variant="h6" sx={{ color: '#2e7d32', mt: 2 }}>
-              Contacto de Emergencia
-            </Typography>
-
-            <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-              <TextField
-                label="Nombre"
-                value={formData.emergencyContact.name}
-                onChange={(e) => handleEmergencyContactChange('name', e.target.value)}
-                sx={{ flex: '1 1 300px' }}
-              />
-
-              <TextField
-                label="Teléfono"
-                value={formData.emergencyContact.phone}
-                onChange={(e) => handleEmergencyContactChange('phone', e.target.value)}
-                sx={{ flex: '1 1 300px' }}
-              />
-
-              <TextField
-                label="Relación"
-                value={formData.emergencyContact.relationship}
-                onChange={(e) => handleEmergencyContactChange('relationship', e.target.value)}
-                sx={{ flex: '1 1 300px' }}
-              />
-            </Box>
-
-            {/* Notas */}
-            <TextField
-              label="Notas adicionales"
-              multiline
-              rows={4}
-              value={formData.notes}
-              onChange={(e) => handleInputChange('notes', e.target.value)}
-              placeholder="Notas adicionales sobre el cliente..."
+          {/* Tab 3: Entrenamiento */}
+          <TabPanel value={tabValue} index={2}>
+            <TrainingTab
+              formData={formData}
+              onTrainingAndGoalsChange={handleTrainingAndGoalsChange}
             />
+          </TabPanel>
 
-            {/* Botones */}
-            <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end', mt: 2 }}>
+          {/* Tab 4: Nutrición y Suplementación */}
+          <TabPanel value={tabValue} index={3}>
+            <NutritionTab
+              formData={formData}
+              onLifestyleDataChange={handleLifestyleDataChange}
+            />
+          </TabPanel>
+
+          {/* Action Buttons Section */}
+          <Divider sx={{ 
+            my: 3,
+            borderColor: alpha(theme.palette.divider, 0.2),
+            borderWidth: 1
+          }} />
+          <Box 
+            sx={{ 
+              display: 'flex', 
+              flexDirection: { xs: 'column', sm: 'row' },
+              gap: 2, 
+              justifyContent: 'flex-end',
+              alignItems: { xs: 'stretch', sm: 'center' }
+            }}
+          >
+            {tabValue > 0 && (
               <Button
                 variant="outlined"
-                onClick={() => navigate('/clients')}
+                onClick={() => setTabValue(tabValue - 1)}
                 disabled={loading}
+                sx={{
+                  border: `2px solid ${alpha(theme.palette.primary.main, 0.3)}`,
+                  color: theme.palette.primary.main,
+                  borderRadius: 2,
+                  fontWeight: 600,
+                  textTransform: 'none',
+                  fontSize: '0.9rem',
+                  py: 1.5,
+                  px: 3,
+                  '&:hover': {
+                    backgroundColor: alpha(theme.palette.primary.main, 0.1),
+                    border: `2px solid ${theme.palette.primary.main}`,
+                    transform: 'translateY(-2px)',
+                    boxShadow: `0 8px 25px ${alpha(theme.palette.primary.main, 0.2)}`
+                  }
+                }}
               >
-                Cancelar
+                Anterior
               </Button>
+            )}
+            
+            {tabValue < 3 && (
               <Button
-                type="submit"
-                variant="contained"
+                variant="outlined"
+                onClick={() => setTabValue(tabValue + 1)}
                 disabled={loading}
-                sx={{ backgroundColor: '#2e7d32' }}
+                sx={{
+                  border: `2px solid ${alpha(theme.palette.primary.main, 0.3)}`,
+                  color: theme.palette.primary.main,
+                  borderRadius: 2,
+                  fontWeight: 600,
+                  textTransform: 'none',
+                  fontSize: '0.9rem',
+                  py: 1.5,
+                  px: 3,
+                  '&:hover': {
+                    backgroundColor: alpha(theme.palette.primary.main, 0.1),
+                    border: `2px solid ${theme.palette.primary.main}`,
+                    transform: 'translateY(-2px)',
+                    boxShadow: `0 8px 25px ${alpha(theme.palette.primary.main, 0.2)}`
+                  }
+                }}
               >
-                {loading ? (
-                  <CircularProgress size={20} color="inherit" />
-                ) : (
-                  id ? 'Actualizar Cliente' : 'Agregar Cliente'
-                )}
+                Siguiente
               </Button>
-            </Box>
+            )}
+            
+            <Button
+              type="submit"
+              variant="contained"
+              disabled={loading}
+              sx={{ 
+                background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${alpha(theme.palette.primary.main, 0.8)} 100%)`,
+                color: 'white',
+                borderRadius: 2,
+                fontWeight: 600,
+                textTransform: 'none',
+                fontSize: '0.9rem',
+                py: 1.5,
+                px: 3,
+                boxShadow: `0 4px 15px ${alpha(theme.palette.primary.main, 0.3)}`,
+                '&:hover': {
+                  background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${alpha(theme.palette.primary.dark, 0.9)} 100%)`,
+                  transform: 'translateY(-2px)',
+                  boxShadow: `0 8px 25px ${alpha(theme.palette.primary.main, 0.4)}`
+                },
+                '&:disabled': {
+                  background: `linear-gradient(135deg, ${theme.palette.grey[400]} 0%, ${alpha(theme.palette.grey[400], 0.8)} 100%)`,
+                  color: theme.palette.grey[600],
+                  transform: 'none',
+                  boxShadow: 'none'
+                }
+              }}
+            >
+              {loading ? 'Guardando...' : (id ? 'Actualizar Cliente' : 'Guardar Cliente')}
+            </Button>
           </Box>
         </form>
-      </Paper>
-    </Box>
-  )
-}
+        </Paper>
+        </motion.div>
+      </Box>
+    )
+  }
 
 export default ClientForm 

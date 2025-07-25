@@ -25,6 +25,87 @@ export interface FoodFormData {
   link: string
 }
 
+export interface PersonalData {
+  firstName?: string
+  lastName?: string
+  birthDate?: string
+  phone?: string
+  address?: string
+  city?: string
+  howDidYouKnow?: string
+  whyChooseServices?: string
+}
+
+export interface HealthQuestion {
+  question: string
+  answer: 'yes' | 'no' | null
+  comments?: string
+}
+
+export interface HealthInfo {
+  // Preguntas PAR-Q
+  parqQuestions: {
+    respiratoryHeartDisease: HealthQuestion
+    muscleJointInjuries: HealthQuestion
+    herniasLoadWork: HealthQuestion
+    sleepProblems: HealthQuestion
+    smoking: HealthQuestion
+    alcoholConsumption: HealthQuestion
+    chronicDiseases: HealthQuestion
+    highCholesterol: HealthQuestion
+  }
+  additionalComments?: string
+  
+  // Preguntas cortas de salud
+  diseases?: string
+  bloodType?: string
+  isSmoker?: boolean
+  isDiabetic?: boolean
+  isCeliac?: boolean
+  foodIntolerances?: string
+  workStressLevel?: number // 1-10
+  personalStressLevel?: number // 1-10
+}
+
+export interface TrainingAndGoals {
+  // Preguntas largas
+  currentTrainingHistory?: string
+  dislikedExercises?: string
+  preferredExercises?: string
+  
+  // Preguntas cortas
+  preferredTrainingDays?: string
+  realisticTrainingDays?: string
+  currentCardio?: string
+  trainingTimeOfDay?: string
+  sportsPracticed?: string
+  injuryHistory?: string
+  
+  // Pregunta clave
+  mainGoals?: string
+}
+
+export interface LifestyleData {
+  // Suplementación
+  hasTakenSupplements?: string
+  currentSupplements?: string
+  wouldLikeSupplements?: string
+  
+  // Nutrición
+  currentDiet?: string
+  dietEffectiveness?: string
+  hungerExperience?: string
+  appetiteTiming?: string
+  eatingOutHabits?: string
+  foodAllergies?: string
+  likedFoods?: string
+  dislikedFoods?: string
+  usualDrinks?: string
+  
+  // Rutina Diaria
+  workDescription?: string
+}
+
 export interface Client {
   id: string
   name: string
@@ -45,6 +126,10 @@ export interface Client {
     phone: string
     relationship: string
   }
+  personalData?: PersonalData
+  healthInfo?: HealthInfo
+  trainingAndGoals?: TrainingAndGoals
+  lifestyleData?: LifestyleData
   createdAt: Date
   updatedAt: Date
   nextVisit?: Date
@@ -69,6 +154,10 @@ export interface ClientFormData {
     phone: string
     relationship: string
   }
+  personalData: PersonalData
+  healthInfo: HealthInfo
+  trainingAndGoals: TrainingAndGoals
+  lifestyleData: LifestyleData
 }
 
 export interface DietMeal {
