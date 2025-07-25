@@ -16,6 +16,7 @@ export interface FoodFormData {
   name: string
   group: string
   portion: string
+  unitOfMeasure: string
   calories: string
   proteins: string
   fats: string
