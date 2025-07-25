@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { useState } from 'react'
 import {
   Box,
@@ -7,10 +6,6 @@ import {
   Button,
   Chip,
   TextField,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Select,
   IconButton,
   Dialog,
   DialogTitle,
@@ -30,7 +25,6 @@ import {
   ListItem,
   ListItemText,
   ListItemButton,
-  Tooltip,
   useTheme,
   alpha
 } from '@mui/material'
@@ -46,7 +40,7 @@ import AnalyticsIcon from '@mui/icons-material/Analytics'
 import SettingsIcon from '@mui/icons-material/Settings'
 import { motion } from 'framer-motion'
 import { useFirebase } from '../contexts/FirebaseContext'
-import type { DayOfWeek, MealType, DietMeal, Diet, Supplement, DynamicMeal, DynamicDayMeals, CustomGoal } from '../types'
+import type { DayOfWeek, MealType, DietMeal, Diet, Supplement, DynamicMeal, CustomGoal } from '../types'
 import DietCharts from './DietCharts'
 import SupplementForm from './SupplementForm'
 import CustomGoalForm from './CustomGoalForm'
@@ -72,13 +66,7 @@ const daysOfWeek: { key: DayOfWeek; label: string }[] = [
   { key: 'sunday', label: 'Sunday' }
 ]
 
-const mealTypes: { key: MealType; label: string }[] = [
-  { key: 'breakfast', label: 'Breakfast' },
-  { key: 'morningSnack', label: 'Morning Snack' },
-  { key: 'lunch', label: 'Lunch' },
-  { key: 'afternoonSnack', label: 'Afternoon Snack' },
-  { key: 'dinner', label: 'Dinner' }
-]
+
 
 const DietBuilder = ({ tmb, onSave, onBack, initialMeals, initialSupplements, initialMealDefinitions, initialCustomGoal, dietName }: DietBuilderProps) => {
   const theme = useTheme()
@@ -210,10 +198,10 @@ const DietBuilder = ({ tmb, onSave, onBack, initialMeals, initialSupplements, in
 
   // Función helper para obtener el color de estado basado en el porcentaje
   const getProgressColor = (percentage: number) => {
-    if (percentage < 70) return theme.palette.error.main
-    if (percentage < 90) return theme.palette.warning.main
-    if (percentage <= 110) return theme.palette.success.main
-    return theme.palette.error.main
+    if (percentage < 70) return 'error'
+    if (percentage < 90) return 'warning'
+    if (percentage <= 110) return 'success'
+    return 'error'
   }
 
   // Función para obtener el estado detallado de un nutriente
@@ -466,6 +454,7 @@ const DietBuilder = ({ tmb, onSave, onBack, initialMeals, initialSupplements, in
           )}
         </Box>
       </motion.div>
+
       {/* Información de Objetivos */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -713,7 +702,7 @@ const DietBuilder = ({ tmb, onSave, onBack, initialMeals, initialSupplements, in
                     }
                   }}>
                     <TableCell sx={{ 
-                      width: '200px',
+                      width: '150px',
                       fontWeight: 700,
                       fontSize: '0.9rem',
                       color: theme.palette.primary.main,
@@ -764,176 +753,24 @@ const DietBuilder = ({ tmb, onSave, onBack, initialMeals, initialSupplements, in
                               onChange={(e) => setEditingMealName(e.target.value)}
                               onKeyPress={(e) => e.key === 'Enter' && handleSaveMealName()}
                               autoFocus
-                              sx={{ 
-                                minWidth: '120px',
-                                '& .MuiOutlinedInput-root': {
-                                  borderRadius: 1.5,
-                                  backgroundColor: alpha(theme.palette.background.paper, 0.8),
-                                  '&:hover': {
-                                    backgroundColor: alpha(theme.palette.background.paper, 0.9),
-                                  },
-                                  '&.Mui-focused': {
-                                    backgroundColor: alpha(theme.palette.background.paper, 0.95),
-                                  }
-                                }
-                              }}
+                              sx={{ minWidth: '120px' }}
                             />
-                            <Box sx={{ 
-                              display: 'flex', 
-                              alignItems: 'center', 
-                              gap: 0.3,
-                              flexShrink: 0
-                            }}>
-                              <motion.div
-                                whileHover={{ scale: 1.1 }}
-                                whileTap={{ scale: 0.9 }}
-                              >
-                                <IconButton 
-                                  size="small" 
-                                  onClick={handleSaveMealName}
-                                  sx={{ 
-                                    backgroundColor: alpha(theme.palette.success.main, 0.1),
-                                    color: theme.palette.success.main,
-                                    border: `1px solid ${alpha(theme.palette.success.main, 0.2)}`,
-                                    width: 20,
-                                    height: 20,
-                                    '&:hover': {
-                                      backgroundColor: alpha(theme.palette.success.main, 0.2),
-                                      transform: 'scale(1.1)',
-                                    },
-                                    '&:focus': {
-                                      outline: 'none',
-                                    }
-                                  }}
-                                >
-                                  <SaveIcon sx={{ fontSize: 12 }} />
-                                </IconButton>
-                              </motion.div>
-                              <motion.div
-                                whileHover={{ scale: 1.1 }}
-                                whileTap={{ scale: 0.9 }}
-                              >
-                                <IconButton 
-                                  size="small" 
-                                  onClick={handleCancelEdit}
-                                  sx={{ 
-                                    backgroundColor: alpha(theme.palette.error.main, 0.1),
-                                    color: theme.palette.error.main,
-                                    border: `1px solid ${alpha(theme.palette.error.main, 0.2)}`,
-                                    width: 20,
-                                    height: 20,
-                                    '&:hover': {
-                                      backgroundColor: alpha(theme.palette.error.main, 0.2),
-                                      transform: 'scale(1.1)',
-                                    },
-                                    '&:focus': {
-                                      outline: 'none',
-                                    }
-                                  }}
-                                >
-                                  <CancelIcon sx={{ fontSize: 12 }} />
-                                </IconButton>
-                              </motion.div>
-                            </Box>
+                            <IconButton size="small" onClick={handleSaveMealName} color="primary">
+                              <SaveIcon fontSize="small" />
+                            </IconButton>
+                            <IconButton size="small" onClick={handleCancelEdit} color="error">
+                              <CancelIcon fontSize="small" />
+                            </IconButton>
                           </Box>
                         ) : (
-                          <Box sx={{ 
-                            display: 'flex', 
-                            alignItems: 'center', 
-                            justifyContent: 'space-between',
-                            width: '100%'
-                          }}>
-                            <Tooltip 
-                              title={meal.name}
-                              placement="top"
-                              arrow
-                              sx={{
-                                '& .MuiTooltip-tooltip': {
-                                  backgroundColor: alpha(theme.palette.background.paper, 0.95),
-                                  color: theme.palette.text.primary,
-                                  border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
-                                  borderRadius: 2,
-                                  fontSize: '0.875rem',
-                                  fontWeight: 500,
-                                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)',
-                                  backdropFilter: 'blur(8px)'
-                                },
-                                '& .MuiTooltip-arrow': {
-                                  color: alpha(theme.palette.background.paper, 0.95)
-                                }
-                              }}
-                            >
-                              <Typography sx={{ 
-                                fontWeight: 600, 
-                                color: theme.palette.text.primary,
-                                flex: 1,
-                                minWidth: 0,
-                                overflow: 'hidden',
-                                textOverflow: 'ellipsis',
-                                whiteSpace: 'nowrap',
-                                pr: 1,
-                                cursor: 'help'
-                              }}>
-                                {meal.name}
-                              </Typography>
-                            </Tooltip>
-                            <Box sx={{ 
-                              display: 'flex', 
-                              alignItems: 'center', 
-                              gap: 0.3,
-                              flexShrink: 0
-                            }}>
-                              <motion.div
-                                whileHover={{ scale: 1.1 }}
-                                whileTap={{ scale: 0.9 }}
-                              >
-                                <IconButton 
-                                  size="small" 
-                                  onClick={() => handleEditMeal(meal.id)}
-                                  sx={{ 
-                                    backgroundColor: alpha(theme.palette.info.main, 0.1),
-                                    color: theme.palette.info.main,
-                                    border: `1px solid ${alpha(theme.palette.info.main, 0.2)}`,
-                                    width: 20,
-                                    height: 20,
-                                    '&:hover': {
-                                      backgroundColor: alpha(theme.palette.info.main, 0.2),
-                                      transform: 'scale(1.1)',
-                                    },
-                                    '&:focus': {
-                                      outline: 'none',
-                                    }
-                                  }}
-                                >
-                                  <EditIcon sx={{ fontSize: 12 }} />
-                                </IconButton>
-                              </motion.div>
-                              <motion.div
-                                whileHover={{ scale: 1.1 }}
-                                whileTap={{ scale: 0.9 }}
-                              >
-                                <IconButton 
-                                  size="small" 
-                                  onClick={() => removeMeal(meal.id)}
-                                  sx={{ 
-                                    backgroundColor: alpha(theme.palette.error.main, 0.1),
-                                    color: theme.palette.error.main,
-                                    border: `1px solid ${alpha(theme.palette.error.main, 0.2)}`,
-                                    width: 20,
-                                    height: 20,
-                                    '&:hover': {
-                                      backgroundColor: alpha(theme.palette.error.main, 0.2),
-                                      transform: 'scale(1.1)',
-                                    },
-                                    '&:focus': {
-                                      outline: 'none',
-                                    }
-                                  }}
-                                >
-                                  <DeleteIcon sx={{ fontSize: 12 }} />
-                                </IconButton>
-                              </motion.div>
-                            </Box>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <Typography>{meal.name}</Typography>
+                            <IconButton size="small" onClick={() => handleEditMeal(meal.id)}>
+                              <EditIcon fontSize="small" />
+                            </IconButton>
+                            <IconButton size="small" onClick={() => removeMeal(meal.id)}>
+                              <DeleteIcon fontSize="small" />
+                            </IconButton>
                           </Box>
                         )}
                       </TableCell>
@@ -1017,237 +854,237 @@ const DietBuilder = ({ tmb, onSave, onBack, initialMeals, initialSupplements, in
                       ))}
                     </TableRow>
                   ))}
-                  
-                  {/* Fila de Resumen Diario */}
-                  <TableRow sx={{ 
-                    backgroundColor: alpha(theme.palette.primary.main, 0.03),
-                    '&:hover': {
-                      backgroundColor: alpha(theme.palette.primary.main, 0.05),
-                    }
-                  }}>
-                    <TableCell sx={{ 
-                      fontWeight: 700,
-                      backgroundColor: alpha(theme.palette.primary.main, 0.08),
-                      borderRight: `1px solid ${alpha(theme.palette.divider, 0.2)}`,
-                      fontSize: '0.85rem',
-                      color: theme.palette.primary.main,
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.5px'
-                    }}>
-                      📊 Resumen
-                    </TableCell>
-                    {daysOfWeek.map(day => {
-                      const totals = calculateDailyTotals(day.key)
-                      const caloriePercentage = Math.min((totals.totalCalories / getCalorieTarget()) * 100, 120)
-                      const proteinPercentage = Math.min((totals.totalProteins / getProteinTarget()) * 100, 120)
-                      const fatPercentage = Math.min((totals.totalFats / getFatTarget()) * 100, 120)
-                      const carbPercentage = Math.min((totals.totalCarbs / getCarbTarget()) * 100, 120)
-                      
-                      return (
-                        <TableCell key={day.key} sx={{ 
-                          p: 2,
-                          backgroundColor: alpha(theme.palette.background.paper, 0.8),
-                          border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
-                          borderRadius: 1,
-                          borderTop: `2px solid ${alpha(theme.palette.primary.main, 0.2)}`,
-                          borderBottom: `2px solid ${alpha(theme.palette.primary.main, 0.2)}`
-                        }}>
-                          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                            {/* Calorías */}
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                              <Typography variant="caption" sx={{ 
-                                fontWeight: 600, 
-                                fontSize: '0.7rem',
-                                color: theme.palette.text.secondary,
-                                minWidth: '45px'
-                              }}>
-                                🔥 {Math.round(totals.totalCalories)}
-                              </Typography>
-                              <Box sx={{ flex: 1, position: 'relative' }}>
-                                <LinearProgress
-                                  variant="determinate"
-                                  value={caloriePercentage}
-                                  sx={{ 
-                                    height: 4, 
-                                    borderRadius: 2,
-                                    backgroundColor: alpha(theme.palette.grey[300], 0.3),
-                                    '& .MuiLinearProgress-bar': {
-                                      backgroundColor: getProgressColor(caloriePercentage)
-                                    }
-                                  }}
-                                />
-                                <Typography variant="caption" sx={{ 
-                                  position: 'absolute',
-                                  top: '-2px',
-                                  right: '0',
-                                  fontSize: '0.6rem',
-                                  fontWeight: 600,
-                                  color: getProgressColor(caloriePercentage)
-                                }}>
-                                  {caloriePercentage.toFixed(0)}%
-                                </Typography>
-                              </Box>
-                            </Box>
-                            
-                            {/* Proteínas */}
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-                              <Typography variant="caption" sx={{ 
-                                fontWeight: 600, 
-                                fontSize: '0.65rem',
-                                color: theme.palette.text.secondary,
-                                minWidth: '35px'
-                              }}>
-                                P: {Math.round(totals.totalProteins)}
-                              </Typography>
-                              <Box sx={{ flex: 1, position: 'relative' }}>
-                                <LinearProgress
-                                  variant="determinate"
-                                  value={proteinPercentage}
-                                  sx={{ 
-                                    height: 3, 
-                                    borderRadius: 1.5,
-                                    backgroundColor: alpha(theme.palette.grey[300], 0.3),
-                                    '& .MuiLinearProgress-bar': {
-                                      backgroundColor: getProgressColor(proteinPercentage)
-                                    }
-                                  }}
-                                />
-                                <Typography variant="caption" sx={{ 
-                                  position: 'absolute',
-                                  top: '-1px',
-                                  right: '0',
-                                  fontSize: '0.55rem',
-                                  fontWeight: 600,
-                                  color: getProgressColor(proteinPercentage)
-                                }}>
-                                  {proteinPercentage.toFixed(0)}%
-                                </Typography>
-                              </Box>
-                            </Box>
-                            
-                            {/* Carbohidratos */}
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-                              <Typography variant="caption" sx={{ 
-                                fontWeight: 600, 
-                                fontSize: '0.65rem',
-                                color: theme.palette.text.secondary,
-                                minWidth: '35px'
-                              }}>
-                                C: {Math.round(totals.totalCarbs)}
-                              </Typography>
-                              <Box sx={{ flex: 1, position: 'relative' }}>
-                                <LinearProgress
-                                  variant="determinate"
-                                  value={carbPercentage}
-                                  sx={{ 
-                                    height: 3, 
-                                    borderRadius: 1.5,
-                                    backgroundColor: alpha(theme.palette.grey[300], 0.3),
-                                    '& .MuiLinearProgress-bar': {
-                                      backgroundColor: getProgressColor(carbPercentage)
-                                    }
-                                  }}
-                                />
-                                <Typography variant="caption" sx={{ 
-                                  position: 'absolute',
-                                  top: '-1px',
-                                  right: '0',
-                                  fontSize: '0.55rem',
-                                  fontWeight: 600,
-                                  color: getProgressColor(carbPercentage)
-                                }}>
-                                  {carbPercentage.toFixed(0)}%
-                                </Typography>
-                              </Box>
-                            </Box>
-                            
-                            {/* Grasas */}
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                              <Typography variant="caption" sx={{ 
-                                fontWeight: 600, 
-                                fontSize: '0.65rem',
-                                color: theme.palette.text.secondary,
-                                minWidth: '35px'
-                              }}>
-                                G: {Math.round(totals.totalFats)}
-                              </Typography>
-                              <Box sx={{ flex: 1, position: 'relative' }}>
-                                <LinearProgress
-                                  variant="determinate"
-                                  value={fatPercentage}
-                                  sx={{ 
-                                    height: 3, 
-                                    borderRadius: 1.5,
-                                    backgroundColor: alpha(theme.palette.grey[300], 0.3),
-                                    '& .MuiLinearProgress-bar': {
-                                      backgroundColor: getProgressColor(fatPercentage)
-                                    }
-                                  }}
-                                />
-                                <Typography variant="caption" sx={{ 
-                                  position: 'absolute',
-                                  top: '-1px',
-                                  right: '0',
-                                  fontSize: '0.55rem',
-                                  fontWeight: 600,
-                                  color: getProgressColor(fatPercentage)
-                                }}>
-                                  {fatPercentage.toFixed(0)}%
-                                </Typography>
-                              </Box>
-                            </Box>
-                          </Box>
-                        </TableCell>
-                      )
-                    })}
-                  </TableRow>
                 </TableBody>
               </Table>
             </TableContainer>
           </Paper>
 
-
-
-          {/* Weekly Summary */}
+          {/* Daily Progress Summary */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: "easeOut" }}
+            transition={{ duration: 0.6, delay: 0.4 }}
           >
-            <Paper
+            <Paper 
               elevation={0}
-              sx={{
-                p: 3,
-                mb: 3,
-                background: `linear-gradient(135deg, ${alpha(theme.palette.background.paper, 0.9)} 0%, ${alpha(theme.palette.background.paper, 0.7)} 100%)`,
-                border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+              sx={{ 
+                p: 3, 
+                mb: 4,
                 borderRadius: 3,
-                backdropFilter: 'blur(10px)',
-                boxShadow: `0 8px 32px ${alpha(theme.palette.common.black, 0.1)}`
+                background: theme.palette.mode === 'dark'
+                  ? 'rgba(30, 30, 30, 0.8)'
+                  : 'rgba(255, 255, 255, 0.8)',
+                backdropFilter: 'blur(20px)',
+                border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
               }}
             >
-              <Box sx={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                gap: 2, 
-                mb: 3 
-              }}>
-                <AnalyticsIcon sx={{ 
-                  color: theme.palette.primary.main,
-                  fontSize: 28
-                }} />
-                <Typography variant="h5" sx={{ 
-                  fontWeight: 700,
-                  background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
-                  backgroundClip: 'text',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  letterSpacing: '-0.5px'
-                }}>
-                  Resumen Semanal
-                </Typography>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, flexWrap: 'wrap', gap: 2 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                  <AnalyticsIcon sx={{ fontSize: 24, color: theme.palette.primary.main }} />
+                  <Typography variant="h6" sx={{ fontWeight: 600, color: theme.palette.text.primary }}>
+                    Resumen de Progreso Diario
+                  </Typography>
+                </Box>
+                <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Box sx={{ width: 12, height: 12, borderRadius: 1, backgroundColor: theme.palette.error.main }} />
+                    <Typography variant="caption" sx={{ fontWeight: 500 }}>Deficiente (&lt;70%)</Typography>
+                  </Box>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Box sx={{ width: 12, height: 12, borderRadius: 1, backgroundColor: theme.palette.warning.main }} />
+                    <Typography variant="caption" sx={{ fontWeight: 500 }}>Casi (70-90%)</Typography>
+                  </Box>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Box sx={{ width: 12, height: 12, borderRadius: 1, backgroundColor: theme.palette.success.main }} />
+                    <Typography variant="caption" sx={{ fontWeight: 500 }}>Óptimo (90-110%)</Typography>
+                  </Box>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Box sx={{ width: 12, height: 12, borderRadius: 1, backgroundColor: theme.palette.error.main }} />
+                    <Typography variant="caption" sx={{ fontWeight: 500 }}>Excede (&gt;110%)</Typography>
+                  </Box>
+                </Box>
               </Box>
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
+              {daysOfWeek.map(day => {
+                const totals = calculateDailyTotals(day.key)
+                const status = getCaloriesStatus(totals.totalCalories)
+                
+                // Calcular porcentajes para cada macronutriente
+                const caloriePercentage = Math.min((totals.totalCalories / getCalorieTarget()) * 100, 120)
+                const proteinPercentage = Math.min((totals.totalProteins / getProteinTarget()) * 100, 120)
+                const fatPercentage = Math.min((totals.totalFats / getFatTarget()) * 100, 120)
+                const carbPercentage = Math.min((totals.totalCarbs / getCarbTarget()) * 100, 120)
+                const fiberPercentage = Math.min((totals.totalFiber / getFiberTarget()) * 100, 120)
 
+                // Obtener estados detallados
+                const proteinStatus = getNutrientStatus(totals.totalProteins, getProteinTarget(), 'proteínas')
+                const fatStatus = getNutrientStatus(totals.totalFats, getFatTarget(), 'grasas')
+                const carbStatus = getNutrientStatus(totals.totalCarbs, getCarbTarget(), 'carbohidratos')
+                const fiberStatus = getNutrientStatus(totals.totalFiber, getFiberTarget(), 'fibra')
+
+                return (
+                  <Box key={day.key} sx={{ 
+                    flex: '1 1 300px', 
+                    minWidth: '300px',
+                    p: 2,
+                    border: '1px solid #e0e0e0',
+                    borderRadius: 2,
+                    backgroundColor: '#fafafa'
+                  }}>
+                    <Typography variant="subtitle1" gutterBottom sx={{ 
+                      fontWeight: 'bold', 
+                      textAlign: 'center',
+                      color: '#2e7d32',
+                      mb: 2
+                    }}>
+                      {day.label}
+                    </Typography>
+                    
+                    {/* Calorías - Destacadas */}
+                    <Box sx={{ 
+                      mb: 2, 
+                      p: 1.5, 
+                      backgroundColor: 'white', 
+                      borderRadius: 1,
+                      border: '1px solid #e0e0e0'
+                    }}>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                        <Typography variant="body2" sx={{ fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                          🔥 Calorías
+                        </Typography>
+                        <Typography variant="body2" color={getProgressColor(caloriePercentage)} sx={{ fontWeight: 'medium' }}>
+                          {Math.round(totals.totalCalories)} / {Math.round(getCalorieTarget())} cal
+                        </Typography>
+                      </Box>
+                      <LinearProgress
+                        variant="determinate"
+                        value={caloriePercentage}
+                        color={getProgressColor(caloriePercentage) as 'error' | 'warning' | 'success'}
+                        sx={{ height: 10, borderRadius: 5, mb: 1 }}
+                      />
+                      <Typography variant="caption" color={status.color} sx={{ display: 'block', fontWeight: 'medium' }}>
+                        {status.status} ({caloriePercentage.toFixed(0)}%)
+                      </Typography>
+                    </Box>
+
+                    {/* Macronutrientes */}
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+                      {/* Proteínas */}
+                      <Box sx={{ 
+                        p: 1, 
+                        backgroundColor: 'white', 
+                        borderRadius: 1,
+                        border: '1px solid #e0e0e0'
+                      }}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
+                          <Typography variant="caption" sx={{ fontWeight: 'medium', display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                            💪 Proteínas
+                          </Typography>
+                          <Typography variant="caption" color={getProgressColor(proteinPercentage)}>
+                            {Math.round(totals.totalProteins)} / {Math.round(getProteinTarget())}g
+                          </Typography>
+                        </Box>
+                        <LinearProgress
+                          variant="determinate"
+                          value={proteinPercentage}
+                          color={getProgressColor(proteinPercentage) as 'error' | 'warning' | 'success'}
+                          sx={{ height: 6, borderRadius: 3, mb: 0.5 }}
+                        />
+                        <Typography variant="caption" color={proteinStatus.color} sx={{ fontSize: '0.7rem' }}>
+                          {proteinStatus.icon} {proteinStatus.message}
+                        </Typography>
+                      </Box>
+
+                      {/* Carbohidratos */}
+                      <Box sx={{ 
+                        p: 1, 
+                        backgroundColor: 'white', 
+                        borderRadius: 1,
+                        border: '1px solid #e0e0e0'
+                      }}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
+                          <Typography variant="caption" sx={{ fontWeight: 'medium', display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                            🌾 Carbohidratos
+                          </Typography>
+                          <Typography variant="caption" color={getProgressColor(carbPercentage)}>
+                            {Math.round(totals.totalCarbs)} / {Math.round(getCarbTarget())}g
+                          </Typography>
+                        </Box>
+                        <LinearProgress
+                          variant="determinate"
+                          value={carbPercentage}
+                          color={getProgressColor(carbPercentage) as 'error' | 'warning' | 'success'}
+                          sx={{ height: 6, borderRadius: 3, mb: 0.5 }}
+                        />
+                        <Typography variant="caption" color={carbStatus.color} sx={{ fontSize: '0.7rem' }}>
+                          {carbStatus.icon} {carbStatus.message}
+                        </Typography>
+                      </Box>
+
+                      {/* Grasas */}
+                      <Box sx={{ 
+                        p: 1, 
+                        backgroundColor: 'white', 
+                        borderRadius: 1,
+                        border: '1px solid #e0e0e0'
+                      }}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
+                          <Typography variant="caption" sx={{ fontWeight: 'medium', display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                            🥑 Grasas
+                          </Typography>
+                          <Typography variant="caption" color={getProgressColor(fatPercentage)}>
+                            {Math.round(totals.totalFats)} / {Math.round(getFatTarget())}g
+                          </Typography>
+                        </Box>
+                        <LinearProgress
+                          variant="determinate"
+                          value={fatPercentage}
+                          color={getProgressColor(fatPercentage) as 'error' | 'warning' | 'success'}
+                          sx={{ height: 6, borderRadius: 3, mb: 0.5 }}
+                        />
+                        <Typography variant="caption" color={fatStatus.color} sx={{ fontSize: '0.7rem' }}>
+                          {fatStatus.icon} {fatStatus.message}
+                        </Typography>
+                      </Box>
+
+                      {/* Fibra */}
+                      <Box sx={{ 
+                        p: 1, 
+                        backgroundColor: 'white', 
+                        borderRadius: 1,
+                        border: '1px solid #e0e0e0'
+                      }}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
+                          <Typography variant="caption" sx={{ fontWeight: 'medium', display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                            🌿 Fibra
+                          </Typography>
+                          <Typography variant="caption" color={getProgressColor(fiberPercentage)}>
+                            {Math.round(totals.totalFiber)} / {Math.round(getFiberTarget())}g
+                          </Typography>
+                        </Box>
+                        <LinearProgress
+                          variant="determinate"
+                          value={fiberPercentage}
+                          color={getProgressColor(fiberPercentage) as 'error' | 'warning' | 'success'}
+                          sx={{ height: 6, borderRadius: 3, mb: 0.5 }}
+                        />
+                        <Typography variant="caption" color={fiberStatus.color} sx={{ fontSize: '0.7rem' }}>
+                          {fiberStatus.icon} {fiberStatus.message}
+                        </Typography>
+                      </Box>
+                    </Box>
+                  </Box>
+                )
+              })}
+            </Box>
+          </Paper>
+
+          {/* Weekly Summary */}
+          <Paper elevation={2} sx={{ p: 3, mb: 3 }}>
+            <Typography variant="h6" gutterBottom>
+              📊 Resumen Semanal
+            </Typography>
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
               {(() => {
                 // Calcular promedios semanales
                 const weeklyTotals = daysOfWeek.reduce((acc, day) => {
@@ -1275,309 +1112,102 @@ const DietBuilder = ({ tmb, onSave, onBack, initialMeals, initialSupplements, in
                 const avgCarbPercentage = (weeklyAverages.carbs / getCarbTarget()) * 100
                 const avgFiberPercentage = (weeklyAverages.fiber / getFiberTarget()) * 100
 
-                // Calcular porcentajes de macronutrientes para el gráfico de queso
-                const totalMacros = weeklyAverages.proteins + weeklyAverages.carbs + weeklyAverages.fats
-                const proteinPercentage = (weeklyAverages.proteins / totalMacros) * 100
-                const carbPercentage = (weeklyAverages.carbs / totalMacros) * 100
-                const fatPercentage = (weeklyAverages.fats / totalMacros) * 100
-
                 return (
                   <>
-                    {/* Calories Card - Full Width */}
-                    <Paper
-                      elevation={0}
-                      sx={{
-                        p: 3,
-                        mb: 3,
-                        background: `linear-gradient(135deg, ${alpha(theme.palette.success.main, 0.1)} 0%, ${alpha(theme.palette.success.main, 0.05)} 100%)`,
-                        border: `2px solid ${alpha(theme.palette.success.main, 0.3)}`,
-                        borderRadius: 3,
-                        textAlign: 'center',
-                        transition: 'all 0.3s ease',
-                        '&:hover': {
-                          transform: 'translateY(-2px)',
-                          boxShadow: `0 8px 25px ${alpha(theme.palette.success.main, 0.15)}`
-                        }
-                      }}
-                    >
-                      <Typography variant="h4" sx={{ 
-                        fontWeight: 700,
-                        color: theme.palette.success.main,
-                        mb: 1
-                      }}>
-                        Calorías Totales
+                    <Box sx={{ 
+                      flex: '1 1 200px', 
+                      p: 2, 
+                      backgroundColor: '#f8f9fa', 
+                      borderRadius: 1,
+                      border: '1px solid #dee2e6'
+                    }}>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1 }}>
+                        🔥 Calorías Promedio
                       </Typography>
-                      <Typography variant="h2" sx={{ 
-                        fontWeight: 800,
-                        color: theme.palette.success.main,
-                        mb: 1
-                      }}>
-                        {Math.round(weeklyTotals.calories)}
+                      <Typography variant="h6" color={getProgressColor(avgCaloriePercentage)}>
+                        {Math.round(weeklyAverages.calories)} cal
                       </Typography>
-                      <Typography variant="h6" sx={{ 
-                        color: theme.palette.text.secondary,
-                        fontWeight: 500
-                      }}>
-                        Promedio diario: {Math.round(weeklyAverages.calories)} kcal
+                      <Typography variant="caption" color="text.secondary">
+                        {avgCaloriePercentage.toFixed(0)}% del objetivo
                       </Typography>
-                    </Paper>
+                    </Box>
 
                     <Box sx={{ 
-                      display: 'flex', 
-                      gap: 3, 
-                      alignItems: 'flex-start'
+                      flex: '1 1 200px', 
+                      p: 2, 
+                      backgroundColor: '#f8f9fa', 
+                      borderRadius: 1,
+                      border: '1px solid #dee2e6'
                     }}>
-                      {/* Pie Chart */}
-                      <Box sx={{ 
-                        flex: '0 0 200px',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        gap: 2
-                      }}>
-                        <Box sx={{
-                          width: 120,
-                          height: 120,
-                          borderRadius: '50%',
-                          background: `conic-gradient(
-                            ${theme.palette.primary.main} 0deg ${proteinPercentage * 3.6}deg,
-                            #4CAF50 ${proteinPercentage * 3.6}deg ${(proteinPercentage + carbPercentage) * 3.6}deg,
-                            #FF9800 ${(proteinPercentage + carbPercentage) * 3.6}deg 360deg
-                          )`,
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          position: 'relative',
-                          boxShadow: `0 4px 20px ${alpha(theme.palette.common.black, 0.15)}`
-                        }}>
-                          <Box sx={{
-                            width: 80,
-                            height: 80,
-                            borderRadius: '50%',
-                            backgroundColor: theme.palette.background.paper,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            boxShadow: 'inset 0 2px 10px rgba(0,0,0,0.1)'
-                          }}>
-                            <Typography variant="h6" sx={{ 
-                              fontWeight: 700,
-                              color: theme.palette.text.primary
-                            }}>
-                              {Math.round(totalMacros)}g
-                            </Typography>
-                          </Box>
-                        </Box>
-                        
-                        {/* Legend */}
-                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, width: '100%' }}>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <Box sx={{ 
-                              width: 12, 
-                              height: 12, 
-                              borderRadius: '50%', 
-                              backgroundColor: theme.palette.primary.main 
-                            }} />
-                            <Typography variant="body2" sx={{ color: theme.palette.text.secondary }}>
-                              Proteínas ({proteinPercentage.toFixed(1)}%)
-                            </Typography>
-                          </Box>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <Box sx={{ 
-                              width: 12, 
-                              height: 12, 
-                              borderRadius: '50%', 
-                              backgroundColor: '#4CAF50' 
-                            }} />
-                            <Typography variant="body2" sx={{ color: theme.palette.text.secondary }}>
-                              Carbohidratos ({carbPercentage.toFixed(1)}%)
-                            </Typography>
-                          </Box>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <Box sx={{ 
-                              width: 12, 
-                              height: 12, 
-                              borderRadius: '50%', 
-                              backgroundColor: '#FF9800' 
-                            }} />
-                            <Typography variant="body2" sx={{ color: theme.palette.text.secondary }}>
-                              Grasas ({fatPercentage.toFixed(1)}%)
-                            </Typography>
-                          </Box>
-                        </Box>
-                      </Box>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1 }}>
+                        💪 Proteínas Promedio
+                      </Typography>
+                      <Typography variant="h6" color={getProgressColor(avgProteinPercentage)}>
+                        {Math.round(weeklyAverages.proteins)}g
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {avgProteinPercentage.toFixed(0)}% del objetivo
+                      </Typography>
+                    </Box>
 
-                      {/* Macro Cards - 2x2 Grid */}
-                      <Box sx={{ 
-                        flex: 1,
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: 2
-                      }}>
-                        {/* First Row - Proteins and Carbs */}
-                        <Box sx={{ 
-                          display: 'grid',
-                          gridTemplateColumns: 'repeat(2, 1fr)',
-                          gap: 2
-                        }}>
-                          <Paper
-                            elevation={0}
-                            sx={{
-                              p: 1.5,
-                              background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.1)} 0%, ${alpha(theme.palette.primary.main, 0.05)} 100%)`,
-                              border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
-                              borderRadius: 2,
-                              textAlign: 'center',
-                              transition: 'all 0.3s ease',
-                              '&:hover': {
-                                transform: 'translateY(-2px)',
-                                boxShadow: `0 8px 25px ${alpha(theme.palette.primary.main, 0.15)}`
-                              }
-                            }}
-                          >
-                            <Typography variant="h6" sx={{ 
-                              fontWeight: 700,
-                              color: theme.palette.primary.main,
-                              mb: 0.5
-                            }}>
-                              Proteínas
-                            </Typography>
-                            <Typography variant="h4" sx={{ 
-                              fontWeight: 800,
-                              color: theme.palette.primary.main
-                            }}>
-                              {Math.round(weeklyAverages.proteins)}g
-                            </Typography>
-                            <Typography variant="body2" sx={{ 
-                              color: theme.palette.text.secondary,
-                              mt: 0.5
-                            }}>
-                              {avgProteinPercentage.toFixed(0)}% objetivo
-                            </Typography>
-                          </Paper>
+                    <Box sx={{ 
+                      flex: '1 1 200px', 
+                      p: 2, 
+                      backgroundColor: '#f8f9fa', 
+                      borderRadius: 1,
+                      border: '1px solid #dee2e6'
+                    }}>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1 }}>
+                        🌾 Carbohidratos Promedio
+                      </Typography>
+                      <Typography variant="h6" color={getProgressColor(avgCarbPercentage)}>
+                        {Math.round(weeklyAverages.carbs)}g
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {avgCarbPercentage.toFixed(0)}% del objetivo
+                      </Typography>
+                    </Box>
 
-                          <Paper
-                            elevation={0}
-                            sx={{
-                              p: 1.5,
-                              background: `linear-gradient(135deg, ${alpha('#4CAF50', 0.1)} 0%, ${alpha('#4CAF50', 0.05)} 100%)`,
-                              border: `1px solid ${alpha('#4CAF50', 0.2)}`,
-                              borderRadius: 2,
-                              textAlign: 'center',
-                              transition: 'all 0.3s ease',
-                              '&:hover': {
-                                transform: 'translateY(-2px)',
-                                boxShadow: `0 8px 25px ${alpha('#4CAF50', 0.15)}`
-                              }
-                            }}
-                          >
-                            <Typography variant="h6" sx={{ 
-                              fontWeight: 700,
-                              color: '#4CAF50',
-                              mb: 0.5
-                            }}>
-                              Carbohidratos
-                            </Typography>
-                            <Typography variant="h4" sx={{ 
-                              fontWeight: 800,
-                              color: '#4CAF50'
-                            }}>
-                              {Math.round(weeklyAverages.carbs)}g
-                            </Typography>
-                            <Typography variant="body2" sx={{ 
-                              color: theme.palette.text.secondary,
-                              mt: 0.5
-                            }}>
-                              {avgCarbPercentage.toFixed(0)}% objetivo
-                            </Typography>
-                          </Paper>
-                        </Box>
+                    <Box sx={{ 
+                      flex: '1 1 200px', 
+                      p: 2, 
+                      backgroundColor: '#f8f9fa', 
+                      borderRadius: 1,
+                      border: '1px solid #dee2e6'
+                    }}>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1 }}>
+                        🥑 Grasas Promedio
+                      </Typography>
+                      <Typography variant="h6" color={getProgressColor(avgFatPercentage)}>
+                        {Math.round(weeklyAverages.fats)}g
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {avgFatPercentage.toFixed(0)}% del objetivo
+                      </Typography>
+                    </Box>
 
-                        {/* Second Row - Fats and Fiber */}
-                        <Box sx={{ 
-                          display: 'grid',
-                          gridTemplateColumns: 'repeat(2, 1fr)',
-                          gap: 2
-                        }}>
-                          <Paper
-                            elevation={0}
-                            sx={{
-                              p: 1.5,
-                              background: `linear-gradient(135deg, ${alpha('#FF9800', 0.1)} 0%, ${alpha('#FF9800', 0.05)} 100%)`,
-                              border: `1px solid ${alpha('#FF9800', 0.2)}`,
-                              borderRadius: 2,
-                              textAlign: 'center',
-                              transition: 'all 0.3s ease',
-                              '&:hover': {
-                                transform: 'translateY(-2px)',
-                                boxShadow: `0 8px 25px ${alpha('#FF9800', 0.15)}`
-                              }
-                            }}
-                          >
-                            <Typography variant="h6" sx={{ 
-                              fontWeight: 700,
-                              color: '#FF9800',
-                              mb: 0.5
-                            }}>
-                              Grasas
-                            </Typography>
-                            <Typography variant="h4" sx={{ 
-                              fontWeight: 800,
-                              color: '#FF9800'
-                            }}>
-                              {Math.round(weeklyAverages.fats)}g
-                            </Typography>
-                            <Typography variant="body2" sx={{ 
-                              color: theme.palette.text.secondary,
-                              mt: 0.5
-                            }}>
-                              {avgFatPercentage.toFixed(0)}% objetivo
-                            </Typography>
-                          </Paper>
-
-                          <Paper
-                            elevation={0}
-                            sx={{
-                              p: 1.5,
-                              background: `linear-gradient(135deg, ${alpha(theme.palette.secondary.main, 0.1)} 0%, ${alpha(theme.palette.secondary.main, 0.05)} 100%)`,
-                              border: `1px solid ${alpha(theme.palette.secondary.main, 0.2)}`,
-                              borderRadius: 2,
-                              textAlign: 'center',
-                              transition: 'all 0.3s ease',
-                              '&:hover': {
-                                transform: 'translateY(-2px)',
-                                boxShadow: `0 8px 25px ${alpha(theme.palette.secondary.main, 0.15)}`
-                              }
-                            }}
-                          >
-                            <Typography variant="h6" sx={{ 
-                              fontWeight: 700,
-                              color: theme.palette.secondary.main,
-                              mb: 0.5
-                            }}>
-                              Fibra
-                            </Typography>
-                            <Typography variant="h4" sx={{ 
-                              fontWeight: 800,
-                              color: theme.palette.secondary.main
-                            }}>
-                              {Math.round(weeklyAverages.fiber)}g
-                            </Typography>
-                            <Typography variant="body2" sx={{ 
-                              color: theme.palette.text.secondary,
-                              mt: 0.5
-                            }}>
-                              {avgFiberPercentage.toFixed(0)}% objetivo
-                            </Typography>
-                          </Paper>
-                        </Box>
-                      </Box>
+                    <Box sx={{ 
+                      flex: '1 1 200px', 
+                      p: 2, 
+                      backgroundColor: '#f8f9fa', 
+                      borderRadius: 1,
+                      border: '1px solid #dee2e6'
+                    }}>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1 }}>
+                        🌿 Fibra Promedio
+                      </Typography>
+                      <Typography variant="h6" color={getProgressColor(avgFiberPercentage)}>
+                        {Math.round(weeklyAverages.fiber)}g
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {avgFiberPercentage.toFixed(0)}% del objetivo
+                      </Typography>
                     </Box>
                   </>
                 )
               })()}
-            </Paper>
-          </motion.div>
+            </Box>
+          </Paper>
         </motion.div>
       )}
 
