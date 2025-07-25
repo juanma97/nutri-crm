@@ -410,28 +410,22 @@ const FoodList = () => {
                   </TableRow>
                 </TableHead>
                                   <TableBody>
-                    <AnimatePresence>
-                      {filteredFoods.map((food, index) => (
-                        <TableRow 
-                          key={food.id}
-                          hover
-                          component={motion.tr}
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ duration: 0.4, delay: index * 0.05 }}
-                          exit={{ opacity: 0, y: -20 }}
-                          sx={{
-                            '&:hover': {
-                              backgroundColor: alpha(theme.palette.primary.main, 0.02),
-                              transform: 'scale(1.01)',
-                              transition: 'all 0.2s ease',
-                            },
-                            '& td': {
-                              borderBottom: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
-                              py: 2,
-                            }
-                          }}
-                        >
+                    {filteredFoods.map((food) => (
+                      <TableRow 
+                        key={food.id}
+                        hover
+                        sx={{
+                          '&:hover': {
+                            backgroundColor: alpha(theme.palette.primary.main, 0.02),
+                            transform: 'scale(1.01)',
+                            transition: 'all 0.2s ease',
+                          },
+                          '& td': {
+                            borderBottom: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+                            py: 2,
+                          }
+                        }}
+                      >
                           <TableCell>
                             <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
                               {food.name}
@@ -524,8 +518,7 @@ const FoodList = () => {
                           </TableCell>
                         </TableRow>
                       ))}
-                  </AnimatePresence>
-                </TableBody>
+                  </TableBody>
               </Table>
             </TableContainer>
           </Paper>
