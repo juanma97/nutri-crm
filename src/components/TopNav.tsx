@@ -57,7 +57,7 @@ const TopNav = () => {
 
   return (
     <>
-      <AppBar position="static" sx={{ backgroundColor: '#2e7d32' }}>
+      <AppBar position="fixed" sx={{ backgroundColor: '#2e7d32', zIndex: 1100 }}>
         <Toolbar>
           <Typography variant="h6" component="div" sx={{ flexGrow: 0, mr: 4 }}>
             NutriCRM
@@ -111,7 +111,7 @@ const TopNav = () => {
         </MenuItem>
       </Menu>
 
-      <Box sx={{ flexGrow: 1 }}>
+      <Box sx={{ flexGrow: 1, minHeight: 'calc(100vh - 64px)', pt: '64px' }}>
         <Outlet />
       </Box>
     </>
