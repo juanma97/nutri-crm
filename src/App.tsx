@@ -15,7 +15,6 @@ import './App.css'
 
 // Lazy load heavy pages
 const Dashboard = lazy(() => import('./pages/Dashboard'))
-const Reports = lazy(() => import('./pages/Reports'))
 const DietList = lazy(() => import('./pages/DietList'))
 const DietViewer = lazy(() => import('./pages/DietViewer'))
 const CreateDiet = lazy(() => import('./pages/CreateDiet'))
@@ -109,11 +108,7 @@ function App() {
                         <DietViewer />
                       </Suspense>
                     } />
-                    <Route path="reports" element={
-                      <Suspense fallback={<PageLoader />}>
-                        <Reports />
-                      </Suspense>
-                    } />
+
                   </Route>
                   <Route path="/diet/:shareId" element={
                     <Suspense fallback={<PageLoader />}>

@@ -20,7 +20,6 @@ import {
   Restaurant as FoodIcon,
   Assignment as DietIcon,
   People as ClientIcon,
-  Assessment as ReportIcon,
   AccountCircle as AccountIcon,
   Logout as LogoutIcon,
   Settings as SettingsIcon
@@ -57,8 +56,7 @@ const TopNav = () => {
     { path: '/dashboard', label: 'Dashboard', icon: <DashboardIcon /> },
     { path: '/foods', label: 'Alimentos', icon: <FoodIcon /> },
     { path: '/diets', label: 'Dietas', icon: <DietIcon /> },
-    { path: '/clients', label: 'Clientes', icon: <ClientIcon /> },
-    { path: '/reports', label: 'Reportes', icon: <ReportIcon /> }
+    { path: '/clients', label: 'Clientes', icon: <ClientIcon /> }
   ]
 
   return (

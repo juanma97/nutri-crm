@@ -21,7 +21,6 @@ import {
   Restaurant as DietIcon,
   TrendingUp as TrendingIcon,
   LocalDining as FoodIcon,
-  Assessment as AnalyticsIcon,
   CheckCircle as CheckIcon,
   Warning as WarningIcon,
   PriorityHigh as PriorityIcon,
@@ -349,7 +348,7 @@ const Dashboard = () => {
           
           <Box sx={{ 
             display: 'grid', 
-            gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' },
+            gridTemplateColumns: { xs: '1fr', sm: 'repeat(3, 1fr)', md: 'repeat(3, 1fr)' },
             gap: 2 
           }}>
             <Button
@@ -412,25 +411,7 @@ const Dashboard = () => {
               Agregar Alimento
             </Button>
             
-            <Button
-              variant="contained"
-              fullWidth
-              startIcon={<AnalyticsIcon />}
-              onClick={() => navigate('/reports')}
-              sx={{
-                background: `linear-gradient(135deg, ${COLORS.purple} 0%, ${COLORS.pink} 100%)`,
-                color: 'white',
-                py: 2,
-                borderRadius: 2,
-                '&:hover': {
-                  background: `linear-gradient(135deg, ${COLORS.pink} 0%, ${COLORS.purple} 100%)`,
-                  transform: 'translateY(-2px)',
-                  boxShadow: '0 8px 25px rgba(0,0,0,0.15)'
-                }
-              }}
-            >
-              Ver Reportes
-            </Button>
+
           </Box>
         </Paper>
       </motion.div>
