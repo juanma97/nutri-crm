@@ -22,6 +22,12 @@ import TrainingTab from '../components/TrainingTab'
 import NutritionTab from '../components/NutritionTab'
 import { buildClientData, validateClientData, optimizeClientData } from '../utils/clientDataBuilder'
 import { motion } from 'framer-motion'
+import { 
+  Person, 
+  HealthAndSafety, 
+  FitnessCenter, 
+  Restaurant
+} from '@mui/icons-material'
 
 interface TabPanelProps {
   children?: React.ReactNode
@@ -529,6 +535,7 @@ const ClientForm = () => {
             value={tabValue}
             onChange={handleTabChange}
             aria-label="Client form tabs"
+            variant="fullWidth"
             sx={{
               '& .MuiTab-root': {
                 textTransform: 'none',
@@ -537,7 +544,6 @@ const ClientForm = () => {
                 fontSize: '0.9rem',
                 color: theme.palette.text.secondary,
                 borderRadius: '8px 8px 0 0',
-                marginRight: 1,
                 '&.Mui-selected': {
                   color: theme.palette.primary.main,
                   fontWeight: 700,
@@ -546,6 +552,12 @@ const ClientForm = () => {
                 '&:hover': {
                   backgroundColor: alpha(theme.palette.primary.main, 0.02),
                   color: theme.palette.primary.main
+                },
+                '&:focus': {
+                  outline: 'none'
+                },
+                '&:focus-visible': {
+                  outline: 'none'
                 }
               },
               '& .MuiTabs-indicator': {
@@ -556,19 +568,27 @@ const ClientForm = () => {
             }}
           >
             <Tab 
+              icon={<Person sx={{ fontSize: 20, mb: 0.5 }} />}
               label="Información del Cliente"
+              iconPosition="top"
               {...a11yProps(0)} 
             />
             <Tab 
+              icon={<HealthAndSafety sx={{ fontSize: 20, mb: 0.5 }} />}
               label="Salud"
+              iconPosition="top"
               {...a11yProps(1)} 
             />
             <Tab 
+              icon={<FitnessCenter sx={{ fontSize: 20, mb: 0.5 }} />}
               label="Entrenamiento"
+              iconPosition="top"
               {...a11yProps(2)} 
             />
             <Tab 
+              icon={<Restaurant sx={{ fontSize: 20, mb: 0.5 }} />}
               label="Nutrición"
+              iconPosition="top"
               {...a11yProps(3)} 
             />
           </Tabs>
