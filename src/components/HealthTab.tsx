@@ -7,11 +7,11 @@ import {
   Radio, 
   RadioGroup, 
   Checkbox, 
- 
   Slider, 
-
   Box,
-  Paper
+  Paper,
+  useTheme,
+  alpha
 } from '@mui/material'
 import type { ClientFormData } from '../types'
 
@@ -26,6 +26,7 @@ const HealthTab: React.FC<HealthTabProps> = ({
   onHealthQuestionChange,
   onHealthInfoChange
 }) => {
+  const theme = useTheme()
   const parqQuestions = [
     {
       key: 'respiratoryHeartDisease',
@@ -72,19 +73,60 @@ const HealthTab: React.FC<HealthTabProps> = ({
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
       {/* Cuestionario PAR-Q */}
-      <Paper elevation={1} sx={{ p: 3 }}>
-        <Typography variant="h6" sx={{ color: '#d32f2f', mb: 3, fontWeight: 500 }}>
+      <Paper 
+        elevation={0}
+        sx={{ 
+          p: 3,
+          background: `linear-gradient(135deg, ${alpha(theme.palette.background.paper, 0.9)} 0%, ${alpha(theme.palette.background.paper, 0.7)} 100%)`,
+          border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+          borderRadius: 3,
+          backdropFilter: 'blur(10px)',
+          boxShadow: `0 8px 32px ${alpha(theme.palette.common.black, 0.1)}`
+        }}
+      >
+        <Typography variant="h6" sx={{ 
+          color: theme.palette.error.main, 
+          mb: 3, 
+          fontWeight: 600,
+          background: `linear-gradient(135deg, ${theme.palette.error.main} 0%, ${theme.palette.error.dark} 100%)`,
+          backgroundClip: 'text',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          letterSpacing: '-0.5px'
+        }}>
           Cuestionario PAR-Q
         </Typography>
         
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
           {parqQuestions.map((item) => (
-            <Paper key={item.key} elevation={0} sx={{ p: 3, bgcolor: 'grey.50', border: '1px solid', borderColor: 'grey.200' }}>
+            <Paper 
+              key={item.key} 
+              elevation={0} 
+              sx={{ 
+                p: 3, 
+                background: `linear-gradient(135deg, ${alpha(theme.palette.background.paper, 0.8)} 0%, ${alpha(theme.palette.background.paper, 0.6)} 100%)`,
+                border: `1px solid ${alpha(theme.palette.divider, 0.2)}`,
+                borderRadius: 2,
+                backdropFilter: 'blur(5px)',
+                transition: 'all 0.3s ease',
+                '&:hover': {
+                  transform: 'translateY(-2px)',
+                  boxShadow: `0 8px 25px ${alpha(theme.palette.common.black, 0.1)}`
+                }
+              }}
+            >
               <Box sx={{ display: 'flex', alignItems: 'flex-start', mb: 2 }}>
-                <Typography variant="h6" sx={{ mr: 2 }}>
+                <Typography variant="h6" sx={{ 
+                  mr: 2,
+                  filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))'
+                }}>
                   {item.icon}
                 </Typography>
-                <Typography variant="body1" fontWeight={500} sx={{ flex: 1 }}>
+                <Typography variant="body1" fontWeight={600} sx={{ 
+                  flex: 1,
+                  color: theme.palette.text.primary,
+                  lineHeight: 1.5
+                }}>
                   {item.question}
                 </Typography>
               </Box>
@@ -94,6 +136,21 @@ const HealthTab: React.FC<HealthTabProps> = ({
                   row
                   value={formData.healthInfo.parqQuestions[item.key as keyof typeof formData.healthInfo.parqQuestions].answer || ''}
                   onChange={(e) => onHealthQuestionChange(item.key, 'answer', e.target.value as 'yes' | 'no')}
+                  sx={{
+                    '& .MuiFormControlLabel-root': {
+                      marginRight: 3,
+                      '& .MuiRadio-root': {
+                        color: alpha(theme.palette.primary.main, 0.5),
+                        '&.Mui-checked': {
+                          color: theme.palette.primary.main,
+                        }
+                      },
+                      '& .MuiFormControlLabel-label': {
+                        fontWeight: 500,
+                        color: theme.palette.text.primary
+                      }
+                    }
+                  }}
                 >
                   <FormControlLabel value="yes" control={<Radio />} label="Sí" />
                   <FormControlLabel value="no" control={<Radio />} label="No" />
@@ -109,6 +166,18 @@ const HealthTab: React.FC<HealthTabProps> = ({
                 fullWidth
                 placeholder="Proporciona más detalles si es necesario..."
                 size="small"
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: 2,
+                    backgroundColor: alpha(theme.palette.background.paper, 0.8),
+                    '&:hover': {
+                      backgroundColor: alpha(theme.palette.background.paper, 0.9),
+                    },
+                    '&.Mui-focused': {
+                      backgroundColor: alpha(theme.palette.background.paper, 0.95),
+                    }
+                  }
+                }}
               />
             </Paper>
           ))}
@@ -116,8 +185,27 @@ const HealthTab: React.FC<HealthTabProps> = ({
       </Paper>
 
       {/* Información de Salud Personal */}
-      <Paper elevation={1} sx={{ p: 3 }}>
-        <Typography variant="h6" sx={{ color: '#d32f2f', mb: 3, fontWeight: 500 }}>
+      <Paper 
+        elevation={0}
+        sx={{ 
+          p: 3,
+          background: `linear-gradient(135deg, ${alpha(theme.palette.background.paper, 0.9)} 0%, ${alpha(theme.palette.background.paper, 0.7)} 100%)`,
+          border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+          borderRadius: 3,
+          backdropFilter: 'blur(10px)',
+          boxShadow: `0 8px 32px ${alpha(theme.palette.common.black, 0.1)}`
+        }}
+      >
+        <Typography variant="h6" sx={{ 
+          color: theme.palette.error.main, 
+          mb: 3, 
+          fontWeight: 600,
+          background: `linear-gradient(135deg, ${theme.palette.error.main} 0%, ${theme.palette.error.dark} 100%)`,
+          backgroundClip: 'text',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          letterSpacing: '-0.5px'
+        }}>
           Información de Salud Personal
         </Typography>
         
