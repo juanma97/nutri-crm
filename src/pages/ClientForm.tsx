@@ -8,7 +8,9 @@ import {
   Alert,
   Typography,
   Paper,
-  Divider
+  Divider,
+  useTheme,
+  alpha
 } from '@mui/material'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useFirebase } from '../contexts/FirebaseContext'
@@ -19,6 +21,13 @@ import HealthTab from '../components/HealthTab'
 import TrainingTab from '../components/TrainingTab'
 import NutritionTab from '../components/NutritionTab'
 import { buildClientData, validateClientData, optimizeClientData } from '../utils/clientDataBuilder'
+import { motion } from 'framer-motion'
+import { 
+  Person, 
+  HealthAndSafety, 
+  FitnessCenter, 
+  Restaurant
+} from '@mui/icons-material'
 
 interface TabPanelProps {
   children?: React.ReactNode
@@ -54,6 +63,7 @@ function a11yProps(index: number) {
 }
 
 const ClientForm = () => {
+  const theme = useTheme()
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { addClient, updateClient, getClientById, loadingClients } = useFirebase()
@@ -387,79 +397,198 @@ const ClientForm = () => {
 
   if (loadingClients) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
-        <CircularProgress size={60} sx={{ color: '#2e7d32' }} />
+      <Box sx={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        minHeight: '50vh',
+        background: `linear-gradient(135deg, ${alpha(theme.palette.background.default, 0.8)} 0%, ${alpha(theme.palette.background.paper, 0.6)} 100%)`
+      }}>
+        <CircularProgress size={60} sx={{ 
+          color: theme.palette.primary.main,
+          filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.1))'
+        }} />
       </Box>
     )
   }
 
   return (
-    <Box sx={{ width: '100%', py: 3, px: 3 }}>
+    <Box sx={{ 
+      width: '100%', 
+      py: 3, 
+      px: 3,
+      background: `linear-gradient(135deg, ${alpha(theme.palette.background.default, 0.8)} 0%, ${alpha(theme.palette.background.paper, 0.6)} 100%)`,
+      minHeight: '100vh'
+    }}>
       {/* Header */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h4">
-          {id ? 'Editar Cliente' : 'Agregar Cliente'}
-        </Typography>
-        <Button
-          variant="outlined"
-          onClick={() => navigate('/clients')}
-          disabled={loading}
-        >
-          Volver
-        </Button>
-      </Box>
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+      >
+        <Box sx={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center', 
+          mb: 3,
+          p: 3,
+          background: `linear-gradient(135deg, ${alpha(theme.palette.background.paper, 0.9)} 0%, ${alpha(theme.palette.background.paper, 0.7)} 100%)`,
+          border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+          borderRadius: 3,
+          backdropFilter: 'blur(10px)',
+          boxShadow: `0 8px 32px ${alpha(theme.palette.common.black, 0.1)}`
+        }}>
+          <Typography variant="h4" sx={{ 
+            fontWeight: 700,
+            background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+            backgroundClip: 'text',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            letterSpacing: '-0.5px'
+          }}>
+            {id ? 'Editar Cliente' : 'Agregar Cliente'}
+          </Typography>
+          <Button
+            variant="outlined"
+            onClick={() => navigate('/clients')}
+            disabled={loading}
+            sx={{
+              border: `2px solid ${alpha(theme.palette.primary.main, 0.3)}`,
+              color: theme.palette.primary.main,
+              borderRadius: 2,
+              fontWeight: 600,
+              textTransform: 'none',
+              fontSize: '0.9rem',
+              py: 1.5,
+              px: 3,
+              '&:hover': {
+                backgroundColor: alpha(theme.palette.primary.main, 0.1),
+                border: `2px solid ${theme.palette.primary.main}`,
+                transform: 'translateY(-2px)',
+                boxShadow: `0 8px 25px ${alpha(theme.palette.primary.main, 0.2)}`
+              }
+            }}
+          >
+            Volver
+          </Button>
+        </Box>
+      </motion.div>
 
       {/* Error Alert */}
       {Object.keys(errors).length > 0 && (
-        <Paper elevation={2} sx={{ p: 3, mb: 3 }}>
-          <Alert severity="error">
-            <Typography variant="body2" fontWeight={500}>
-              Por favor, completa los campos requeridos en la sección "Información del Cliente"
-            </Typography>
-          </Alert>
-        </Paper>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, ease: "easeOut" }}
+        >
+          <Paper
+            elevation={0}
+            sx={{
+              p: 3,
+              mb: 3,
+              background: `linear-gradient(135deg, ${alpha(theme.palette.error.main, 0.1)} 0%, ${alpha(theme.palette.error.main, 0.05)} 100%)`,
+              border: `1px solid ${alpha(theme.palette.error.main, 0.2)}`,
+              borderRadius: 3,
+              backdropFilter: 'blur(10px)',
+              boxShadow: `0 8px 32px ${alpha(theme.palette.error.main, 0.1)}`
+            }}
+          >
+            <Alert severity="error" sx={{
+              backgroundColor: 'transparent',
+              '& .MuiAlert-icon': {
+                color: theme.palette.error.main
+              }
+            }}>
+              <Typography variant="body2" fontWeight={500}>
+                Por favor, completa los campos requeridos en la sección "Información del Cliente"
+              </Typography>
+            </Alert>
+          </Paper>
+        </motion.div>
       )}
 
       {/* Main Form Container */}
-      <Paper elevation={2} sx={{ p: 3, mb: 3 }}>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+      >
+        <Paper
+          elevation={0}
+          sx={{
+            p: 3,
+            mb: 3,
+            background: `linear-gradient(135deg, ${alpha(theme.palette.background.paper, 0.9)} 0%, ${alpha(theme.palette.background.paper, 0.7)} 100%)`,
+            border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+            borderRadius: 3,
+            backdropFilter: 'blur(10px)',
+            boxShadow: `0 8px 32px ${alpha(theme.palette.common.black, 0.1)}`
+          }}
+        >
         {/* Tabs Navigation */}
-        <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
+        <Box sx={{ 
+          borderBottom: 1, 
+          borderColor: alpha(theme.palette.divider, 0.2), 
+          mb: 3 
+        }}>
           <Tabs
             value={tabValue}
             onChange={handleTabChange}
             aria-label="Client form tabs"
+            variant="fullWidth"
             sx={{
               '& .MuiTab-root': {
                 textTransform: 'none',
                 fontWeight: 600,
                 minHeight: 48,
                 fontSize: '0.9rem',
-                color: 'text.secondary',
+                color: theme.palette.text.secondary,
+                borderRadius: '8px 8px 0 0',
                 '&.Mui-selected': {
-                  color: 'text.primary',
-                  fontWeight: 700
+                  color: theme.palette.primary.main,
+                  fontWeight: 700,
+                  backgroundColor: alpha(theme.palette.primary.main, 0.05)
+                },
+                '&:hover': {
+                  backgroundColor: alpha(theme.palette.primary.main, 0.02),
+                  color: theme.palette.primary.main
+                },
+                '&:focus': {
+                  outline: 'none'
+                },
+                '&:focus-visible': {
+                  outline: 'none'
                 }
               },
               '& .MuiTabs-indicator': {
-                height: 2,
-                bgcolor: '#2e7d32'
+                height: 3,
+                background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+                borderRadius: '2px 2px 0 0'
               }
             }}
           >
             <Tab 
+              icon={<Person sx={{ fontSize: 20, mb: 0.5 }} />}
               label="Información del Cliente"
+              iconPosition="top"
               {...a11yProps(0)} 
             />
             <Tab 
+              icon={<HealthAndSafety sx={{ fontSize: 20, mb: 0.5 }} />}
               label="Salud"
+              iconPosition="top"
               {...a11yProps(1)} 
             />
             <Tab 
+              icon={<FitnessCenter sx={{ fontSize: 20, mb: 0.5 }} />}
               label="Entrenamiento"
+              iconPosition="top"
               {...a11yProps(2)} 
             />
             <Tab 
+              icon={<Restaurant sx={{ fontSize: 20, mb: 0.5 }} />}
               label="Nutrición"
+              iconPosition="top"
               {...a11yProps(3)} 
             />
           </Tabs>
@@ -504,7 +633,11 @@ const ClientForm = () => {
           </TabPanel>
 
           {/* Action Buttons Section */}
-          <Divider sx={{ my: 3 }} />
+          <Divider sx={{ 
+            my: 3,
+            borderColor: alpha(theme.palette.divider, 0.2),
+            borderWidth: 1
+          }} />
           <Box 
             sx={{ 
               display: 'flex', 
@@ -519,6 +652,22 @@ const ClientForm = () => {
                 variant="outlined"
                 onClick={() => setTabValue(tabValue - 1)}
                 disabled={loading}
+                sx={{
+                  border: `2px solid ${alpha(theme.palette.primary.main, 0.3)}`,
+                  color: theme.palette.primary.main,
+                  borderRadius: 2,
+                  fontWeight: 600,
+                  textTransform: 'none',
+                  fontSize: '0.9rem',
+                  py: 1.5,
+                  px: 3,
+                  '&:hover': {
+                    backgroundColor: alpha(theme.palette.primary.main, 0.1),
+                    border: `2px solid ${theme.palette.primary.main}`,
+                    transform: 'translateY(-2px)',
+                    boxShadow: `0 8px 25px ${alpha(theme.palette.primary.main, 0.2)}`
+                  }
+                }}
               >
                 Anterior
               </Button>
@@ -529,6 +678,22 @@ const ClientForm = () => {
                 variant="outlined"
                 onClick={() => setTabValue(tabValue + 1)}
                 disabled={loading}
+                sx={{
+                  border: `2px solid ${alpha(theme.palette.primary.main, 0.3)}`,
+                  color: theme.palette.primary.main,
+                  borderRadius: 2,
+                  fontWeight: 600,
+                  textTransform: 'none',
+                  fontSize: '0.9rem',
+                  py: 1.5,
+                  px: 3,
+                  '&:hover': {
+                    backgroundColor: alpha(theme.palette.primary.main, 0.1),
+                    border: `2px solid ${theme.palette.primary.main}`,
+                    transform: 'translateY(-2px)',
+                    boxShadow: `0 8px 25px ${alpha(theme.palette.primary.main, 0.2)}`
+                  }
+                }}
               >
                 Siguiente
               </Button>
@@ -538,15 +703,37 @@ const ClientForm = () => {
               type="submit"
               variant="contained"
               disabled={loading}
-              sx={{ backgroundColor: '#2e7d32' }}
+              sx={{ 
+                background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${alpha(theme.palette.primary.main, 0.8)} 100%)`,
+                color: 'white',
+                borderRadius: 2,
+                fontWeight: 600,
+                textTransform: 'none',
+                fontSize: '0.9rem',
+                py: 1.5,
+                px: 3,
+                boxShadow: `0 4px 15px ${alpha(theme.palette.primary.main, 0.3)}`,
+                '&:hover': {
+                  background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${alpha(theme.palette.primary.dark, 0.9)} 100%)`,
+                  transform: 'translateY(-2px)',
+                  boxShadow: `0 8px 25px ${alpha(theme.palette.primary.main, 0.4)}`
+                },
+                '&:disabled': {
+                  background: `linear-gradient(135deg, ${theme.palette.grey[400]} 0%, ${alpha(theme.palette.grey[400], 0.8)} 100%)`,
+                  color: theme.palette.grey[600],
+                  transform: 'none',
+                  boxShadow: 'none'
+                }
+              }}
             >
               {loading ? 'Guardando...' : (id ? 'Actualizar Cliente' : 'Guardar Cliente')}
             </Button>
           </Box>
         </form>
-      </Paper>
-    </Box>
-  )
-}
+        </Paper>
+        </motion.div>
+      </Box>
+    )
+  }
 
 export default ClientForm 

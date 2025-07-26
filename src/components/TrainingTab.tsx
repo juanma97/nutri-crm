@@ -3,7 +3,9 @@ import {
   Typography, 
   TextField,
   Box,
-  Paper
+  Paper,
+  useTheme,
+  alpha
 } from '@mui/material'
 import type { ClientFormData } from '../types'
 
@@ -16,11 +18,31 @@ const TrainingTab: React.FC<TrainingTabProps> = ({
   formData, 
   onTrainingAndGoalsChange 
 }) => {
+  const theme = useTheme()
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
       {/* Experiencia y Preferencias de Entrenamiento */}
-      <Paper elevation={1} sx={{ p: 3 }}>
-        <Typography variant="h6" sx={{ color: '#ff9800', mb: 3, fontWeight: 500 }}>
+      <Paper 
+        elevation={0}
+        sx={{ 
+          p: 3,
+          background: `linear-gradient(135deg, ${alpha(theme.palette.background.paper, 0.9)} 0%, ${alpha(theme.palette.background.paper, 0.7)} 100%)`,
+          border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+          borderRadius: 3,
+          backdropFilter: 'blur(10px)',
+          boxShadow: `0 8px 32px ${alpha(theme.palette.common.black, 0.1)}`
+        }}
+      >
+        <Typography variant="h6" sx={{ 
+          color: theme.palette.warning.main, 
+          mb: 3, 
+          fontWeight: 600,
+          background: `linear-gradient(135deg, ${theme.palette.warning.main} 0%, ${theme.palette.warning.dark} 100%)`,
+          backgroundClip: 'text',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          letterSpacing: '-0.5px'
+        }}>
           Experiencia y Preferencias
         </Typography>
         
@@ -33,6 +55,18 @@ const TrainingTab: React.FC<TrainingTabProps> = ({
             rows={3}
             fullWidth
             placeholder="Describe tu experiencia actual con el entrenamiento..."
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                borderRadius: 2,
+                backgroundColor: alpha(theme.palette.background.paper, 0.8),
+                '&:hover': {
+                  backgroundColor: alpha(theme.palette.background.paper, 0.9),
+                },
+                '&.Mui-focused': {
+                  backgroundColor: alpha(theme.palette.background.paper, 0.95),
+                }
+              }
+            }}
           />
           <TextField
             label="Ejercicios que no te gustan"
@@ -40,6 +74,18 @@ const TrainingTab: React.FC<TrainingTabProps> = ({
             onChange={e => onTrainingAndGoalsChange('dislikedExercises', e.target.value)}
             fullWidth
             placeholder="Ejercicios que prefieres evitar..."
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                borderRadius: 2,
+                backgroundColor: alpha(theme.palette.background.paper, 0.8),
+                '&:hover': {
+                  backgroundColor: alpha(theme.palette.background.paper, 0.9),
+                },
+                '&.Mui-focused': {
+                  backgroundColor: alpha(theme.palette.background.paper, 0.95),
+                }
+              }
+            }}
           />
           <TextField
             label="Ejercicios preferidos"
@@ -47,13 +93,44 @@ const TrainingTab: React.FC<TrainingTabProps> = ({
             onChange={e => onTrainingAndGoalsChange('preferredExercises', e.target.value)}
             fullWidth
             placeholder="Ejercicios que más te gustan..."
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                borderRadius: 2,
+                backgroundColor: alpha(theme.palette.background.paper, 0.8),
+                '&:hover': {
+                  backgroundColor: alpha(theme.palette.background.paper, 0.9),
+                },
+                '&.Mui-focused': {
+                  backgroundColor: alpha(theme.palette.background.paper, 0.95),
+                }
+              }
+            }}
           />
         </Box>
       </Paper>
 
       {/* Planificación y Disponibilidad */}
-      <Paper elevation={1} sx={{ p: 3 }}>
-        <Typography variant="h6" sx={{ color: '#ff9800', mb: 3, fontWeight: 500 }}>
+      <Paper 
+        elevation={0}
+        sx={{ 
+          p: 3,
+          background: `linear-gradient(135deg, ${alpha(theme.palette.background.paper, 0.9)} 0%, ${alpha(theme.palette.background.paper, 0.7)} 100%)`,
+          border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+          borderRadius: 3,
+          backdropFilter: 'blur(10px)',
+          boxShadow: `0 8px 32px ${alpha(theme.palette.common.black, 0.1)}`
+        }}
+      >
+        <Typography variant="h6" sx={{ 
+          color: theme.palette.warning.main, 
+          mb: 3, 
+          fontWeight: 600,
+          background: `linear-gradient(135deg, ${theme.palette.warning.main} 0%, ${theme.palette.warning.dark} 100%)`,
+          backgroundClip: 'text',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          letterSpacing: '-0.5px'
+        }}>
           Planificación y Disponibilidad
         </Typography>
         
@@ -64,6 +141,18 @@ const TrainingTab: React.FC<TrainingTabProps> = ({
             onChange={e => onTrainingAndGoalsChange('preferredTrainingDays', e.target.value)}
             fullWidth
             placeholder="Lunes, miércoles, viernes..."
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                borderRadius: 2,
+                backgroundColor: alpha(theme.palette.background.paper, 0.8),
+                '&:hover': {
+                  backgroundColor: alpha(theme.palette.background.paper, 0.9),
+                },
+                '&.Mui-focused': {
+                  backgroundColor: alpha(theme.palette.background.paper, 0.95),
+                }
+              }
+            }}
           />
           <TextField
             label="Días realistas para entrenar"
@@ -71,6 +160,18 @@ const TrainingTab: React.FC<TrainingTabProps> = ({
             onChange={e => onTrainingAndGoalsChange('realisticTrainingDays', e.target.value)}
             fullWidth
             placeholder="Cuántos días puedes entrenar realmente..."
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                borderRadius: 2,
+                backgroundColor: alpha(theme.palette.background.paper, 0.8),
+                '&:hover': {
+                  backgroundColor: alpha(theme.palette.background.paper, 0.9),
+                },
+                '&.Mui-focused': {
+                  backgroundColor: alpha(theme.palette.background.paper, 0.95),
+                }
+              }
+            }}
           />
           <TextField
             label="Horario preferido para entrenar"
@@ -78,6 +179,18 @@ const TrainingTab: React.FC<TrainingTabProps> = ({
             onChange={e => onTrainingAndGoalsChange('trainingTimeOfDay', e.target.value)}
             fullWidth
             placeholder="Mañana, tarde, noche..."
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                borderRadius: 2,
+                backgroundColor: alpha(theme.palette.background.paper, 0.8),
+                '&:hover': {
+                  backgroundColor: alpha(theme.palette.background.paper, 0.9),
+                },
+                '&.Mui-focused': {
+                  backgroundColor: alpha(theme.palette.background.paper, 0.95),
+                }
+              }
+            }}
           />
           <TextField
             label="Cardio actual"
@@ -85,13 +198,44 @@ const TrainingTab: React.FC<TrainingTabProps> = ({
             onChange={e => onTrainingAndGoalsChange('currentCardio', e.target.value)}
             fullWidth
             placeholder="Running, bicicleta, natación..."
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                borderRadius: 2,
+                backgroundColor: alpha(theme.palette.background.paper, 0.8),
+                '&:hover': {
+                  backgroundColor: alpha(theme.palette.background.paper, 0.9),
+                },
+                '&.Mui-focused': {
+                  backgroundColor: alpha(theme.palette.background.paper, 0.95),
+                }
+              }
+            }}
           />
         </Box>
       </Paper>
 
       {/* Objetivos y Lesiones */}
-      <Paper elevation={1} sx={{ p: 3 }}>
-        <Typography variant="h6" sx={{ color: '#ff9800', mb: 3, fontWeight: 500 }}>
+      <Paper 
+        elevation={0}
+        sx={{ 
+          p: 3,
+          background: `linear-gradient(135deg, ${alpha(theme.palette.background.paper, 0.9)} 0%, ${alpha(theme.palette.background.paper, 0.7)} 100%)`,
+          border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+          borderRadius: 3,
+          backdropFilter: 'blur(10px)',
+          boxShadow: `0 8px 32px ${alpha(theme.palette.common.black, 0.1)}`
+        }}
+      >
+        <Typography variant="h6" sx={{ 
+          color: theme.palette.warning.main, 
+          mb: 3, 
+          fontWeight: 600,
+          background: `linear-gradient(135deg, ${theme.palette.warning.main} 0%, ${theme.palette.warning.dark} 100%)`,
+          backgroundClip: 'text',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          letterSpacing: '-0.5px'
+        }}>
           Objetivos y Lesiones
         </Typography>
         
@@ -102,6 +246,18 @@ const TrainingTab: React.FC<TrainingTabProps> = ({
             onChange={e => onTrainingAndGoalsChange('sportsPracticed', e.target.value)}
             fullWidth
             placeholder="Fútbol, tenis, baloncesto..."
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                borderRadius: 2,
+                backgroundColor: alpha(theme.palette.background.paper, 0.8),
+                '&:hover': {
+                  backgroundColor: alpha(theme.palette.background.paper, 0.9),
+                },
+                '&.Mui-focused': {
+                  backgroundColor: alpha(theme.palette.background.paper, 0.95),
+                }
+              }
+            }}
           />
           <TextField
             label="Historial de lesiones"
@@ -111,6 +267,18 @@ const TrainingTab: React.FC<TrainingTabProps> = ({
             rows={3}
             fullWidth
             placeholder="Describe cualquier lesión previa..."
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                borderRadius: 2,
+                backgroundColor: alpha(theme.palette.background.paper, 0.8),
+                '&:hover': {
+                  backgroundColor: alpha(theme.palette.background.paper, 0.9),
+                },
+                '&.Mui-focused': {
+                  backgroundColor: alpha(theme.palette.background.paper, 0.95),
+                }
+              }
+            }}
           />
           <TextField
             label="Objetivos principales"
@@ -120,6 +288,18 @@ const TrainingTab: React.FC<TrainingTabProps> = ({
             rows={3}
             fullWidth
             placeholder="¿Qué quieres lograr con el entrenamiento?"
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                borderRadius: 2,
+                backgroundColor: alpha(theme.palette.background.paper, 0.8),
+                '&:hover': {
+                  backgroundColor: alpha(theme.palette.background.paper, 0.9),
+                },
+                '&.Mui-focused': {
+                  backgroundColor: alpha(theme.palette.background.paper, 0.95),
+                }
+              }
+            }}
           />
         </Box>
       </Paper>

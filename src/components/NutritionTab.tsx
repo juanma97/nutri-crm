@@ -3,7 +3,9 @@ import {
   Typography, 
   TextField,
   Box,
-  Paper
+  Paper,
+  useTheme,
+  alpha
 } from '@mui/material'
 import type { ClientFormData } from '../types'
 
@@ -16,11 +18,31 @@ const NutritionTab: React.FC<NutritionTabProps> = ({
   formData, 
   onLifestyleDataChange 
 }) => {
+  const theme = useTheme()
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
       {/* Suplementación */}
-      <Paper elevation={1} sx={{ p: 3 }}>
-        <Typography variant="h6" sx={{ color: '#9c27b0', mb: 3, fontWeight: 500 }}>
+      <Paper 
+        elevation={0}
+        sx={{ 
+          p: 3,
+          background: `linear-gradient(135deg, ${alpha(theme.palette.background.paper, 0.9)} 0%, ${alpha(theme.palette.background.paper, 0.7)} 100%)`,
+          border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+          borderRadius: 3,
+          backdropFilter: 'blur(10px)',
+          boxShadow: `0 8px 32px ${alpha(theme.palette.common.black, 0.1)}`
+        }}
+      >
+        <Typography variant="h6" sx={{ 
+          color: theme.palette.secondary.main, 
+          mb: 3, 
+          fontWeight: 600,
+          background: `linear-gradient(135deg, ${theme.palette.secondary.main} 0%, ${theme.palette.secondary.dark} 100%)`,
+          backgroundClip: 'text',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          letterSpacing: '-0.5px'
+        }}>
           Suplementación
         </Typography>
         
@@ -31,6 +53,18 @@ const NutritionTab: React.FC<NutritionTabProps> = ({
             onChange={e => onLifestyleDataChange('hasTakenSupplements', e.target.value)}
             fullWidth
             placeholder="Describe tu experiencia con suplementos..."
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                borderRadius: 2,
+                backgroundColor: alpha(theme.palette.background.paper, 0.8),
+                '&:hover': {
+                  backgroundColor: alpha(theme.palette.background.paper, 0.9),
+                },
+                '&.Mui-focused': {
+                  backgroundColor: alpha(theme.palette.background.paper, 0.95),
+                }
+              }
+            }}
           />
           <TextField
             label="¿Qué suplementos tomas actualmente?"
@@ -38,6 +72,18 @@ const NutritionTab: React.FC<NutritionTabProps> = ({
             onChange={e => onLifestyleDataChange('currentSupplements', e.target.value)}
             fullWidth
             placeholder="Lista de suplementos actuales..."
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                borderRadius: 2,
+                backgroundColor: alpha(theme.palette.background.paper, 0.8),
+                '&:hover': {
+                  backgroundColor: alpha(theme.palette.background.paper, 0.9),
+                },
+                '&.Mui-focused': {
+                  backgroundColor: alpha(theme.palette.background.paper, 0.95),
+                }
+              }
+            }}
           />
           <TextField
             label="¿Te gustaría tomar algún suplemento?"
@@ -45,13 +91,44 @@ const NutritionTab: React.FC<NutritionTabProps> = ({
             onChange={e => onLifestyleDataChange('wouldLikeSupplements', e.target.value)}
             fullWidth
             placeholder="Suplementos que te interesan..."
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                borderRadius: 2,
+                backgroundColor: alpha(theme.palette.background.paper, 0.8),
+                '&:hover': {
+                  backgroundColor: alpha(theme.palette.background.paper, 0.9),
+                },
+                '&.Mui-focused': {
+                  backgroundColor: alpha(theme.palette.background.paper, 0.95),
+                }
+              }
+            }}
           />
         </Box>
       </Paper>
 
       {/* Nutrición */}
-      <Paper elevation={1} sx={{ p: 3 }}>
-        <Typography variant="h6" sx={{ color: '#9c27b0', mb: 3, fontWeight: 500 }}>
+      <Paper 
+        elevation={0}
+        sx={{ 
+          p: 3,
+          background: `linear-gradient(135deg, ${alpha(theme.palette.background.paper, 0.9)} 0%, ${alpha(theme.palette.background.paper, 0.7)} 100%)`,
+          border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+          borderRadius: 3,
+          backdropFilter: 'blur(10px)',
+          boxShadow: `0 8px 32px ${alpha(theme.palette.common.black, 0.1)}`
+        }}
+      >
+        <Typography variant="h6" sx={{ 
+          color: theme.palette.secondary.main, 
+          mb: 3, 
+          fontWeight: 600,
+          background: `linear-gradient(135deg, ${theme.palette.secondary.main} 0%, ${theme.palette.secondary.dark} 100%)`,
+          backgroundClip: 'text',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          letterSpacing: '-0.5px'
+        }}>
           Nutrición
         </Typography>
         
@@ -62,6 +139,18 @@ const NutritionTab: React.FC<NutritionTabProps> = ({
             onChange={e => onLifestyleDataChange('currentDiet', e.target.value)}
             fullWidth
             placeholder="Describe tu dieta actual..."
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                borderRadius: 2,
+                backgroundColor: alpha(theme.palette.background.paper, 0.8),
+                '&:hover': {
+                  backgroundColor: alpha(theme.palette.background.paper, 0.9),
+                },
+                '&.Mui-focused': {
+                  backgroundColor: alpha(theme.palette.background.paper, 0.95),
+                }
+              }
+            }}
           />
           <TextField
             label="Efectividad de la dieta actual"
@@ -69,6 +158,18 @@ const NutritionTab: React.FC<NutritionTabProps> = ({
             onChange={e => onLifestyleDataChange('dietEffectiveness', e.target.value)}
             fullWidth
             placeholder="¿Cómo te sientes con tu dieta actual?"
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                borderRadius: 2,
+                backgroundColor: alpha(theme.palette.background.paper, 0.8),
+                '&:hover': {
+                  backgroundColor: alpha(theme.palette.background.paper, 0.9),
+                },
+                '&.Mui-focused': {
+                  backgroundColor: alpha(theme.palette.background.paper, 0.95),
+                }
+              }
+            }}
           />
           <TextField
             label="Experiencia con el hambre"
@@ -76,6 +177,18 @@ const NutritionTab: React.FC<NutritionTabProps> = ({
             onChange={e => onLifestyleDataChange('hungerExperience', e.target.value)}
             fullWidth
             placeholder="¿Cómo manejas el hambre?"
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                borderRadius: 2,
+                backgroundColor: alpha(theme.palette.background.paper, 0.8),
+                '&:hover': {
+                  backgroundColor: alpha(theme.palette.background.paper, 0.9),
+                },
+                '&.Mui-focused': {
+                  backgroundColor: alpha(theme.palette.background.paper, 0.95),
+                }
+              }
+            }}
           />
           <TextField
             label="Horarios de apetito"
@@ -83,13 +196,44 @@ const NutritionTab: React.FC<NutritionTabProps> = ({
             onChange={e => onLifestyleDataChange('appetiteTiming', e.target.value)}
             fullWidth
             placeholder="¿Cuándo tienes más hambre?"
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                borderRadius: 2,
+                backgroundColor: alpha(theme.palette.background.paper, 0.8),
+                '&:hover': {
+                  backgroundColor: alpha(theme.palette.background.paper, 0.9),
+                },
+                '&.Mui-focused': {
+                  backgroundColor: alpha(theme.palette.background.paper, 0.95),
+                }
+              }
+            }}
           />
         </Box>
       </Paper>
 
       {/* Rutina Diaria */}
-      <Paper elevation={1} sx={{ p: 3 }}>
-        <Typography variant="h6" sx={{ color: '#9c27b0', mb: 3, fontWeight: 500 }}>
+      <Paper 
+        elevation={0}
+        sx={{ 
+          p: 3,
+          background: `linear-gradient(135deg, ${alpha(theme.palette.background.paper, 0.9)} 0%, ${alpha(theme.palette.background.paper, 0.7)} 100%)`,
+          border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+          borderRadius: 3,
+          backdropFilter: 'blur(10px)',
+          boxShadow: `0 8px 32px ${alpha(theme.palette.common.black, 0.1)}`
+        }}
+      >
+        <Typography variant="h6" sx={{ 
+          color: theme.palette.secondary.main, 
+          mb: 3, 
+          fontWeight: 600,
+          background: `linear-gradient(135deg, ${theme.palette.secondary.main} 0%, ${theme.palette.secondary.dark} 100%)`,
+          backgroundClip: 'text',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          letterSpacing: '-0.5px'
+        }}>
           Rutina Diaria
         </Typography>
         
@@ -100,6 +244,18 @@ const NutritionTab: React.FC<NutritionTabProps> = ({
             onChange={e => onLifestyleDataChange('eatingOutHabits', e.target.value)}
             fullWidth
             placeholder="¿Con qué frecuencia comes fuera?"
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                borderRadius: 2,
+                backgroundColor: alpha(theme.palette.background.paper, 0.8),
+                '&:hover': {
+                  backgroundColor: alpha(theme.palette.background.paper, 0.9),
+                },
+                '&.Mui-focused': {
+                  backgroundColor: alpha(theme.palette.background.paper, 0.95),
+                }
+              }
+            }}
           />
           <TextField
             label="Alergias alimentarias"
@@ -107,6 +263,18 @@ const NutritionTab: React.FC<NutritionTabProps> = ({
             onChange={e => onLifestyleDataChange('foodAllergies', e.target.value)}
             fullWidth
             placeholder="Alergias conocidas..."
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                borderRadius: 2,
+                backgroundColor: alpha(theme.palette.background.paper, 0.8),
+                '&:hover': {
+                  backgroundColor: alpha(theme.palette.background.paper, 0.9),
+                },
+                '&.Mui-focused': {
+                  backgroundColor: alpha(theme.palette.background.paper, 0.95),
+                }
+              }
+            }}
           />
           <TextField
             label="Alimentos que te gustan"
@@ -114,6 +282,18 @@ const NutritionTab: React.FC<NutritionTabProps> = ({
             onChange={e => onLifestyleDataChange('likedFoods', e.target.value)}
             fullWidth
             placeholder="Comidas favoritas..."
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                borderRadius: 2,
+                backgroundColor: alpha(theme.palette.background.paper, 0.8),
+                '&:hover': {
+                  backgroundColor: alpha(theme.palette.background.paper, 0.9),
+                },
+                '&.Mui-focused': {
+                  backgroundColor: alpha(theme.palette.background.paper, 0.95),
+                }
+              }
+            }}
           />
           <TextField
             label="Alimentos que no te gustan"
@@ -121,6 +301,18 @@ const NutritionTab: React.FC<NutritionTabProps> = ({
             onChange={e => onLifestyleDataChange('dislikedFoods', e.target.value)}
             fullWidth
             placeholder="Comidas que evitas..."
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                borderRadius: 2,
+                backgroundColor: alpha(theme.palette.background.paper, 0.8),
+                '&:hover': {
+                  backgroundColor: alpha(theme.palette.background.paper, 0.9),
+                },
+                '&.Mui-focused': {
+                  backgroundColor: alpha(theme.palette.background.paper, 0.95),
+                }
+              }
+            }}
           />
           <TextField
             label="Bebidas habituales"
@@ -128,6 +320,18 @@ const NutritionTab: React.FC<NutritionTabProps> = ({
             onChange={e => onLifestyleDataChange('usualDrinks', e.target.value)}
             fullWidth
             placeholder="Agua, café, té, refrescos..."
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                borderRadius: 2,
+                backgroundColor: alpha(theme.palette.background.paper, 0.8),
+                '&:hover': {
+                  backgroundColor: alpha(theme.palette.background.paper, 0.9),
+                },
+                '&.Mui-focused': {
+                  backgroundColor: alpha(theme.palette.background.paper, 0.95),
+                }
+              }
+            }}
           />
           <TextField
             label="Descripción del trabajo"
@@ -135,6 +339,18 @@ const NutritionTab: React.FC<NutritionTabProps> = ({
             onChange={e => onLifestyleDataChange('workDescription', e.target.value)}
             fullWidth
             placeholder="Tipo de trabajo y horarios..."
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                borderRadius: 2,
+                backgroundColor: alpha(theme.palette.background.paper, 0.8),
+                '&:hover': {
+                  backgroundColor: alpha(theme.palette.background.paper, 0.9),
+                },
+                '&.Mui-focused': {
+                  backgroundColor: alpha(theme.palette.background.paper, 0.95),
+                }
+              }
+            }}
           />
         </Box>
       </Paper>

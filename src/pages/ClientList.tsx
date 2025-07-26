@@ -30,7 +30,9 @@ import {
   Avatar,
   ListItemIcon,
   ListItemText,
-  Divider
+  Divider,
+  useTheme,
+  alpha
 } from '@mui/material'
 import {
   Add as AddIcon,
@@ -50,14 +52,17 @@ import {
   HealthAndSafety as HealthIcon,
   Warning as WarningIcon,
   FitnessCenter as FitnessIcon,
-  Restaurant as RestaurantIcon
+  Restaurant as RestaurantIcon,
+  People as PeopleIcon
 } from '@mui/icons-material'
 import { useNavigate } from 'react-router-dom'
 import { useFirebase } from '../contexts/FirebaseContext'
 import { useNotifications } from '../hooks/useNotifications'
 import type { Client } from '../types'
+import { motion } from 'framer-motion'
 
 const ClientList = () => {
+  const theme = useTheme()
   const { clients, deleteClient, loadingClients } = useFirebase()
   const navigate = useNavigate()
 
@@ -149,104 +154,313 @@ const ClientList = () => {
 
   if (loadingClients) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
-        <CircularProgress size={60} sx={{ color: '#2e7d32' }} />
+      <Box sx={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        minHeight: '50vh',
+        background: `linear-gradient(135deg, ${alpha(theme.palette.background.default, 0.8)} 0%, ${alpha(theme.palette.background.paper, 0.6)} 100%)`
+      }}>
+        <CircularProgress size={60} sx={{ 
+          color: theme.palette.primary.main,
+          filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.1))'
+        }} />
       </Box>
     )
   }
 
   return (
-    <Box sx={{ width: '100%', py: 3, px: 3 }}>
+    <Box sx={{ 
+      width: '100%', 
+      py: 3, 
+      px: 3,
+      background: `linear-gradient(135deg, ${alpha(theme.palette.background.default, 0.8)} 0%, ${alpha(theme.palette.background.paper, 0.6)} 100%)`,
+      minHeight: '100vh'
+    }}>
       {/* Header */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h4">Clientes</Typography>
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={handleCreateClient}
-          sx={{ backgroundColor: '#2e7d32' }}
-        >
-          Agregar Cliente
-        </Button>
-      </Box>
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+      >
+        <Box sx={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center', 
+          mb: 3,
+          p: 3,
+          background: `linear-gradient(135deg, ${alpha(theme.palette.background.paper, 0.9)} 0%, ${alpha(theme.palette.background.paper, 0.7)} 100%)`,
+          border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+          borderRadius: 3,
+          backdropFilter: 'blur(10px)',
+          boxShadow: `0 8px 32px ${alpha(theme.palette.common.black, 0.1)}`
+        }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <PeopleIcon sx={{ 
+              color: theme.palette.primary.main,
+              fontSize: 32
+            }} />
+            <Typography variant="h4" sx={{ 
+              fontWeight: 700,
+              background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+              backgroundClip: 'text',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              letterSpacing: '-0.5px'
+            }}>
+              Clientes
+            </Typography>
+          </Box>
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={handleCreateClient}
+            sx={{ 
+              background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${alpha(theme.palette.primary.main, 0.8)} 100%)`,
+              color: 'white',
+              borderRadius: 2,
+              fontWeight: 600,
+              textTransform: 'none',
+              fontSize: '0.9rem',
+              py: 1.5,
+              px: 3,
+              boxShadow: `0 4px 15px ${alpha(theme.palette.primary.main, 0.3)}`,
+              '&:hover': {
+                background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${alpha(theme.palette.primary.dark, 0.9)} 100%)`,
+                transform: 'translateY(-2px)',
+                boxShadow: `0 8px 25px ${alpha(theme.palette.primary.main, 0.4)}`
+              }
+            }}
+          >
+            Agregar Cliente
+          </Button>
+        </Box>
+      </motion.div>
 
       {/* Filters and Search */}
-      <Paper elevation={2} sx={{ p: 3, mb: 3 }}>
-        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, alignItems: 'center' }}>
-          <Box sx={{ flex: '1 1 300px', minWidth: '250px' }}>
-            <TextField
-              fullWidth
-              placeholder="Buscar clientes..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon />
-                  </InputAdornment>
-                ),
-              }}
-            />
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+      >
+        <Paper
+          elevation={0}
+          sx={{
+            p: 3,
+            mb: 3,
+            background: `linear-gradient(135deg, ${alpha(theme.palette.background.paper, 0.9)} 0%, ${alpha(theme.palette.background.paper, 0.7)} 100%)`,
+            border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+            borderRadius: 3,
+            backdropFilter: 'blur(10px)',
+            boxShadow: `0 8px 32px ${alpha(theme.palette.common.black, 0.1)}`
+          }}
+        >
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, alignItems: 'center' }}>
+            <Box sx={{ flex: '1 1 300px', minWidth: '250px' }}>
+              <TextField
+                fullWidth
+                placeholder="Buscar clientes..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon sx={{ color: theme.palette.text.secondary }} />
+                    </InputAdornment>
+                  ),
+                }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: 2,
+                    backgroundColor: alpha(theme.palette.background.paper, 0.8),
+                    '&:hover': {
+                      backgroundColor: alpha(theme.palette.background.paper, 0.9),
+                    },
+                    '&.Mui-focused': {
+                      backgroundColor: alpha(theme.palette.background.paper, 0.95),
+                    }
+                  }
+                }}
+              />
+            </Box>
+            <Box sx={{ flex: '1 1 150px', minWidth: '120px' }}>
+              <FormControl fullWidth>
+                <InputLabel>Estado</InputLabel>
+                <Select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  label="Estado"
+                  sx={{
+                    borderRadius: 2,
+                    backgroundColor: alpha(theme.palette.background.paper, 0.8),
+                    '& .MuiOutlinedInput-notchedOutline': {
+                      borderColor: alpha(theme.palette.divider, 0.2),
+                    },
+                    '&:hover .MuiOutlinedInput-notchedOutline': {
+                      borderColor: alpha(theme.palette.primary.main, 0.3),
+                    },
+                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                      borderColor: theme.palette.primary.main,
+                    }
+                  }}
+                >
+                  <MenuItem value="all">Todos</MenuItem>
+                  <MenuItem value="active">Activos</MenuItem>
+                  <MenuItem value="inactive">Inactivos</MenuItem>
+                  <MenuItem value="completed">Completados</MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              <Tooltip title="Vista de tabla">
+                <IconButton
+                  onClick={() => setViewMode('table')}
+                  sx={{
+                    backgroundColor: viewMode === 'table' ? alpha(theme.palette.primary.main, 0.1) : 'transparent',
+                    color: viewMode === 'table' ? theme.palette.primary.main : theme.palette.text.secondary,
+                    borderRadius: 2,
+                    '&:hover': {
+                      backgroundColor: alpha(theme.palette.primary.main, 0.1),
+                      transform: 'scale(1.05)',
+                    }
+                  }}
+                >
+                  <ViewListIcon />
+                </IconButton>
+              </Tooltip>
+              <Tooltip title="Vista de tarjetas">
+                <IconButton
+                  onClick={() => setViewMode('cards')}
+                  sx={{
+                    backgroundColor: viewMode === 'cards' ? alpha(theme.palette.primary.main, 0.1) : 'transparent',
+                    color: viewMode === 'cards' ? theme.palette.primary.main : theme.palette.text.secondary,
+                    borderRadius: 2,
+                    '&:hover': {
+                      backgroundColor: alpha(theme.palette.primary.main, 0.1),
+                      transform: 'scale(1.05)',
+                    }
+                  }}
+                >
+                  <ViewModuleIcon />
+                </IconButton>
+              </Tooltip>
+            </Box>
           </Box>
-          <Box sx={{ flex: '1 1 150px', minWidth: '120px' }}>
-            <FormControl fullWidth>
-              <InputLabel>Estado</InputLabel>
-              <Select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                label="Estado"
-              >
-                <MenuItem value="all">Todos</MenuItem>
-                <MenuItem value="active">Activos</MenuItem>
-                <MenuItem value="inactive">Inactivos</MenuItem>
-                <MenuItem value="completed">Completados</MenuItem>
-              </Select>
-            </FormControl>
-          </Box>
-          <Box sx={{ display: 'flex', gap: 1 }}>
-            <Tooltip title="Vista de tabla">
-              <IconButton
-                onClick={() => setViewMode('table')}
-                color={viewMode === 'table' ? 'primary' : 'default'}
-              >
-                <ViewListIcon />
-              </IconButton>
-            </Tooltip>
-            <Tooltip title="Vista de tarjetas">
-              <IconButton
-                onClick={() => setViewMode('cards')}
-                color={viewMode === 'cards' ? 'primary' : 'default'}
-              >
-                <ViewModuleIcon />
-              </IconButton>
-            </Tooltip>
-          </Box>
-        </Box>
-      </Paper>
+        </Paper>
+      </motion.div>
 
       {/* Results Count */}
-      <Box sx={{ mb: 2 }}>
-        <Typography variant="body2" color="text.secondary">
-          {filteredClients.length} cliente{filteredClients.length !== 1 ? 's' : ''} encontrado{filteredClients.length !== 1 ? 's' : ''}
-        </Typography>
-      </Box>
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, ease: "easeOut" }}
+      >
+        <Box sx={{ 
+          mb: 2,
+          p: 2,
+          background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.05)} 0%, ${alpha(theme.palette.primary.main, 0.02)} 100%)`,
+          border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`,
+          borderRadius: 2,
+          display: 'inline-block'
+        }}>
+          <Typography variant="body2" sx={{ 
+            color: theme.palette.primary.main,
+            fontWeight: 600
+          }}>
+            {filteredClients.length} cliente{filteredClients.length !== 1 ? 's' : ''} encontrado{filteredClients.length !== 1 ? 's' : ''}
+          </Typography>
+        </Box>
+      </motion.div>
 
       {/* Table View */}
       {viewMode === 'table' && (
-        <Paper elevation={3}>
-          <TableContainer>
-            <Table>
-              <TableHead>
-                <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
-                  <TableCell>Cliente</TableCell>
-                  <TableCell>Contacto</TableCell>
-                  <TableCell>Edad</TableCell>
-                  <TableCell>Objetivo</TableCell>
-                  <TableCell>Estado</TableCell>
-                                      <TableCell>Próxima visita</TableCell>
-                  <TableCell align="center">Acciones</TableCell>
-                </TableRow>
-              </TableHead>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+        >
+          <Paper
+            elevation={0}
+            sx={{
+              background: `linear-gradient(135deg, ${alpha(theme.palette.background.paper, 0.9)} 0%, ${alpha(theme.palette.background.paper, 0.7)} 100%)`,
+              border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+              borderRadius: 3,
+              backdropFilter: 'blur(10px)',
+              boxShadow: `0 8px 32px ${alpha(theme.palette.common.black, 0.1)}`,
+              overflow: 'hidden'
+            }}
+          >
+            <TableContainer>
+              <Table>
+                <TableHead>
+                  <TableRow sx={{ 
+                    background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.1)} 0%, ${alpha(theme.palette.primary.main, 0.05)} 100%)`
+                  }}>
+                    <TableCell sx={{ 
+                      fontWeight: 700, 
+                      color: theme.palette.primary.main,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.5px',
+                      fontSize: '0.8rem'
+                    }}>
+                      Cliente
+                    </TableCell>
+                    <TableCell sx={{ 
+                      fontWeight: 700, 
+                      color: theme.palette.primary.main,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.5px',
+                      fontSize: '0.8rem'
+                    }}>
+                      Contacto
+                    </TableCell>
+                    <TableCell sx={{ 
+                      fontWeight: 700, 
+                      color: theme.palette.primary.main,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.5px',
+                      fontSize: '0.8rem'
+                    }}>
+                      Edad
+                    </TableCell>
+                    <TableCell sx={{ 
+                      fontWeight: 700, 
+                      color: theme.palette.primary.main,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.5px',
+                      fontSize: '0.8rem'
+                    }}>
+                      Objetivo
+                    </TableCell>
+                    <TableCell sx={{ 
+                      fontWeight: 700, 
+                      color: theme.palette.primary.main,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.5px',
+                      fontSize: '0.8rem'
+                    }}>
+                      Estado
+                    </TableCell>
+                    <TableCell sx={{ 
+                      fontWeight: 700, 
+                      color: theme.palette.primary.main,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.5px',
+                      fontSize: '0.8rem'
+                    }}>
+                      Próxima visita
+                    </TableCell>
+                    <TableCell align="center" sx={{ 
+                      fontWeight: 700, 
+                      color: theme.palette.primary.main,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.5px',
+                      fontSize: '0.8rem'
+                    }}>
+                      Acciones
+                    </TableCell>
+                  </TableRow>
+                </TableHead>
               <TableBody>
                 {filteredClients.map((client) => (
                   <TableRow key={client.id} hover>
@@ -328,6 +542,7 @@ const ClientList = () => {
             </Table>
           </TableContainer>
         </Paper>
+        </motion.div>
       )}
 
       {/* Cards View */}
