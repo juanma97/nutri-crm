@@ -17,10 +17,7 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  Menu,
   MenuItem,
-  ListItemIcon,
-  ListItemText,
   Card,
   CardContent,
   Grid,
@@ -33,12 +30,9 @@ import {
 import {
   Add as AddIcon,
   Search as SearchIcon,
-  MoreVert as MoreIcon,
   Edit as EditIcon,
   Delete as DeleteIcon,
-
   Assignment as AssignIcon,
-  Visibility as ViewIcon,
   Restaurant as TemplateIcon
 } from '@mui/icons-material'
 import { useNavigate } from 'react-router-dom'
@@ -56,8 +50,6 @@ const DietTemplates = () => {
   const [viewMode, setViewMode] = useState<'table' | 'cards'>('table')
   const [selectedTemplate, setSelectedTemplate] = useState<DietTemplate | null>(null)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
-  const [selectedTemplateForMenu, setSelectedTemplateForMenu] = useState<DietTemplate | null>(null)
 
   // Scroll hacia arriba cuando se monta el componente
   useEffect(() => {
@@ -128,23 +120,11 @@ const DietTemplates = () => {
     navigate(`/templates/edit/${template.id}`)
   }
 
-  const handleViewTemplate = (template: DietTemplate) => {
-    navigate(`/templates/view/${template.id}`)
-  }
-
   const handleAssignTemplate = (template: DietTemplate) => {
     navigate(`/templates/assign/${template.id}`)
   }
 
-  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, template: DietTemplate) => {
-    setAnchorEl(event.currentTarget)
-    setSelectedTemplateForMenu(template)
-  }
 
-  const handleMenuClose = () => {
-    setAnchorEl(null)
-    setSelectedTemplateForMenu(null)
-  }
 
   const filteredTemplates = dietTemplates.filter(template => {
     const matchesSearch = template.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -319,12 +299,32 @@ const DietTemplates = () => {
                       </Typography>
                     </TableCell>
                     <TableCell align="right">
-                      <IconButton
-                        onClick={(e) => handleMenuOpen(e, template)}
-                        size="small"
-                      >
-                        <MoreIcon />
-                      </IconButton>
+                      <Box sx={{ display: 'flex', gap: 1 }}>
+                        <IconButton
+                          onClick={() => handleEditTemplate(template)}
+                          size="small"
+                          color="primary"
+                          title="Editar"
+                        >
+                          <EditIcon />
+                        </IconButton>
+                        <IconButton
+                          onClick={() => handleAssignTemplate(template)}
+                          size="small"
+                          color="success"
+                          title="Asignar a Cliente"
+                        >
+                          <AssignIcon />
+                        </IconButton>
+                        <IconButton
+                          onClick={() => handleDeleteTemplate(template)}
+                          size="small"
+                          color="error"
+                          title="Eliminar"
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      </Box>
                     </TableCell>
                   </TableRow>
                 )
@@ -352,12 +352,32 @@ const DietTemplates = () => {
                           sx={{ mb: 1 }}
                         />
                       </Box>
-                      <IconButton
-                        onClick={(e) => handleMenuOpen(e, template)}
-                        size="small"
-                      >
-                        <MoreIcon />
-                      </IconButton>
+                      <Box sx={{ display: 'flex', gap: 0.5 }}>
+                        <IconButton
+                          onClick={() => handleEditTemplate(template)}
+                          size="small"
+                          color="primary"
+                          title="Editar"
+                        >
+                          <EditIcon />
+                        </IconButton>
+                        <IconButton
+                          onClick={() => handleAssignTemplate(template)}
+                          size="small"
+                          color="success"
+                          title="Asignar a Cliente"
+                        >
+                          <AssignIcon />
+                        </IconButton>
+                        <IconButton
+                          onClick={() => handleDeleteTemplate(template)}
+                          size="small"
+                          color="error"
+                          title="Eliminar"
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      </Box>
                     </Box>
                     
                     {template.description && (
@@ -394,49 +414,7 @@ const DietTemplates = () => {
         </Grid>
       )}
 
-      {/* Menu de acciones */}
-      <Menu
-        anchorEl={anchorEl}
-        open={Boolean(anchorEl)}
-        onClose={handleMenuClose}
-      >
-        <MenuItem onClick={() => {
-          if (selectedTemplateForMenu) handleViewTemplate(selectedTemplateForMenu)
-          handleMenuClose()
-        }}>
-          <ListItemIcon>
-            <ViewIcon fontSize="small" />
-          </ListItemIcon>
-          <ListItemText>Ver Plantilla</ListItemText>
-        </MenuItem>
-        <MenuItem onClick={() => {
-          if (selectedTemplateForMenu) handleEditTemplate(selectedTemplateForMenu)
-          handleMenuClose()
-        }}>
-          <ListItemIcon>
-            <EditIcon fontSize="small" />
-          </ListItemIcon>
-          <ListItemText>Editar</ListItemText>
-        </MenuItem>
-        <MenuItem onClick={() => {
-          if (selectedTemplateForMenu) handleAssignTemplate(selectedTemplateForMenu)
-          handleMenuClose()
-        }}>
-          <ListItemIcon>
-            <AssignIcon fontSize="small" />
-          </ListItemIcon>
-          <ListItemText>Asignar a Cliente</ListItemText>
-        </MenuItem>
-        <MenuItem onClick={() => {
-          if (selectedTemplateForMenu) handleDeleteTemplate(selectedTemplateForMenu)
-          handleMenuClose()
-        }}>
-          <ListItemIcon>
-            <DeleteIcon fontSize="small" />
-          </ListItemIcon>
-          <ListItemText>Eliminar</ListItemText>
-        </MenuItem>
-      </Menu>
+
 
       {/* Dialog de confirmación de eliminación */}
       <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>

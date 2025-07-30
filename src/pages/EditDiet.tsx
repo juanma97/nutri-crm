@@ -98,48 +98,40 @@ const EditDiet = () => {
       customGoal
     }
 
-    const success = await updateDiet(diet.id, updatedDiet)
-    if (success) {
-      navigate('/diets')
+    try {
+      await updateDiet(diet.id, updatedDiet)
+      showSuccess('Dieta actualizada correctamente')
+      setActiveStep(2)
+    } catch (error) {
+      showError('Error al actualizar la dieta')
+      console.error('Error updating diet:', error)
     }
   }
 
   const handleBack = () => {
-    setActiveStep((prevActiveStep) => prevActiveStep - 1)
+    setActiveStep(0)
   }
 
-  const handleSaveAsTemplate = () => {
-    if (diet) {
-      setTemplateName(`${diet.name} - Plantilla`)
-      setTemplateDescription(`Plantilla basada en la dieta de ${diet.clientName}`)
-      setSaveAsTemplateDialog(true)
-    }
-  }
+  // Función para guardar como plantilla (no utilizada actualmente)
+  // const handleSaveAsTemplate = () => {
+  //   if (diet) {
+  //     setTemplateName(`${diet.name} - Template`)
+  //     setTemplateDescription(`Plantilla basada en la dieta de ${diet.clientName}`)
+  //     setSaveAsTemplateDialog(true)
+  //   }
+  // }
 
   const confirmSaveAsTemplate = async () => {
-    if (!diet || !templateName.trim()) {
-      showError('Por favor ingresa un nombre para la plantilla')
-      return
-    }
+    if (!diet) return
 
     try {
-      const templateData = convertDietToTemplate(
-        diet, 
-        templateName, 
-        templateDescription, 
-        templateCategory
-      )
-
-      const success = await addDietTemplate(templateData)
-      if (success) {
-        showSuccess('Dieta guardada como plantilla correctamente')
-        setSaveAsTemplateDialog(false)
-        setTemplateName('')
-        setTemplateDescription('')
-        setTemplateCategory('custom')
-      }
+      const template = convertDietToTemplate(diet, templateName, templateDescription, templateCategory)
+      await addDietTemplate(template)
+      showSuccess('Plantilla guardada correctamente')
+      setSaveAsTemplateDialog(false)
     } catch (error) {
       showError('Error al guardar la plantilla')
+      console.error('Error saving template:', error)
     }
   }
 
@@ -352,7 +344,7 @@ const EditDiet = () => {
               lineHeight: 1.6
             }}
           >
-            Editando la dieta para <strong>{diet.clientName}</strong> (TMB: {Math.round(diet.tmb).toLocaleString()} kcal)
+            Editando la dieta para <strong>{diet.clientName}</strong> (TMB: {Math.round(diet.tmb || 0).toLocaleString()} kcal)
           </Typography>
 
           {/* Diet Name Input */}
@@ -506,119 +498,6 @@ const EditDiet = () => {
           </Button>
         </DialogActions>
       </Dialog>
-=======
-
-          <Typography 
-            variant="body1" 
-            sx={{ 
-              mb: 4, 
-              color: 'text.secondary',
-              fontWeight: 500,
-              lineHeight: 1.6
-            }}
-          >
-            Editando la dieta para <strong>{diet.clientName}</strong> (TMB: {Math.round(diet.tmb).toLocaleString()} kcal)
-          </Typography>
-
-          {/* Diet Name Input */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-          >
-            <Box sx={{ mb: 4 }}>
-              <TextField
-                fullWidth
-                label="Nombre de la Dieta"
-                variant="outlined"
-                value={dietName}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDietName(e.target.value)}
-                placeholder="Ingresa el nombre de la dieta"
-                sx={{ 
-                  maxWidth: '400px',
-                  '& .MuiOutlinedInput-root': {
-                    borderRadius: 2,
-                    backgroundColor: theme.palette.background.paper,
-                    transition: 'all 0.3s ease',
-                    '&:hover .MuiOutlinedInput-notchedOutline': {
-                      borderColor: alpha(theme.palette.primary.main, 0.5),
-                    },
-                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                      borderColor: theme.palette.primary.main,
-                      borderWidth: 2,
-                    },
-                    '& input': {
-                      color: theme.palette.text.primary,
-                    },
-                    '& input:-webkit-autofill': {
-                      WebkitBoxShadow: `0 0 0 1000px ${theme.palette.background.paper} inset`,
-                      WebkitTextFillColor: theme.palette.text.primary,
-                      backgroundColor: theme.palette.background.paper,
-                    },
-                  },
-                  '& .MuiInputLabel-root.Mui-focused': {
-                    color: theme.palette.primary.main,
-                  }
-                }}
-              />
-            </Box>
-          </motion.div>
-
-          {activeStep === 2 ? (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5 }}
-            >
-              <Box sx={{ textAlign: 'center' }}>
-                <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, color: theme.palette.success.main }}>
-                  ¡Todos los pasos completados!
-                </Typography>
-                <motion.div
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  <Button 
-                    onClick={() => navigate('/diets')}
-                    sx={{
-                      mt: 2,
-                      px: 3,
-                      py: 1.5,
-                      borderRadius: 2,
-                      textTransform: 'none',
-                      fontWeight: 600,
-                      fontSize: '1rem',
-                      background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
-                      boxShadow: `0 8px 25px ${alpha(theme.palette.primary.main, 0.3)}`,
-                      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                      '&:hover': {
-                        background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
-                        boxShadow: `0 12px 35px ${alpha(theme.palette.primary.main, 0.4)}`,
-                        transform: 'translateY(-2px)',
-                      },
-                      '&:focus': {
-                        outline: 'none',
-                      }
-                    }}
-                  >
-                    Ir a Dietas
-                  </Button>
-                </motion.div>
-              </Box>
-            </motion.div>
-          ) : (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-            >
-              <Box>
-                {renderStepContent(activeStep)}
-              </Box>
-            </motion.div>
-          )}
-        </Paper>
-      </motion.div>
     </Box>
   )
 }

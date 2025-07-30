@@ -5,7 +5,6 @@ import {
   Paper,
   Typography,
   Button,
-  TextField,
   FormControl,
   InputLabel,
   Select,
@@ -16,9 +15,7 @@ import {
   Chip,
   Alert,
   CircularProgress,
-  Divider,
-  FormControlLabel,
-  Checkbox
+  Divider
 } from '@mui/material'
 import {
   ArrowBack as ArrowBackIcon,
@@ -39,8 +36,6 @@ const AssignTemplate = () => {
 
   const [selectedClientId, setSelectedClientId] = useState('')
   const [tmb, setTmb] = useState<number>(0)
-  const [useCustomGoal, setUseCustomGoal] = useState(false)
-  const [customGoal, setCustomGoal] = useState<number>(0)
   const [template, setTemplate] = useState<DietTemplate | null>(null)
   const [selectedClient, setSelectedClient] = useState<Client | null>(null)
 
@@ -62,10 +57,8 @@ const AssignTemplate = () => {
         if (foundClient.weight && foundClient.height && foundClient.age && foundClient.gender) {
           const calculatedTMB = calculateTMB(foundClient)
           setTmb(calculatedTMB)
-          setCustomGoal(calculatedTMB) // Inicializar objetivo personalizado con TMB
         } else {
           setTmb(0)
-          setCustomGoal(0)
           console.warn('Cliente no tiene todos los datos necesarios para calcular TMB:', {
             weight: foundClient.weight,
             height: foundClient.height,
@@ -85,10 +78,8 @@ const AssignTemplate = () => {
       return
     }
 
-    const targetCalories = useCustomGoal ? customGoal : tmb
-
-    if (targetCalories <= 0) {
-      showError('Por favor ingresa un objetivo calórico válido')
+    if (tmb <= 0) {
+      showError('Por favor asegúrate de que el cliente tenga todos los datos necesarios para calcular el TMB')
       return
     }
 
@@ -96,7 +87,7 @@ const AssignTemplate = () => {
       template.id,
       selectedClient.id,
       selectedClient.name,
-      targetCalories
+      tmb
     )
 
     if (success) {
@@ -372,29 +363,7 @@ const AssignTemplate = () => {
               </CardContent>
             </Card>
 
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={useCustomGoal}
-                  onChange={(e) => setUseCustomGoal(e.target.checked)}
-                  color="primary"
-                />
-              }
-              label="Usar objetivo personalizado"
-              sx={{ mb: 2 }}
-            />
 
-            {useCustomGoal && (
-              <TextField
-                fullWidth
-                label="Objetivo personalizado (calorías/día)"
-                type="number"
-                value={customGoal}
-                onChange={(e) => setCustomGoal(Number(e.target.value))}
-                sx={{ mb: 2 }}
-                helperText="Define un objetivo calórico personalizado para este cliente"
-              />
-            )}
 
             <Divider sx={{ my: 2 }} />
 
@@ -411,7 +380,7 @@ const AssignTemplate = () => {
                 startIcon={<AssignIcon />}
                 onClick={handleAssign}
                 fullWidth
-                disabled={!selectedClientId || (useCustomGoal ? customGoal <= 0 : tmb <= 0)}
+                disabled={!selectedClientId || tmb <= 0}
                 sx={{ backgroundColor: '#2e7d32' }}
               >
                 Asignar Plantilla
