@@ -560,7 +560,7 @@ const DietList = () => {
                         />
                       </TableCell>
                       <TableCell align="center">
-                        <Tooltip title="View">
+                        <Tooltip title="Ver">
                           <IconButton 
                             size="small" 
                             color="primary"
@@ -569,7 +569,7 @@ const DietList = () => {
                             <VisibilityIcon />
                           </IconButton>
                         </Tooltip>
-                        <Tooltip title="Edit">
+                        <Tooltip title="Editar">
                           <IconButton 
                             size="small" 
                             color="primary"
@@ -578,7 +578,7 @@ const DietList = () => {
                             <EditIcon />
                           </IconButton>
                         </Tooltip>
-                        <Tooltip title="Share">
+                        <Tooltip title="Compartir">
                           <IconButton 
                             size="small" 
                             color="secondary"
@@ -587,7 +587,7 @@ const DietList = () => {
                             <ShareIcon />
                           </IconButton>
                         </Tooltip>
-                        <Tooltip title="Delete">
+                        <Tooltip title="Eliminar">
                           <IconButton 
                             size="small" 
                             color="error"
@@ -664,7 +664,7 @@ const DietList = () => {
                         startIcon={<VisibilityIcon />}
                         onClick={() => handleViewDiet(diet)}
                       >
-                        View
+                        Ver
                       </Button>
                       <Button
                         size="small"
@@ -672,7 +672,7 @@ const DietList = () => {
                         startIcon={<EditIcon />}
                         onClick={() => handleEditDiet(diet)}
                       >
-                        Edit
+                        Editar
                       </Button>
                       <IconButton
                         size="small"
@@ -693,12 +693,12 @@ const DietList = () => {
       {filteredDiets.length === 0 && (
         <Paper elevation={3} sx={{ p: 4, textAlign: 'center' }}>
           <Typography variant="h6" color="text.secondary" gutterBottom>
-            No diets found
+            No se encontraron dietas
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
             {searchTerm || statusFilter !== 'all' || dateFilter !== 'all' 
-              ? 'Try adjusting your search or filters'
-              : 'Create your first diet to get started'
+              ? 'Intenta ajustar tu búsqueda o filtros'
+                              : 'Crea tu primera dieta para comenzar'
             }
           </Typography>
           {!searchTerm && statusFilter === 'all' && dateFilter === 'all' && (
@@ -708,7 +708,7 @@ const DietList = () => {
               onClick={handleCreateDiet}
               sx={{ backgroundColor: '#2e7d32' }}
             >
-              Create First Diet
+              Crear Primera Dieta
             </Button>
           )}
         </Paper>
@@ -737,23 +737,23 @@ const DietList = () => {
                   <Typography variant="body1">{selectedDiet.tmb ? Math.round(selectedDiet.tmb).toLocaleString() : 'N/A'} cal</Typography>
                 </Box>
                 <Box sx={{ flex: '1 1 200px', minWidth: '200px' }}>
-                  <Typography variant="subtitle2">Created:</Typography>
+                  <Typography variant="subtitle2">Creada:</Typography>
                   <Typography variant="body1">{new Date(selectedDiet.createdAt).toLocaleDateString()}</Typography>
                 </Box>
                 <Box sx={{ flex: '1 1 200px', minWidth: '200px' }}>
-                  <Typography variant="subtitle2">Total Calories:</Typography>
+                  <Typography variant="subtitle2">Calorías Totales:</Typography>
                   <Typography variant="body1">{Math.round(calculateDietStats(selectedDiet).totalCalories)} cal</Typography>
                 </Box>
               </Box>
               
               <Alert severity="info">
-                This is a preview of the diet. Use the Edit button to make changes.
+                Esta es una vista previa de la dieta. Usa el botón Editar para hacer cambios.
               </Alert>
             </Box>
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setPreviewDialogOpen(false)}>Close</Button>
+          <Button onClick={() => setPreviewDialogOpen(false)}>Cerrar</Button>
           <Button 
             variant="contained"
             onClick={() => {
@@ -761,23 +761,23 @@ const DietList = () => {
               if (selectedDiet) handleEditDiet(selectedDiet)
             }}
           >
-            Edit Diet
+            Editar Dieta
           </Button>
         </DialogActions>
       </Dialog>
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
-        <DialogTitle>Delete Diet</DialogTitle>
+        <DialogTitle>Eliminar Dieta</DialogTitle>
         <DialogContent>
           <Typography>
-            Are you sure you want to delete "{dietToDelete?.name}"? This action cannot be undone.
+            ¿Estás seguro de que quieres eliminar "{dietToDelete?.name}"? Esta acción no se puede deshacer.
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
+          <Button onClick={() => setDeleteDialogOpen(false)}>Cancelar</Button>
           <Button onClick={confirmDelete} color="error" variant="contained">
-            Delete
+            Eliminar
           </Button>
         </DialogActions>
       </Dialog>
@@ -793,21 +793,21 @@ const DietList = () => {
           handleMenuClose()
         }}>
           <ContentCopyIcon sx={{ mr: 1 }} />
-          Duplicate
+          Duplicar
         </MenuItem>
         <MenuItem onClick={() => {
           if (selectedDietForMenu) handleShareDiet(selectedDietForMenu)
           handleMenuClose()
         }}>
           <ShareIcon sx={{ mr: 1 }} />
-          Share
+          Compartir
         </MenuItem>
         <MenuItem onClick={() => {
           if (selectedDietForMenu) handleDeleteDiet(selectedDietForMenu)
           handleMenuClose()
         }} sx={{ color: 'error.main' }}>
           <DeleteIcon sx={{ mr: 1 }} />
-          Delete
+          Eliminar
         </MenuItem>
       </Menu>
 

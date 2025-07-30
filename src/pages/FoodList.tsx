@@ -38,7 +38,7 @@ import type { Food } from '../types'
 import { useFirebase } from '../contexts/FirebaseContext'
 import FoodForm from '../components/FoodForm'
 
-const foodGroups = ['Proteins', 'Vegetables', 'Grains', 'Fruits', 'Dairy', 'Fats', 'Others']
+const foodGroups = ['Proteínas', 'Verduras', 'Granos', 'Frutas', 'Lácteos', 'Grasas', 'Otros']
 
 const FoodList = () => {
   const { foods, addFood, updateFood, deleteFood, loadingFoods } = useFirebase()

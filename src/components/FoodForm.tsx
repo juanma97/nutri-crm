@@ -19,13 +19,13 @@ import { motion } from 'framer-motion'
 import type { Food, FoodFormData } from '../types'
 
 const foodGroups = [
-  'Vegetables',
-  'Fruits', 
-  'Grains',
-  'Proteins',
-  'Dairy',
-  'Fats',
-  'Beverages'
+  'Verduras',
+  'Frutas', 
+  'Granos',
+  'Proteínas',
+  'Lácteos',
+  'Grasas',
+  'Bebidas'
 ]
 
 const unit = [

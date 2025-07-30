@@ -75,16 +75,16 @@ const TMBStep = ({ onComplete, onNext, onUpdate, initialClientName = '', initial
     const newErrors: string[] = []
     
     if (tabValue === 0) {
-      if (!selectedClientId) newErrors.push('Please select a client')
+      if (!selectedClientId) newErrors.push('Por favor selecciona un cliente')
     } else {
-      if (!client.name.trim()) newErrors.push('Name is required')
-      if (!client.age) newErrors.push('Age is required')
-      if (!client.weight || Number(client.weight) <= 0) newErrors.push('Valid weight is required')
-      if (!client.height || Number(client.height) <= 0) newErrors.push('Valid height is required')
+      if (!client.name.trim()) newErrors.push('El nombre es requerido')
+      if (!client.age) newErrors.push('La edad es requerida')
+      if (!client.weight || Number(client.weight) <= 0) newErrors.push('Un peso válido es requerido')
+      if (!client.height || Number(client.height) <= 0) newErrors.push('Una altura válida es requerida')
     }
     
     if (showDietNameField && !dietName.trim()) {
-      newErrors.push('Diet name is required')
+      newErrors.push('El nombre de la dieta es requerido')
     }
     
     setErrors(newErrors)
@@ -148,7 +148,7 @@ const TMBStep = ({ onComplete, onNext, onUpdate, initialClientName = '', initial
   return (
     <Box sx={{ width: '100%', maxWidth: '100%', height: '100vw', overflow: 'hidden' }}>
       <Typography variant="h5" gutterBottom>
-        Step 1: Select Client and Calculate TMB
+        Paso 1: Seleccionar Cliente y Calcular TMB
       </Typography>
       
       {errors.length > 0 && (
@@ -165,7 +165,7 @@ const TMBStep = ({ onComplete, onNext, onUpdate, initialClientName = '', initial
           onChange={(_, newValue) => setTabValue(newValue)}
           sx={{ borderBottom: 1, borderColor: 'divider' }}
         >
-          <Tab label="Select Client" />
+          <Tab label="Seleccionar Cliente" />
         </Tabs>
       </Paper>
 
@@ -173,11 +173,11 @@ const TMBStep = ({ onComplete, onNext, onUpdate, initialClientName = '', initial
         // Seleccionar cliente existente
         <Box sx={{ width: '100%', maxWidth: '100%', display: 'flex', flexDirection: 'column', gap: 3 }}>
           <FormControl fullWidth>
-            <InputLabel>Select Client</InputLabel>
+            <InputLabel>Seleccionar Cliente</InputLabel>
             <Select
               value={selectedClientId}
               onChange={(e) => handleClientSelect(e.target.value)}
-              label="Select Client"
+              label="Seleccionar Cliente"
             >
               {clients.map((client) => {
                 return (
@@ -192,12 +192,12 @@ const TMBStep = ({ onComplete, onNext, onUpdate, initialClientName = '', initial
           {selectedClientId && (
             <Alert severity={tmb ? "info" : "warning"}>
               <Typography variant="h6">
-                Basal Metabolic Rate (TMB): {tmb ? Math.round(tmb) : 'Cannot calculate'} calories/day
+                Tasa Metabólica Basal (TMB): {tmb ? Math.round(tmb) : 'No se puede calcular'} calorías/día
               </Typography>
                       <Typography variant="body2">
           {tmb 
-            ? "This is the number of calories your body needs at rest to maintain basic life functions."
-            : "The selected client is missing required data (weight, height, or age) to calculate TMB."
+            ? "Esta es la cantidad de calorías que tu cuerpo necesita en reposo para mantener las funciones básicas de la vida."
+            : "El cliente seleccionado no tiene todos los datos requeridos (peso, altura o edad) para calcular el TMB."
           }
         </Typography>
             </Alert>
@@ -207,28 +207,28 @@ const TMBStep = ({ onComplete, onNext, onUpdate, initialClientName = '', initial
         // Crear nuevo cliente
         <Box sx={{ width: '100%', maxWidth: '100%', display: 'flex', flexDirection: 'column', gap: 3 }}>
           <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
-            <TextField
-              fullWidth
-              label="Client Name"
-              variant="outlined"
-              value={client.name}
-              onChange={handleInputChange('name')}
-              required
-              sx={{ flex: '1 1 300px' }}
-            />
-            <TextField
-              fullWidth
-              select
-              label="Gender"
-              variant="outlined"
-              value={client.gender}
-              onChange={handleInputChange('gender')}
-              sx={{ flex: '1 1 200px' }}
-            >
-              <MenuItem value="male">Male</MenuItem>
-              <MenuItem value="female">Female</MenuItem>
-              <MenuItem value="other">Other</MenuItem>
-            </TextField>
+                          <TextField
+                fullWidth
+                label="Nombre del Cliente"
+                variant="outlined"
+                value={client.name}
+                onChange={handleInputChange('name')}
+                required
+                sx={{ flex: '1 1 300px' }}
+              />
+              <TextField
+                fullWidth
+                select
+                label="Género"
+                variant="outlined"
+                value={client.gender}
+                onChange={handleInputChange('gender')}
+                sx={{ flex: '1 1 200px' }}
+              >
+                <MenuItem value="male">Masculino</MenuItem>
+                <MenuItem value="female">Femenino</MenuItem>
+                <MenuItem value="other">Otro</MenuItem>
+              </TextField>
           </Box>
 
 
@@ -236,10 +236,10 @@ const TMBStep = ({ onComplete, onNext, onUpdate, initialClientName = '', initial
           {tmb && (
             <Alert severity="info">
               <Typography variant="h6">
-                Basal Metabolic Rate (TMB): {Math.round(tmb)} calories/day
+                Tasa Metabólica Basal (TMB): {Math.round(tmb)} calorías/día
               </Typography>
               <Typography variant="body2">
-                This is the number of calories your body needs at rest to maintain basic life functions.
+                Esta es la cantidad de calorías que tu cuerpo necesita en reposo para mantener las funciones básicas de la vida.
               </Typography>
             </Alert>
           )}
@@ -248,16 +248,16 @@ const TMBStep = ({ onComplete, onNext, onUpdate, initialClientName = '', initial
       
       {showDietNameField && (
         <Box sx={{ mt: 3 }}>
-          <TextField
-            fullWidth
-            label="Diet Name"
-            variant="outlined"
-            value={dietName}
-            onChange={(e) => setDietName(e.target.value)}
-            required
-            placeholder="Enter a name for this diet"
-            sx={{ mb: 2 }}
-          />
+                      <TextField
+              fullWidth
+              label="Nombre de la Dieta"
+              variant="outlined"
+              value={dietName}
+              onChange={(e) => setDietName(e.target.value)}
+              required
+              placeholder="Ingresa un nombre para esta dieta"
+              sx={{ mb: 2 }}
+            />
         </Box>
       )}
       
@@ -269,7 +269,7 @@ const TMBStep = ({ onComplete, onNext, onUpdate, initialClientName = '', initial
           disabled={!tmb || errors.length > 0}
           sx={{ backgroundColor: '#2e7d32' }}
         >
-          Continue to Diet Builder
+          Continuar al Constructor de Dietas
         </Button>
       </Box>
     </Box>

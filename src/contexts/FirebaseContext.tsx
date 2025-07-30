@@ -223,11 +223,11 @@ export const FirebaseProvider: React.FC<{ children: ReactNode }> = ({ children }
         // Si no hay mealDefinitions, crear las por defecto basadas en la estructura existente
         if (!mealDefinitions && meals) {
           const defaultMeals = [
-            { id: 'breakfast', name: 'Breakfast', order: 1 },
-            { id: 'morningSnack', name: 'Morning Snack', order: 2 },
-            { id: 'lunch', name: 'Lunch', order: 3 },
-            { id: 'afternoonSnack', name: 'Afternoon Snack', order: 4 },
-            { id: 'dinner', name: 'Dinner', order: 5 }
+            { id: 'breakfast', name: 'Desayuno', order: 1 },
+            { id: 'morningSnack', name: 'Media mañana', order: 2 },
+            { id: 'lunch', name: 'Comida', order: 3 },
+            { id: 'afternoonSnack', name: 'Merienda', order: 4 },
+            { id: 'dinner', name: 'Cena', order: 5 }
           ]
           
           // Verificar si la dieta usa el formato antiguo
@@ -493,11 +493,11 @@ export const FirebaseProvider: React.FC<{ children: ReactNode }> = ({ children }
         // Si no hay mealDefinitions, crear las por defecto basadas en la estructura existente
         if (!mealDefinitions && meals) {
           const defaultMeals = [
-            { id: 'breakfast', name: 'Breakfast', order: 1 },
-            { id: 'morningSnack', name: 'Morning Snack', order: 2 },
-            { id: 'lunch', name: 'Lunch', order: 3 },
-            { id: 'afternoonSnack', name: 'Afternoon Snack', order: 4 },
-            { id: 'dinner', name: 'Dinner', order: 5 }
+            { id: 'breakfast', name: 'Desayuno', order: 1 },
+            { id: 'morningSnack', name: 'Media mañana', order: 2 },
+            { id: 'lunch', name: 'Comida', order: 3 },
+            { id: 'afternoonSnack', name: 'Merienda', order: 4 },
+            { id: 'dinner', name: 'Cena', order: 5 }
           ]
           
           // Verificar si la dieta usa el formato antiguo

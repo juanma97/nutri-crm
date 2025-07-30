@@ -31,21 +31,21 @@ import LazyCharts from '../components/LazyCharts'
 import type { DayOfWeek, MealType, Diet, DietMeal } from '../types'
 
 const daysOfWeek: { key: DayOfWeek; label: string }[] = [
-  { key: 'monday', label: 'Monday' },
-  { key: 'tuesday', label: 'Tuesday' },
-  { key: 'wednesday', label: 'Wednesday' },
-  { key: 'thursday', label: 'Thursday' },
-  { key: 'friday', label: 'Friday' },
-  { key: 'saturday', label: 'Saturday' },
-  { key: 'sunday', label: 'Sunday' }
+  { key: 'monday', label: 'Lunes' },
+  { key: 'tuesday', label: 'Martes' },
+  { key: 'wednesday', label: 'Miércoles' },
+  { key: 'thursday', label: 'Jueves' },
+  { key: 'friday', label: 'Viernes' },
+  { key: 'saturday', label: 'Sábado' },
+  { key: 'sunday', label: 'Domingo' }
 ]
 
 const mealTypes: { key: MealType; label: string }[] = [
-  { key: 'breakfast', label: 'Breakfast' },
-  { key: 'morningSnack', label: 'Morning Snack' },
-  { key: 'lunch', label: 'Lunch' },
-  { key: 'afternoonSnack', label: 'Afternoon Snack' },
-  { key: 'dinner', label: 'Dinner' }
+  { key: 'breakfast', label: 'Desayuno' },
+  { key: 'morningSnack', label: 'Media mañana' },
+  { key: 'lunch', label: 'Comida' },
+  { key: 'afternoonSnack', label: 'Merienda' },
+  { key: 'dinner', label: 'Cena' }
 ]
 
 const DietViewer = () => {
@@ -152,18 +152,18 @@ const DietViewer = () => {
         <Paper elevation={3} sx={{ p: 4, textAlign: 'center' }}>
           <Alert severity="error" sx={{ mb: 3 }}>
             <Typography variant="h6" gutterBottom>
-              Diet not found
+              Dieta no encontrada
             </Typography>
             <Typography variant="body2">
-              The diet you're looking for doesn't exist or the link is invalid.
+              La dieta que buscas no existe o el enlace es inválido.
             </Typography>
           </Alert>
           <Button 
             variant="contained" 
-            onClick={() => navigate('/')}
+            onClick={() => navigate('/')} 
             sx={{ backgroundColor: '#2e7d32' }}
           >
-            Go Home
+            Ir al inicio
           </Button>
         </Paper>
       </Box>
@@ -180,7 +180,7 @@ const DietViewer = () => {
       <Paper elevation={3} sx={{ p: 4, mb: 3 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
           <Typography variant="h3" sx={{ color: '#2e7d32' }}>
-            {diet.clientName}'s Diet Plan
+            Plan de dieta de {diet.clientName}
           </Typography>
           <Button
             variant="outlined"
@@ -196,17 +196,17 @@ const DietViewer = () => {
           {diet.customGoal && (
             <Chip label={`Objetivo: ${diet.customGoal.calories} cal`} color="secondary" />
           )}
-          <Chip label={`Total Calories: ${Math.round(calculateTotalCalories())} cal`} color="secondary" />
+          <Chip label={`Calorías Totales: ${Math.round(calculateTotalCalories())} cal`} color="secondary" />
         </Box>
         <Typography variant="body1" color="text.secondary">
-          This is your personalized nutrition plan. Follow it daily for optimal results.
+          Este es tu plan nutricional personalizado. Síguelo diariamente para obtener resultados óptimos.
         </Typography>
       </Paper>
 
       {/* Charts */}
       <Paper elevation={3} sx={{ p: 4, mb: 3 }}>
         <Typography variant="h5" gutterBottom>
-          Nutrition Analysis
+          Análisis Nutricional
         </Typography>
         <LazyCharts meals={diet.meals as unknown as Record<DayOfWeek, Record<string, DietMeal[]>>} tmb={diet.tmb || 0} customGoal={diet.customGoal} />
       </Paper>
@@ -254,14 +254,14 @@ const DietViewer = () => {
       {/* Weekly Plan */}
       <Paper elevation={3} sx={{ p: 4 }}>
         <Typography variant="h5" gutterBottom>
-          Weekly Meal Plan
+          Plan Semanal de Comidas
         </Typography>
         
         <TableContainer>
           <Table>
             <TableHead>
               <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
-                <TableCell>Day</TableCell>
+                <TableCell>Día</TableCell>
                 {mealTypes.map(meal => (
                   <TableCell key={meal.key}>{meal.label}</TableCell>
                 ))}
@@ -294,8 +294,8 @@ const DietViewer = () => {
                           ))}
                         </Box>
                       ) : (
-                        <Typography variant="body2" color="text.secondary">
-                          No foods added
+                        <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 2 }}>
+                          No se han añadido alimentos
                         </Typography>
                       )}
                     </TableCell>
@@ -310,10 +310,10 @@ const DietViewer = () => {
       {/* Footer */}
       <Paper elevation={1} sx={{ p: 3, mt: 3, textAlign: 'center' }}>
         <Typography variant="body2" color="text.secondary">
-          This diet plan was created by your nutritionist using NutriCRM.
+          Este plan de dieta fue creado por tu nutricionista usando NutriCRM.
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-          For questions or modifications, please contact your nutritionist.
+          Para dudas o modificaciones, por favor contacta a tu nutricionista.
         </Typography>
       </Paper>
 

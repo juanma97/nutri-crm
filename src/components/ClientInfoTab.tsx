@@ -117,7 +117,7 @@ const ClientInfoTab: React.FC<ClientInfoTabProps> = ({
           />
           <TextField
             type="email"
-            label="Email"
+            label="Correo electrónico"
             value={formData.email}
             onChange={(e) => onFormDataChange('email', e.target.value)}
             error={!!errors.email}

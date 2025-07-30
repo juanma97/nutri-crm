@@ -64,21 +64,21 @@ interface DietBuilderProps {
 }
 
 const daysOfWeek: { key: DayOfWeek; label: string }[] = [
-  { key: 'monday', label: 'Monday' },
-  { key: 'tuesday', label: 'Tuesday' },
-  { key: 'wednesday', label: 'Wednesday' },
-  { key: 'thursday', label: 'Thursday' },
-  { key: 'friday', label: 'Friday' },
-  { key: 'saturday', label: 'Saturday' },
-  { key: 'sunday', label: 'Sunday' }
+  { key: 'monday', label: 'Lunes' },
+  { key: 'tuesday', label: 'Martes' },
+  { key: 'wednesday', label: 'Miércoles' },
+  { key: 'thursday', label: 'Jueves' },
+  { key: 'friday', label: 'Viernes' },
+  { key: 'saturday', label: 'Sábado' },
+  { key: 'sunday', label: 'Domingo' }
 ]
 
 const mealTypes: { key: MealType; label: string }[] = [
-  { key: 'breakfast', label: 'Breakfast' },
-  { key: 'morningSnack', label: 'Morning Snack' },
-  { key: 'lunch', label: 'Lunch' },
-  { key: 'afternoonSnack', label: 'Afternoon Snack' },
-  { key: 'dinner', label: 'Dinner' }
+  { key: 'breakfast', label: 'Desayuno' },
+  { key: 'morningSnack', label: 'Media mañana' },
+  { key: 'lunch', label: 'Comida' },
+  { key: 'afternoonSnack', label: 'Merienda' },
+  { key: 'dinner', label: 'Cena' }
 ]
 
 const DietBuilder = ({ tmb, onSave, onBack, initialMeals, initialSupplements, initialMealDefinitions, initialCustomGoal, dietName, isTemplate = false }: DietBuilderProps) => {
@@ -87,11 +87,11 @@ const DietBuilder = ({ tmb, onSave, onBack, initialMeals, initialSupplements, in
   
   // Comidas por defecto para migración
   const defaultMeals: DynamicMeal[] = [
-    { id: 'breakfast', name: 'Breakfast', order: 1 },
-    { id: 'morningSnack', name: 'Morning Snack', order: 2 },
-    { id: 'lunch', name: 'Lunch', order: 3 },
-    { id: 'afternoonSnack', name: 'Afternoon Snack', order: 4 },
-    { id: 'dinner', name: 'Dinner', order: 5 }
+    { id: 'breakfast', name: 'Desayuno', order: 1 },
+    { id: 'morningSnack', name: 'Me Mañana', order: 2 },
+    { id: 'lunch', name: 'Comida', order: 3 },
+    { id: 'afternoonSnack', name: 'Colación Tarde', order: 4 },
+    { id: 'dinner', name: 'Cena', order: 5 }
   ]
 
   // Estado inicial dinámico
@@ -1654,7 +1654,7 @@ const DietBuilder = ({ tmb, onSave, onBack, initialMeals, initialSupplements, in
             onClick={onBack}
             sx={{ minWidth: '120px' }}
           >
-            Back
+            Volver
           </Button>
         )}
         <Button
@@ -1666,7 +1666,7 @@ const DietBuilder = ({ tmb, onSave, onBack, initialMeals, initialSupplements, in
             minWidth: '140px'
           }}
         >
-          {saving ? 'Saving...' : 'Save Diet'}
+          {saving ? 'Guardando...' : 'Guardar Dieta'}
         </Button>
       </Box>
 
@@ -1680,13 +1680,13 @@ const DietBuilder = ({ tmb, onSave, onBack, initialMeals, initialSupplements, in
           sx: { maxHeight: '80vh' }
         }}
       >
-        <DialogTitle>Add Food to {mealDefinitions.find(m => m.id === selectedMeal)?.name}</DialogTitle>
+        <DialogTitle>Añadir Alimento a {mealDefinitions.find(m => m.id === selectedMeal)?.name}</DialogTitle>
         <DialogContent>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2 }}>
             <TextField
               fullWidth
-              label="Search Foods"
-              placeholder="Type to search foods..."
+              label="Buscar Alimentos"
+              placeholder="Escribe para buscar alimentos..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               InputProps={{
@@ -1723,7 +1723,7 @@ const DietBuilder = ({ tmb, onSave, onBack, initialMeals, initialSupplements, in
                   </List>
                 ) : (
                   <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 2 }}>
-                    {searchTerm ? 'No foods found matching your search' : 'Start typing to search foods'}
+                    {searchTerm ? 'No se encontraron alimentos que coincidan con tu búsqueda' : 'Empieza a escribir para buscar alimentos'}
                   </Typography>
                 )}
               </Box>
@@ -1731,7 +1731,7 @@ const DietBuilder = ({ tmb, onSave, onBack, initialMeals, initialSupplements, in
               <Box sx={{ p: 2, backgroundColor: '#f5f5f5', borderRadius: 1 }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                   <Typography variant="subtitle2">
-                    Selected Food: {foods.find(f => f.id === selectedFood)?.name}
+                    Alimento Seleccionado: {foods.find(f => f.id === selectedFood)?.name}
                   </Typography>
                   <Button 
                     size="small" 
@@ -1740,16 +1740,16 @@ const DietBuilder = ({ tmb, onSave, onBack, initialMeals, initialSupplements, in
                       setSearchTerm('')
                     }}
                   >
-                    Change
+                    Cambiar
                   </Button>
                 </Box>
                 <TextField
                   fullWidth
-                  label="Quantity"
+                  label="Cantidad"
                   type="number"
                   value={quantity}
                   onChange={(e) => setQuantity(e.target.value)}
-                  helperText={`Enter quantity in ${foods.find(f => f.id === selectedFood)?.unitOfMeasure || 'unit'}`}
+                  helperText={`Ingresa la cantidad en ${foods.find(f => f.id === selectedFood)?.unitOfMeasure || 'unidad'}`}
                 />
               </Box>
             )}
@@ -1762,11 +1762,11 @@ const DietBuilder = ({ tmb, onSave, onBack, initialMeals, initialSupplements, in
             setSearchTerm('')
             setQuantity('')
           }}>
-            Cancel
+            Cancelar
           </Button>
           {selectedFood && (
             <Button onClick={handleAddMeal} variant="contained" disabled={!quantity}>
-              Add Food
+              Añadir Alimento
             </Button>
           )}
         </DialogActions>

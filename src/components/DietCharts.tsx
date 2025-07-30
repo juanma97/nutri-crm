@@ -115,9 +115,9 @@ const DietCharts = ({ meals, tmb, customGoal }: DietChartsProps) => {
   const mealAnalysis = Object.entries(meals).map(([day, dayMeals]) => {
     const mealTotals = Object.entries(dayMeals).map(([mealType, meals]) => ({
       meal: mealType === 'breakfast' ? 'Desayuno' : 
-            mealType === 'morningSnack' ? 'Merienda AM' :
-            mealType === 'lunch' ? 'Almuerzo' :
-            mealType === 'afternoonSnack' ? 'Merienda PM' : 'Cena',
+            mealType === 'morningSnack' ? 'Media mañana' :
+            mealType === 'lunch' ? 'Comida' :
+            mealType === 'afternoonSnack' ? 'Merienda' : 'Cena',
       calories: Math.round(meals.reduce((sum, meal) => sum + meal.calories, 0)),
       proteins: Math.round(meals.reduce((sum, meal) => sum + meal.proteins, 0)),
       fats: Math.round(meals.reduce((sum, meal) => sum + meal.fats, 0)),
