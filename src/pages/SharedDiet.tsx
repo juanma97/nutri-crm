@@ -1,5 +1,4 @@
-// @ts-nocheck
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import {
   Box,
@@ -11,44 +10,54 @@ import {
   Card,
   CardContent,
   Chip,
-  Grid
+  useTheme,
+  alpha,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow
 } from '@mui/material'
+import { motion } from 'framer-motion'
 import { useFirebase } from '../contexts/FirebaseContext'
-import LazyCharts from '../components/LazyCharts'
-import type { Diet, DayOfWeek, DynamicMeal } from '../types'
+import type { Diet, DayOfWeek } from '../types'
 
-// Función para ordenar los datos de la dieta
-const getOrderedDietData = (diet: Diet) => {
-  // Orden fijo de días de la semana
-  const dayOrder: DayOfWeek[] = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
+// Función para obtener todas las comidas únicas de la dieta
+const getUniqueMeals = (diet: Diet) => {
+  const allMeals = new Set<string>()
   
-  // Ordenar días según el orden fijo
-  const orderedDays = dayOrder.map(day => ({
-    day,
-    dayMeals: diet.meals[day]
-  }))
-  
-  // Para cada día, ordenar las comidas según el orden guardado en mealDefinitions
-  const orderedDaysWithMeals = orderedDays.map(({ day, dayMeals }) => {
-    const orderedMeals = Object.entries(dayMeals)
-      .map(([mealType, meals]) => {
-        const mealDefinition = diet.mealDefinitions?.find(m => m.id === mealType)
-        return {
-          mealType,
-          mealName: mealDefinition?.name || mealType,
-          order: mealDefinition?.order || 999, // Fallback para comidas sin orden
-          meals
-        }
-      })
-      .sort((a, b) => a.order - b.order) // Ordenar por el campo 'order'
-    
-    return {
-      day,
-      dayMeals: orderedMeals
-    }
+  Object.values(diet.meals).forEach(dayMeals => {
+    Object.keys(dayMeals).forEach(mealType => {
+      allMeals.add(mealType)
+    })
   })
   
-  return orderedDaysWithMeals
+  // Ordenar comidas según mealDefinitions
+  const orderedMeals = Array.from(allMeals).map(mealType => {
+    const mealDefinition = diet.mealDefinitions?.find(m => m.id === mealType)
+    return {
+      id: mealType,
+      name: mealDefinition?.name || mealType,
+      order: mealDefinition?.order || 999
+    }
+  }).sort((a, b) => a.order - b.order)
+  
+  return orderedMeals
+}
+
+// Función para obtener el nombre del día
+const getDayName = (day: DayOfWeek) => {
+  const dayNames: Record<DayOfWeek, string> = {
+    monday: 'Lunes',
+    tuesday: 'Martes',
+    wednesday: 'Miércoles',
+    thursday: 'Jueves',
+    friday: 'Viernes',
+    saturday: 'Sábado',
+    sunday: 'Domingo'
+  }
+  return dayNames[day]
 }
 
 const SharedDiet = () => {
@@ -57,6 +66,7 @@ const SharedDiet = () => {
   const [diet, setDiet] = useState<Diet | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const theme = useTheme()
 
   useEffect(() => {
     const loadDiet = async () => {
@@ -88,306 +98,325 @@ const SharedDiet = () => {
 
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
-        <CircularProgress size={60} sx={{ color: '#2e7d32' }} />
+      <Box sx={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        minHeight: '50vh',
+        background: theme.palette.mode === 'dark' 
+          ? 'rgba(18, 18, 18, 0.8)' 
+          : 'rgba(255, 255, 255, 0.8)'
+      }}>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5 }}
+        >
+          <CircularProgress size={60} sx={{ color: theme.palette.primary.main }} />
+        </motion.div>
       </Box>
     )
   }
 
   if (error || !diet) {
     return (
-      <Box sx={{ width: '100%', py: 3, px: 3 }}>
-        <Paper elevation={3} sx={{ p: 4, textAlign: 'center' }}>
-          <Alert severity="error" sx={{ mb: 3 }}>
-            {error || 'Dieta no encontrada'}
-          </Alert>
-          <Typography variant="h6" color="text.secondary" gutterBottom>
-            La dieta que buscas no existe o ha sido eliminada
-          </Typography>
-          <Button 
-            variant="contained" 
-            onClick={() => window.history.back()}
-            sx={{ mt: 2, backgroundColor: '#2e7d32' }}
-          >
-            Volver
-          </Button>
-        </Paper>
+      <Box sx={{ 
+        width: '100%', 
+        py: 3, 
+        px: 3,
+        background: theme.palette.mode === 'dark' 
+          ? 'rgba(18, 18, 18, 0.8)' 
+          : 'rgba(255, 255, 255, 0.8)',
+        minHeight: '100vh'
+      }}>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <Paper elevation={0} sx={{ 
+            p: 4, 
+            textAlign: 'center',
+            background: theme.palette.mode === 'dark' 
+              ? 'rgba(18, 18, 18, 0.8)' 
+              : 'rgba(255, 255, 255, 0.8)',
+            backdropFilter: 'blur(10px)',
+            border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+            borderRadius: 3
+          }}>
+            <Alert severity="error" sx={{ mb: 3 }}>
+              {error || 'Dieta no encontrada'}
+            </Alert>
+            <Typography variant="h6" color="text.secondary" gutterBottom>
+              La dieta que buscas no existe o ha sido eliminada
+            </Typography>
+            <Button 
+              variant="contained" 
+              onClick={() => window.history.back()}
+              sx={{ 
+                mt: 2, 
+                backgroundColor: theme.palette.primary.main,
+                '&:hover': {
+                  backgroundColor: theme.palette.primary.dark,
+                  transform: 'translateY(-2px)',
+                  boxShadow: '0 8px 25px rgba(0,0,0,0.15)'
+                }
+              }}
+            >
+              Volver
+            </Button>
+          </Paper>
+        </motion.div>
       </Box>
     )
   }
 
+  // Calcular calorías totales
+  const totalCalories = diet.customGoal?.calories || Math.round(diet.tmb)
+  
+  // Obtener comidas únicas y días de la semana
+  const uniqueMeals = getUniqueMeals(diet)
+  const dayOrder: DayOfWeek[] = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
+
   return (
-    <Box sx={{ width: '100%', py: 3, px: 3 }}>
-      {/* Header */}
-      <Paper elevation={3} sx={{ p: 4, mb: 3 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 3 }}>
-          <Box>
-            <Typography variant="h4" gutterBottom sx={{ color: '#2e7d32', fontWeight: 'bold' }}>
-              🍽️ {diet.name}
-            </Typography>
-            <Typography variant="h6" color="text.secondary">
-              Dieta compartida para {diet.clientName}
-            </Typography>
+    <Box sx={{ 
+      width: '100%', 
+      py: 3, 
+      px: 3,
+      background: theme.palette.mode === 'dark' 
+        ? 'rgba(18, 18, 18, 0.8)' 
+        : 'rgba(255, 255, 255, 0.8)',
+      minHeight: '100vh'
+    }}>
+      {/* Header Principal */}
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+      >
+        <Paper elevation={0} sx={{ 
+          p: 1, 
+          mb: 1,
+          background: theme.palette.mode === 'dark' 
+            ? 'rgba(18, 18, 18, 0.8)' 
+            : 'rgba(255, 255, 255, 0.8)',
+          backdropFilter: 'blur(10px)',
+          border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+          borderRadius: 3
+        }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+            <Box>
+              <Typography variant="h3" gutterBottom sx={{ 
+                color: theme.palette.primary.main, 
+                fontWeight: 'bold'
+              }}>
+                🍽️ {diet.name}
+              </Typography>
+              <Typography variant="h5" color="text.secondary" sx={{ fontWeight: 500, fontSize: '1.5rem' }}>
+                Plan nutricional para {diet.clientName}
+              </Typography>
+            </Box>
           </Box>
-          <Chip 
-            label="Dieta Compartida" 
-            color="primary" 
-            variant="outlined"
-            sx={{ fontWeight: 'bold' }}
-          />
-        </Box>
 
-        {/* Objetivos Nutricionales */}
-        <Box sx={{ mb: 3 }}>
-          <Typography variant="h6" gutterBottom sx={{ color: '#2e7d32', fontWeight: 'bold' }}>
-            🎯 Objetivos Nutricionales
-          </Typography>
-          
-          {diet.customGoal ? (
-            // Mostrar customGoal como objetivo principal
-            <Grid container spacing={2}>
-              <Grid item xs={12} md={2}>
-                <Card variant="outlined" sx={{ borderColor: '#2e7d32', borderWidth: 2 }}>
-                  <CardContent sx={{ textAlign: 'center' }}>
-                    <Typography variant="h6" color="primary" sx={{ fontWeight: 'bold' }}>
-                      {diet.customGoal.calories.toLocaleString()} kcal
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      Calorías Objetivo
-                    </Typography>
-                    <Typography variant="caption" color="success.main" sx={{ fontWeight: 'bold' }}>
-                      Basado en objetivo personalizado
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-              <Grid item xs={12} md={2}>
-                <Card variant="outlined">
-                  <CardContent sx={{ textAlign: 'center' }}>
-                    <Typography variant="h6" color="primary">
-                      {diet.customGoal.proteins}g
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      Proteínas
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-              <Grid item xs={12} md={2}>
-                <Card variant="outlined">
-                  <CardContent sx={{ textAlign: 'center' }}>
-                    <Typography variant="h6" color="primary">
-                      {diet.customGoal.carbs}g
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      Carbohidratos
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-              <Grid item xs={12} md={2}>
-                <Card variant="outlined">
-                  <CardContent sx={{ textAlign: 'center' }}>
-                    <Typography variant="h6" color="primary">
-                      {diet.customGoal.fats}g
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      Grasas
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-              <Grid item xs={12} md={2}>
-                <Card variant="outlined">
-                  <CardContent sx={{ textAlign: 'center' }}>
-                    <Typography variant="h6" color="primary">
-                      {diet.customGoal.fiber}g
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      Fibra
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-              <Grid item xs={12} md={2}>
-                <Card variant="outlined" sx={{ borderColor: '#666', borderWidth: 1 }}>
-                  <CardContent sx={{ textAlign: 'center' }}>
-                    <Typography variant="h6" color="text.secondary">
-                      {Math.round(diet.tmb).toLocaleString()} kcal
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      TMB Base
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      Tasa Metabólica Basal
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-            </Grid>
-          ) : (
-            // Mostrar solo TMB como objetivo
-            <Grid container spacing={2}>
-              <Grid item xs={12} md={3}>
-                <Card variant="outlined" sx={{ borderColor: '#2e7d32', borderWidth: 2 }}>
-                  <CardContent sx={{ textAlign: 'center' }}>
-                    <Typography variant="h6" color="primary" sx={{ fontWeight: 'bold' }}>
-                      {Math.round(diet.tmb).toLocaleString()} kcal
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      Calorías Objetivo
-                    </Typography>
-                    <Typography variant="caption" color="success.main" sx={{ fontWeight: 'bold' }}>
-                      Basado en TMB
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-            </Grid>
-          )}
-        </Box>
-
-        {/* Información del Cliente */}
-        <Grid container spacing={3}>
-          <Grid item xs={12} md={4}>
-            <Card variant="outlined">
-              <CardContent>
-                <Typography variant="h6" color="primary">
-                  {new Date(diet.createdAt).toLocaleDateString()}
+          {/* Información Principal - Calorías */}
+          <Box sx={{ 
+            display: 'grid', 
+            gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' },
+            gap: 3,
+            mb: 3
+          }}>
+            <Card elevation={0} sx={{ 
+              backgroundColor: theme.palette.primary.main,
+              color: 'white',
+              border: 'none'
+            }}>
+              <CardContent sx={{ textAlign: 'center', p: 3 }}>
+                <Typography variant="h2" sx={{ fontWeight: 'bold', mb: 1, color: 'white', fontSize: '3rem' }}>
+                  {totalCalories.toLocaleString()}
                 </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Fecha de Creación
+                <Typography variant="h6" sx={{ opacity: 0.9 , color: 'white'}}>
+                  Calorías Diarias
                 </Typography>
               </CardContent>
             </Card>
-          </Grid>
-          <Grid item xs={12} md={4}>
-            <Card variant="outlined">
-              <CardContent>
-                <Typography variant="h6" color="primary">
-                  {diet.clientData?.age || 'N/A'} años
+
+            <Card elevation={0} sx={{ 
+              background: theme.palette.mode === 'dark' 
+                ? 'rgba(18, 18, 18, 0.9)' 
+                : 'rgba(255, 255, 255, 0.9)',
+              backdropFilter: 'blur(10px)',
+              border: `1px solid ${alpha(theme.palette.divider, 0.1)}`
+            }}>
+              <CardContent sx={{ textAlign: 'center', p: 3 }}>
+                <Typography variant="h4" color="primary" sx={{ fontWeight: 'bold', mb: 1, fontSize: '2rem' }}>
+                  {diet.clientData?.age || 'N/A'}
                 </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Edad del Cliente
+                <Typography variant="body1" color="text.secondary">
+                  Años
                 </Typography>
               </CardContent>
             </Card>
-          </Grid>
-          <Grid item xs={12} md={4}>
-            <Card variant="outlined">
-              <CardContent>
-                <Typography variant="h6" color="primary">
+
+            <Card elevation={0} sx={{ 
+              background: theme.palette.mode === 'dark' 
+                ? 'rgba(18, 18, 18, 0.9)' 
+                : 'rgba(255, 255, 255, 0.9)',
+              backdropFilter: 'blur(10px)',
+              border: `1px solid ${alpha(theme.palette.divider, 0.1)}`
+            }}>
+              <CardContent sx={{ textAlign: 'center', p: 3 }}>
+                <Typography variant="h4" color="primary" sx={{ fontWeight: 'bold', mb: 1, fontSize: '2rem' }}>
                   {diet.clientData?.gender === 'male' ? 'Hombre' : 'Mujer'}
                 </Typography>
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="body1" color="text.secondary">
                   Género
                 </Typography>
               </CardContent>
             </Card>
-          </Grid>
-        </Grid>
-      </Paper>
-
-      {/* Diet Charts */}
-              <LazyCharts meals={diet.meals} tmb={diet.tmb} customGoal={diet.customGoal} />
-
-      {/* Supplements */}
-      {diet.supplements && diet.supplements.length > 0 && (
-        <Paper elevation={3} sx={{ p: 4, mt: 3 }}>
-          <Typography variant="h5" gutterBottom sx={{ color: '#2e7d32', fontWeight: 'bold' }}>
-            💊 Suplementación
-          </Typography>
-          <Grid container spacing={2}>
-            {diet.supplements.map((supplement) => (
-              <Grid item xs={12} md={6} lg={4} key={supplement.id}>
-                <Card variant="outlined">
-                  <CardContent>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
-                      <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-                        {supplement.name}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        {supplement.quantity}
-                      </Typography>
-                    </Box>
-                    {(supplement.time || supplement.comments) && (
-                      <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-                        {supplement.time && (
-                          <Chip 
-                            label={`⏰ ${supplement.time}`} 
-                            size="small" 
-                            color="primary" 
-                            variant="outlined"
-                          />
-                        )}
-                        {supplement.comments && (
-                          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                            {supplement.comments}
-                          </Typography>
-                        )}
-                      </Box>
-                    )}
-                  </CardContent>
-                </Card>
-              </Grid>
-            ))}
-          </Grid>
+          </Box>
         </Paper>
-      )}
+      </motion.div>
 
-      {/* Weekly Meal Plan */}
-      <Paper elevation={3} sx={{ p: 4, mt: 3 }}>
-        <Typography variant="h5" gutterBottom sx={{ color: '#2e7d32', fontWeight: 'bold' }}>
-          📅 Plan Semanal de Comidas
-        </Typography>
-        
-        <Grid container spacing={2}>
-          {getOrderedDietData(diet).map(({ day, dayMeals }) => (
-            <Grid item xs={12} md={6} lg={4} key={day}>
-              <Card variant="outlined">
-                <CardContent>
-                  <Typography variant="h6" gutterBottom sx={{ color: '#2e7d32' }}>
-                    {day.charAt(0).toUpperCase() + day.slice(1)}
-                  </Typography>
-                  
-                  {dayMeals.map(({ mealType, mealName, meals }) => (
-                    <Box key={mealType} sx={{ mb: 2 }}>
-                      <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                        {mealName}
-                      </Typography>
-                    
-                    {meals.length > 0 ? (
-                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                        {meals.map((meal, index) => (
-                          <Chip
-                            key={index}
-                            label={`${meal.foodName} (${meal.quantity}${meal.unit})`}
-                            size="small"
-                            variant="outlined"
-                            sx={{ fontSize: '0.75rem' }}
-                          />
-                        ))}
-                      </Box>
-                    ) : (
-                      <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic' }}>
-                        Sin alimentos programados
-                      </Typography>
-                    )}
-                  </Box>
+      {/* Plan Semanal de Comidas - Tabla */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.2 }}
+      >
+        <Paper elevation={0} sx={{ 
+          p: 2,
+          background: theme.palette.mode === 'dark' 
+            ? 'rgba(18, 18, 18, 0.8)' 
+            : 'rgba(255, 255, 255, 0.8)',
+          backdropFilter: 'blur(10px)',
+          border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+          borderRadius: 3
+        }}>
+          <Typography variant="h4" gutterBottom sx={{ 
+            color: theme.palette.primary.main, 
+            fontWeight: 'bold',
+            mb: 2
+          }}>
+            📅 Plan Semanal de Comidas
+          </Typography>
+          
+          <TableContainer sx={{ 
+            background: theme.palette.mode === 'dark' 
+              ? 'rgba(18, 18, 18, 0.9)' 
+              : 'rgba(255, 255, 255, 0.9)',
+            borderRadius: 2,
+            border: `1px solid ${alpha(theme.palette.divider, 0.1)}`
+          }}>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell sx={{ 
+                    fontWeight: 'bold', 
+                    color: theme.palette.primary.main,
+                    background: alpha(theme.palette.primary.main, 0.1),
+                    borderBottom: `2px solid ${theme.palette.primary.main}`
+                  }}>
+                    Comida
+                  </TableCell>
+                  {dayOrder.map(day => (
+                    <TableCell key={day} sx={{ 
+                      fontWeight: 'bold', 
+                      textAlign: 'center',
+                      color: theme.palette.primary.main,
+                      background: alpha(theme.palette.primary.main, 0.1),
+                      borderBottom: `2px solid ${theme.palette.primary.main}`
+                    }}>
+                      {getDayName(day)}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {uniqueMeals.map((meal) => (
+                  <TableRow key={meal.id} sx={{ 
+                    '&:hover': {
+                      backgroundColor: alpha(theme.palette.primary.main, 0.05)
+                    }
+                  }}>
+                    <TableCell sx={{ 
+                      fontWeight: 'bold',
+                      color: theme.palette.primary.main,
+                      background: alpha(theme.palette.primary.main, 0.05)
+                    }}>
+                      {meal.name}
+                    </TableCell>
+                    {dayOrder.map(day => {
+                      const dayMeals = diet.meals[day]
+                      const meals = dayMeals[meal.id] || []
+                      
+                      return (
+                        <TableCell key={day} sx={{ 
+                          textAlign: 'center',
+                          verticalAlign: 'top',
+                          py: 2
+                        }}>
+                          {meals.length > 0 ? (
+                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                              {meals.map((food, index) => (
+                                <Chip
+                                  key={index}
+                                  label={`${food.foodName} (${food.quantity}${food.unit})`}
+                                  size="small"
+                                  variant="outlined"
+                                  sx={{ 
+                                    fontSize: '0.75rem',
+                                    background: theme.palette.mode === 'dark' 
+                                      ? 'rgba(18, 18, 18, 0.8)' 
+                                      : 'rgba(255, 255, 255, 0.8)',
+                                    borderColor: alpha(theme.palette.primary.main, 0.3),
+                                    '&:hover': {
+                                      backgroundColor: alpha(theme.palette.primary.main, 0.1)
+                                    }
+                                  }}
+                                />
+                              ))}
+                            </Box>
+                          ) : (
+                            <Typography variant="body2" color="text.secondary" sx={{ 
+                              fontStyle: 'italic',
+                              fontSize: '0.8rem'
+                            }}>
+                              -
+                            </Typography>
+                          )}
+                        </TableCell>
+                      )
+                    })}
+                  </TableRow>
                 ))}
-                </CardContent>
-              </Card>
-            </Grid>
-          ))}
-        </Grid>
-      </Paper>
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Paper>
+      </motion.div>
 
       {/* Footer */}
-      <Paper elevation={1} sx={{ p: 3, mt: 3, textAlign: 'center' }}>
-        <Typography variant="body2" color="text.secondary">
-          Esta dieta fue creada con NutriCRM - Sistema de Gestión Nutricional
-        </Typography>
-      </Paper>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.6, delay: 0.4 }}
+      >
+        <Paper elevation={0} sx={{ 
+          p: 3, 
+          mt: 3, 
+          textAlign: 'center',
+          background: theme.palette.mode === 'dark' 
+            ? 'rgba(18, 18, 18, 0.8)' 
+            : 'rgba(255, 255, 255, 0.8)',
+          backdropFilter: 'blur(10px)',
+          border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+          borderRadius: 3
+        }}>
+          <Typography variant="body2" color="text.secondary">
+            Esta dieta fue creada con NutriCRM - Sistema de Gestión Nutricional
+          </Typography>
+        </Paper>
+      </motion.div>
     </Box>
   )
 }

@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
-import { ThemeProvider, createTheme } from '@mui/material/styles'
+import { ThemeProvider } from '@mui/material/styles'
 import CssBaseline from '@mui/material/CssBaseline'
 import { SnackbarProvider } from 'notistack'
 import { Suspense, lazy } from 'react'
@@ -10,22 +10,11 @@ import TopNav from './components/TopNav'
 import ScrollToTop from './components/ScrollToTop'
 import Login from './pages/Login'
 import { CircularProgress, Box } from '@mui/material'
+import theme from './styles/theme'
 import './App.css'
-
-const theme = createTheme({
-  palette: {
-    primary: {
-      main: '#2e7d32',
-    },
-    secondary: {
-      main: '#1976d2',
-    },
-  },
-})
 
 // Lazy load heavy pages
 const Dashboard = lazy(() => import('./pages/Dashboard'))
-const Reports = lazy(() => import('./pages/Reports'))
 const DietList = lazy(() => import('./pages/DietList'))
 const DietViewer = lazy(() => import('./pages/DietViewer'))
 const CreateDiet = lazy(() => import('./pages/CreateDiet'))
@@ -147,11 +136,6 @@ function App() {
                     <Route path="templates/assign/:templateId" element={
                       <Suspense fallback={<PageLoader />}>
                         <AssignTemplate />
-                      </Suspense>
-                    } />
-                    <Route path="reports" element={
-                      <Suspense fallback={<PageLoader />}>
-                        <Reports />
                       </Suspense>
                     } />
                   </Route>

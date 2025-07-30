@@ -3,12 +3,13 @@ import {
   Typography, 
   TextField, 
   FormControl, 
- 
   MenuItem, 
   Chip, 
   Alert,
   Box,
-  Paper
+  Paper,
+  useTheme,
+  alpha
 } from '@mui/material'
 import type { ClientFormData } from '../types'
 
@@ -27,6 +28,7 @@ const ClientInfoTab: React.FC<ClientInfoTabProps> = ({
   errors, 
   isEditMode 
 }) => {
+  const theme = useTheme()
   // Calcular edad automáticamente desde fecha de nacimiento
   const calculatedAge = useMemo(() => {
     if (formData.personalData.birthDate) {
@@ -66,8 +68,27 @@ const ClientInfoTab: React.FC<ClientInfoTabProps> = ({
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
       {/* Información Personal */}
-      <Paper elevation={1} sx={{ p: 3 }}>
-        <Typography variant="h6" sx={{ color: '#1976d2', mb: 3, fontWeight: 500 }}>
+      <Paper 
+        elevation={0}
+        sx={{ 
+          p: 3,
+          background: `linear-gradient(135deg, ${alpha(theme.palette.background.paper, 0.9)} 0%, ${alpha(theme.palette.background.paper, 0.7)} 100%)`,
+          border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+          borderRadius: 3,
+          backdropFilter: 'blur(10px)',
+          boxShadow: `0 8px 32px ${alpha(theme.palette.common.black, 0.1)}`
+        }}
+      >
+        <Typography variant="h6" sx={{ 
+          color: theme.palette.primary.main, 
+          mb: 3, 
+          fontWeight: 600,
+          background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+          backgroundClip: 'text',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          letterSpacing: '-0.5px'
+        }}>
           Información Personal
         </Typography>
         
@@ -81,6 +102,18 @@ const ClientInfoTab: React.FC<ClientInfoTabProps> = ({
             required
             fullWidth
             placeholder="Nombre y apellidos"
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                borderRadius: 2,
+                backgroundColor: alpha(theme.palette.background.paper, 0.8),
+                '&:hover': {
+                  backgroundColor: alpha(theme.palette.background.paper, 0.9),
+                },
+                '&.Mui-focused': {
+                  backgroundColor: alpha(theme.palette.background.paper, 0.95),
+                }
+              }
+            }}
           />
           <TextField
             type="email"
@@ -92,6 +125,18 @@ const ClientInfoTab: React.FC<ClientInfoTabProps> = ({
             required
             fullWidth
             placeholder="tu@email.com"
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                borderRadius: 2,
+                backgroundColor: alpha(theme.palette.background.paper, 0.8),
+                '&:hover': {
+                  backgroundColor: alpha(theme.palette.background.paper, 0.9),
+                },
+                '&.Mui-focused': {
+                  backgroundColor: alpha(theme.palette.background.paper, 0.95),
+                }
+              }
+            }}
           />
           <TextField
             label="Teléfono"
@@ -99,6 +144,18 @@ const ClientInfoTab: React.FC<ClientInfoTabProps> = ({
             onChange={(e) => onFormDataChange('phone', e.target.value)}
             fullWidth
             placeholder="+34 600 000 000"
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                borderRadius: 2,
+                backgroundColor: alpha(theme.palette.background.paper, 0.8),
+                '&:hover': {
+                  backgroundColor: alpha(theme.palette.background.paper, 0.9),
+                },
+                '&.Mui-focused': {
+                  backgroundColor: alpha(theme.palette.background.paper, 0.95),
+                }
+              }
+            }}
           />
           <FormControl fullWidth>
             <TextField
@@ -107,6 +164,19 @@ const ClientInfoTab: React.FC<ClientInfoTabProps> = ({
               value={formData.gender}
               onChange={(e) => onFormDataChange('gender', e.target.value)}
               fullWidth
+              sx={{
+                borderRadius: 2,
+                backgroundColor: alpha(theme.palette.background.paper, 0.8),
+                '& .MuiOutlinedInput-notchedOutline': {
+                  borderColor: alpha(theme.palette.divider, 0.2),
+                },
+                '&:hover .MuiOutlinedInput-notchedOutline': {
+                  borderColor: alpha(theme.palette.primary.main, 0.3),
+                },
+                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                  borderColor: theme.palette.primary.main,
+                }
+              }}
             >
               <MenuItem value="">Seleccionar género</MenuItem>
               <MenuItem value="male">Masculino</MenuItem>
@@ -121,6 +191,18 @@ const ClientInfoTab: React.FC<ClientInfoTabProps> = ({
             onChange={(e) => handleBirthDateChange(e.target.value)}
             fullWidth
             InputLabelProps={{ shrink: true }}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                borderRadius: 2,
+                backgroundColor: alpha(theme.palette.background.paper, 0.8),
+                '&:hover': {
+                  backgroundColor: alpha(theme.palette.background.paper, 0.9),
+                },
+                '&.Mui-focused': {
+                  backgroundColor: alpha(theme.palette.background.paper, 0.95),
+                }
+              }
+            }}
           />
           <TextField
             label="Edad"
@@ -138,17 +220,53 @@ const ClientInfoTab: React.FC<ClientInfoTabProps> = ({
                   size="small" 
                   color="success" 
                   variant="outlined"
-                  sx={{ ml: 1 }}
+                  sx={{ 
+                    ml: 1,
+                    backgroundColor: alpha(theme.palette.success.main, 0.1),
+                    borderColor: alpha(theme.palette.success.main, 0.3),
+                    color: theme.palette.success.main
+                  }}
                 />
               )
+            }}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                borderRadius: 2,
+                backgroundColor: alpha(theme.palette.background.paper, 0.8),
+                '&:hover': {
+                  backgroundColor: alpha(theme.palette.background.paper, 0.9),
+                },
+                '&.Mui-focused': {
+                  backgroundColor: alpha(theme.palette.background.paper, 0.95),
+                }
+              }
             }}
           />
         </Box>
       </Paper>
 
       {/* Estado del Cliente */}
-      <Paper elevation={1} sx={{ p: 3 }}>
-        <Typography variant="h6" sx={{ color: '#1976d2', mb: 3, fontWeight: 500 }}>
+      <Paper 
+        elevation={0}
+        sx={{ 
+          p: 3,
+          background: `linear-gradient(135deg, ${alpha(theme.palette.background.paper, 0.9)} 0%, ${alpha(theme.palette.background.paper, 0.7)} 100%)`,
+          border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+          borderRadius: 3,
+          backdropFilter: 'blur(10px)',
+          boxShadow: `0 8px 32px ${alpha(theme.palette.common.black, 0.1)}`
+        }}
+      >
+        <Typography variant="h6" sx={{ 
+          color: theme.palette.primary.main, 
+          mb: 3, 
+          fontWeight: 600,
+          background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+          backgroundClip: 'text',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          letterSpacing: '-0.5px'
+        }}>
           Estado del Cliente
         </Typography>
         

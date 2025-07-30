@@ -28,7 +28,9 @@ import {
   Tooltip,
   Alert,
   Snackbar,
-  CircularProgress
+  CircularProgress,
+  useTheme,
+  alpha
 } from '@mui/material'
 import { useNavigate } from 'react-router-dom'
 import AddIcon from '@mui/icons-material/Add'
@@ -41,10 +43,13 @@ import SearchIcon from '@mui/icons-material/Search'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
 import ViewListIcon from '@mui/icons-material/ViewList'
 import ViewModuleIcon from '@mui/icons-material/ViewModule'
+import RestaurantIcon from '@mui/icons-material/Restaurant'
+import { motion } from 'framer-motion'
 import type { Diet, DayOfWeek } from '../types'
 import { useFirebase } from '../contexts/FirebaseContext'
 
 const DietList = () => {
+  const theme = useTheme()
   const { diets, deleteDiet, loadingDiets } = useFirebase()
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
@@ -157,117 +162,367 @@ const DietList = () => {
 
   if (loadingDiets) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
-        <CircularProgress size={60} sx={{ color: '#2e7d32' }} />
+      <Box sx={{ 
+        display: 'flex', 
+        flexDirection: 'column',
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        minHeight: '50vh',
+        gap: 2
+      }}>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5 }}
+        >
+          <CircularProgress 
+            size={60} 
+            sx={{ 
+              color: theme.palette.primary.main,
+              filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.1))'
+            }} 
+          />
+        </motion.div>
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
+          <Typography 
+            variant="body1" 
+            color="text.secondary"
+            sx={{ fontWeight: 500 }}
+          >
+            Cargando dietas...
+          </Typography>
+        </motion.div>
       </Box>
     )
   }
 
   return (
-    <Box sx={{ width: '100%', height: '100vw', py: 3, px: 3 }}>
+    <Box sx={{ 
+      width: '100%', 
+      minHeight: '100vh',
+      py: 3, 
+      px: 3,
+      background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.02)} 0%, ${alpha(theme.palette.background.default, 0.8)} 100%)`,
+      position: 'relative'
+    }}>
+      {/* Decorative elements */}
+      <Box sx={{
+        position: 'absolute',
+        top: 0,
+        right: 0,
+        width: 200,
+        height: 200,
+        background: `radial-gradient(circle, ${alpha(theme.palette.primary.main, 0.1)} 0%, transparent 70%)`,
+        borderRadius: '50%',
+        zIndex: 0
+      }} />
+      
       {/* Header */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h4">Diets</Typography>
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={handleCreateDiet}
-          sx={{ backgroundColor: '#2e7d32' }}
-        >
-          Create Diet
-        </Button>
-      </Box>
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+      >
+        <Box sx={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center', 
+          mb: 4,
+          position: 'relative',
+          zIndex: 1
+        }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <motion.div
+              whileHover={{ rotate: 5 }}
+              transition={{ duration: 0.2 }}
+            >
+              <RestaurantIcon sx={{ fontSize: 32, color: theme.palette.primary.main }} />
+            </motion.div>
+            <Typography 
+              variant="h4" 
+              sx={{ 
+                fontWeight: 700,
+                color: theme.palette.text.primary,
+                letterSpacing: '-0.01em'
+              }}
+            >
+              Dietas
+            </Typography>
+          </Box>
+          <motion.div
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={handleCreateDiet}
+              sx={{
+                px: 3,
+                py: 1.5,
+                borderRadius: 2,
+                textTransform: 'none',
+                fontWeight: 600,
+                fontSize: '1rem',
+                background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+                boxShadow: `0 8px 25px ${alpha(theme.palette.primary.main, 0.3)}`,
+                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                '&:hover': {
+                  background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
+                  boxShadow: `0 12px 35px ${alpha(theme.palette.primary.main, 0.4)}`,
+                  transform: 'translateY(-2px)',
+                },
+                '&:focus': {
+                  outline: 'none',
+                }
+              }}
+            >
+              Crear Dieta
+            </Button>
+          </motion.div>
+        </Box>
+      </motion.div>
 
       {/* Filters and Search */}
-      <Paper elevation={2} sx={{ p: 3, mb: 3 }}>
-        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, alignItems: 'center' }}>
-          <Box sx={{ flex: '1 1 300px', minWidth: '250px' }}>
-            <TextField
-              fullWidth
-              placeholder="Search diets or clients..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon />
-                  </InputAdornment>
-                ),
-              }}
-            />
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.1 }}
+      >
+        <Paper 
+          elevation={0}
+          sx={{ 
+            p: 3, 
+            mb: 3,
+            borderRadius: 3,
+            background: theme.palette.mode === 'dark'
+              ? 'rgba(30, 30, 30, 0.8)'
+              : 'rgba(255, 255, 255, 0.8)',
+            backdropFilter: 'blur(20px)',
+            border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+            position: 'relative',
+            zIndex: 1
+          }}
+        >
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, alignItems: 'center' }}>
+            <Box sx={{ flex: '1 1 300px', minWidth: '250px' }}>
+              <TextField
+                fullWidth
+                placeholder="Buscar dietas o clientes..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon sx={{ color: theme.palette.text.secondary }} />
+                    </InputAdornment>
+                  ),
+                }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: 2,
+                    backgroundColor: theme.palette.background.paper,
+                    transition: 'all 0.3s ease',
+                    '&:hover .MuiOutlinedInput-notchedOutline': {
+                      borderColor: alpha(theme.palette.primary.main, 0.5),
+                    },
+                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                      borderColor: theme.palette.primary.main,
+                      borderWidth: 2,
+                    },
+                    '& input': {
+                      color: theme.palette.text.primary,
+                    },
+                    '& input:-webkit-autofill': {
+                      WebkitBoxShadow: `0 0 0 1000px ${theme.palette.background.paper} inset`,
+                      WebkitTextFillColor: theme.palette.text.primary,
+                      backgroundColor: theme.palette.background.paper,
+                    },
+                  },
+                  '& .MuiInputLabel-root.Mui-focused': {
+                    color: theme.palette.primary.main,
+                  }
+                }}
+              />
+            </Box>
+            <Box sx={{ flex: '1 1 150px', minWidth: '120px' }}>
+              <FormControl fullWidth>
+                <InputLabel>Estado</InputLabel>
+                <Select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  label="Estado"
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: 2,
+                      backgroundColor: theme.palette.background.paper,
+                      '&:hover .MuiOutlinedInput-notchedOutline': {
+                        borderColor: alpha(theme.palette.primary.main, 0.5),
+                      },
+                      '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                        borderColor: theme.palette.primary.main,
+                        borderWidth: 2,
+                      },
+                    },
+                    '& .MuiInputLabel-root.Mui-focused': {
+                      color: theme.palette.primary.main,
+                    }
+                  }}
+                >
+                  <MenuItem value="all">Todos</MenuItem>
+                  <MenuItem value="active">Activas</MenuItem>
+                  <MenuItem value="inactive">Inactivas</MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
+            <Box sx={{ flex: '1 1 150px', minWidth: '120px' }}>
+              <FormControl fullWidth>
+                <InputLabel>Fecha</InputLabel>
+                <Select
+                  value={dateFilter}
+                  onChange={(e) => setDateFilter(e.target.value)}
+                  label="Fecha"
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: 2,
+                      backgroundColor: theme.palette.background.paper,
+                      '&:hover .MuiOutlinedInput-notchedOutline': {
+                        borderColor: alpha(theme.palette.primary.main, 0.5),
+                      },
+                      '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                        borderColor: theme.palette.primary.main,
+                        borderWidth: 2,
+                      },
+                    },
+                    '& .MuiInputLabel-root.Mui-focused': {
+                      color: theme.palette.primary.main,
+                    }
+                  }}
+                >
+                  <MenuItem value="all">Todas</MenuItem>
+                  <MenuItem value="recent">Recientes (7 días)</MenuItem>
+                  <MenuItem value="old">Antiguas</MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              <Tooltip title="Vista de Tabla">
+                <IconButton
+                  onClick={() => setViewMode('table')}
+                  sx={{
+                    color: viewMode === 'table' ? theme.palette.primary.main : theme.palette.text.secondary,
+                    backgroundColor: viewMode === 'table' ? alpha(theme.palette.primary.main, 0.1) : 'transparent',
+                    borderRadius: 2,
+                    '&:hover': {
+                      backgroundColor: alpha(theme.palette.primary.main, 0.1),
+                    },
+                    '&:focus': {
+                      outline: 'none',
+                    }
+                  }}
+                >
+                  <ViewListIcon />
+                </IconButton>
+              </Tooltip>
+              <Tooltip title="Vista de Tarjetas">
+                <IconButton
+                  onClick={() => setViewMode('cards')}
+                  sx={{
+                    color: viewMode === 'cards' ? theme.palette.primary.main : theme.palette.text.secondary,
+                    backgroundColor: viewMode === 'cards' ? alpha(theme.palette.primary.main, 0.1) : 'transparent',
+                    borderRadius: 2,
+                    '&:hover': {
+                      backgroundColor: alpha(theme.palette.primary.main, 0.1),
+                    },
+                    '&:focus': {
+                      outline: 'none',
+                    }
+                  }}
+                >
+                  <ViewModuleIcon />
+                </IconButton>
+              </Tooltip>
+            </Box>
           </Box>
-          <Box sx={{ flex: '1 1 150px', minWidth: '120px' }}>
-            <FormControl fullWidth>
-              <InputLabel>Status</InputLabel>
-              <Select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                label="Status"
-              >
-                <MenuItem value="all">All</MenuItem>
-                <MenuItem value="active">Active</MenuItem>
-                <MenuItem value="inactive">Inactive</MenuItem>
-              </Select>
-            </FormControl>
-          </Box>
-          <Box sx={{ flex: '1 1 150px', minWidth: '120px' }}>
-            <FormControl fullWidth>
-              <InputLabel>Date</InputLabel>
-              <Select
-                value={dateFilter}
-                onChange={(e) => setDateFilter(e.target.value)}
-                label="Date"
-              >
-                <MenuItem value="all">All</MenuItem>
-                <MenuItem value="recent">Recent (7 days)</MenuItem>
-                <MenuItem value="old">Older</MenuItem>
-              </Select>
-            </FormControl>
-          </Box>
-          <Box sx={{ display: 'flex', gap: 1 }}>
-            <Tooltip title="Table View">
-              <IconButton
-                onClick={() => setViewMode('table')}
-                color={viewMode === 'table' ? 'primary' : 'default'}
-              >
-                <ViewListIcon />
-              </IconButton>
-            </Tooltip>
-            <Tooltip title="Card View">
-              <IconButton
-                onClick={() => setViewMode('cards')}
-                color={viewMode === 'cards' ? 'primary' : 'default'}
-              >
-                <ViewModuleIcon />
-              </IconButton>
-            </Tooltip>
-          </Box>
-        </Box>
-      </Paper>
+        </Paper>
+      </motion.div>
 
       {/* Results Count */}
-      <Box sx={{ mb: 2 }}>
-        <Typography variant="body2" color="text.secondary">
-          {filteredDiets.length} diet{filteredDiets.length !== 1 ? 's' : ''} found
-        </Typography>
-      </Box>
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.2 }}
+      >
+        <Box sx={{ 
+          mb: 3,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 1,
+          position: 'relative',
+          zIndex: 1
+        }}>
+          <Chip 
+            label={filteredDiets.length} 
+            size="small"
+            sx={{
+              backgroundColor: alpha(theme.palette.primary.main, 0.1),
+              color: theme.palette.primary.main,
+              fontWeight: 600
+            }}
+          />
+          <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
+            {filteredDiets.length === 1 ? 'dieta encontrada' : 'dietas encontradas'}
+          </Typography>
+        </Box>
+      </motion.div>
 
       {/* Table View */}
       {viewMode === 'table' && (
-        <Paper elevation={3}>
-          <TableContainer>
-            <Table sx={{ tableLayout: 'fixed', width: '100%' }}>
-              <TableHead>
-                <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
-                  <TableCell>Name</TableCell>
-                  <TableCell>Client</TableCell>
-                  <TableCell>TMB</TableCell>
-                  <TableCell>Total Calories</TableCell>
-                  <TableCell>Created</TableCell>
-                  <TableCell>Status</TableCell>
-                  <TableCell align="center">Actions</TableCell>
-                </TableRow>
-              </TableHead>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.3 }}
+        >
+          <Paper 
+            elevation={0}
+            sx={{
+              borderRadius: 3,
+              background: theme.palette.mode === 'dark'
+                ? 'rgba(30, 30, 30, 0.8)'
+                : 'rgba(255, 255, 255, 0.8)',
+              backdropFilter: 'blur(20px)',
+              border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+              position: 'relative',
+              zIndex: 1
+            }}
+          >
+            <TableContainer>
+              <Table sx={{ tableLayout: 'fixed', width: '100%' }}>
+                <TableHead>
+                  <TableRow sx={{ 
+                    backgroundColor: alpha(theme.palette.primary.main, 0.05),
+                    '& th': {
+                      borderBottom: `2px solid ${alpha(theme.palette.primary.main, 0.2)}`,
+                      fontWeight: 600,
+                      fontSize: '0.875rem',
+                      color: theme.palette.primary.main,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.5px'
+                    }
+                  }}>
+                    <TableCell>Nombre</TableCell>
+                    <TableCell>Cliente</TableCell>
+                    <TableCell>TMB</TableCell>
+                    <TableCell>Calorías Totales</TableCell>
+                    <TableCell>Creada</TableCell>
+                    <TableCell>Estado</TableCell>
+                    <TableCell align="center">Acciones</TableCell>
+                  </TableRow>
+                </TableHead>
               <TableBody>
                 {filteredDiets.map((diet) => {
                   const stats = calculateDietStats(diet)
@@ -294,7 +549,14 @@ const DietList = () => {
                         <Chip 
                           label="Active" 
                           color="success" 
-                          size="small" 
+                          size="small"
+                          sx={{
+                            color: 'white',
+                            fontWeight: 600,
+                            '& .MuiChip-label': {
+                              color: 'white'
+                            }
+                          }}
                         />
                       </TableCell>
                       <TableCell align="center">
@@ -342,6 +604,7 @@ const DietList = () => {
             </Table>
           </TableContainer>
         </Paper>
+        </motion.div>
       )}
 
       {/* Cards View */}
@@ -368,7 +631,18 @@ const DietList = () => {
                           />
                         )}
                       </Box>
-                      <Chip label="Active" color="success" size="small" />
+                      <Chip 
+                        label="Active" 
+                        color="success" 
+                        size="small"
+                        sx={{
+                          color: 'white',
+                          fontWeight: 600,
+                          '& .MuiChip-label': {
+                            color: 'white'
+                          }
+                        }}
+                      />
                     </Box>
                     
                     <Box sx={{ mb: 2 }}>

@@ -1,0 +1,47 @@
+[1mdiff --git a/src/App.tsx b/src/App.tsx[m
+[1mindex cf3784e..984c505 100644[m
+[1m--- a/src/App.tsx[m
+[1m+++ b/src/App.tsx[m
+[36m@@ -1,5 +1,5 @@[m
+ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'[m
+[31m-import { ThemeProvider, createTheme } from '@mui/material/styles'[m
+[32m+[m[32mimport { ThemeProvider } from '@mui/material/styles'[m
+ import CssBaseline from '@mui/material/CssBaseline'[m
+ import { SnackbarProvider } from 'notistack'[m
+ import { Suspense, lazy } from 'react'[m
+[36m@@ -10,22 +10,11 @@[m [mimport TopNav from './components/TopNav'[m
+ import ScrollToTop from './components/ScrollToTop'[m
+ import Login from './pages/Login'[m
+ import { CircularProgress, Box } from '@mui/material'[m
+[32m+[m[32mimport theme from './styles/theme'[m
+ import './App.css'[m
+ [m
+[31m-const theme = createTheme({[m
+[31m-  palette: {[m
+[31m-    primary: {[m
+[31m-      main: '#2e7d32',[m
+[31m-    },[m
+[31m-    secondary: {[m
+[31m-      main: '#1976d2',[m
+[31m-    },[m
+[31m-  },[m
+[31m-})[m
+[31m-[m
+ // Lazy load heavy pages[m
+ const Dashboard = lazy(() => import('./pages/Dashboard'))[m
+[31m-const Reports = lazy(() => import('./pages/Reports'))[m
+ const DietList = lazy(() => import('./pages/DietList'))[m
+ const DietViewer = lazy(() => import('./pages/DietViewer'))[m
+ const CreateDiet = lazy(() => import('./pages/CreateDiet'))[m
+[36m@@ -149,11 +138,6 @@[m [mfunction App() {[m
+                         <AssignTemplate />[m
+                       </Suspense>[m
+                     } />[m
+[31m-                    <Route path="reports" element={[m
+[31m-                      <Suspense fallback={<PageLoader />}>[m
+[31m-                        <Reports />[m
+[31m-                      </Suspense>[m
+[31m-                    } />[m
+                   </Route>[m
+                   <Route path="/diet/:shareId" element={[m
+                     <Suspense fallback={<PageLoader />}>[m
