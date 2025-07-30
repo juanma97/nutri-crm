@@ -349,7 +349,7 @@ const EditTemplate = () => {
                 }
               }}
             >
-              {steps.map((label, index) => (
+              {steps.map((label) => (
                 <Step key={label}>
                   <StepLabel 
                     StepIconProps={{

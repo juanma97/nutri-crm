@@ -47,8 +47,7 @@ import {
   ViewModule as ViewModuleIcon,
   MoreVert as MoreVertIcon,
   LibraryBooks as LibraryIcon,
-  TrendingUp as TrendingIcon,
-  AccessTime as TimeIcon
+
 } from '@mui/icons-material'
 import { useNavigate } from 'react-router-dom'
 import { useFirebase } from '../contexts/FirebaseContext'
@@ -472,14 +471,11 @@ const DietTemplates = () => {
                     return (
                       <motion.tr
                         key={template.id}
-                        component={TableRow}
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.3, delay: index * 0.05 }}
-                        sx={{
-                          '&:hover': {
-                            backgroundColor: alpha(theme.palette.primary.main, 0.02),
-                          }
+                        style={{
+                          display: 'table-row'
                         }}
                       >
                         <TableCell>
