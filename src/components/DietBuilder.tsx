@@ -88,9 +88,9 @@ const DietBuilder = ({ tmb, onSave, onBack, initialMeals, initialSupplements, in
   // Comidas por defecto para migración
   const defaultMeals: DynamicMeal[] = [
     { id: 'breakfast', name: 'Desayuno', order: 1 },
-    { id: 'morningSnack', name: 'Me Mañana', order: 2 },
+    { id: 'morningSnack', name: 'Media mañana', order: 2 },
     { id: 'lunch', name: 'Comida', order: 3 },
-    { id: 'afternoonSnack', name: 'Colación Tarde', order: 4 },
+    { id: 'afternoonSnack', name: 'Merienda', order: 4 },
     { id: 'dinner', name: 'Cena', order: 5 }
   ]
 
