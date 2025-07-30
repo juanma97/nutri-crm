@@ -24,20 +24,13 @@ export const convertDietToTemplate = (diet: Diet, templateName: string, descript
     })
   })
 
-  const avgCalories = Math.round(totalCalories / 7)
-  const avgProteins = Math.round(totalProteins / 7)
-  const avgCarbs = Math.round(totalCarbs / 7)
-  const avgFats = Math.round(totalFats / 7)
+
 
   // Crear objeto de plantilla excluyendo campos sensibles
   const templateData: DietTemplateCreateData = {
     name: templateName,
     description: description || `Plantilla basada en la dieta de ${diet.clientName}`,
     category,
-    targetCalories: avgCalories,
-    targetProteins: avgProteins,
-    targetCarbs: avgCarbs,
-    targetFats: avgFats,
     meals: diet.meals, // Copiar estructura de comidas tal cual
     mealDefinitions: diet.mealDefinitions || [], // Definiciones de comidas
     supplements: diet.supplements || [], // Suplementos

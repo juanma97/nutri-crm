@@ -33,8 +33,8 @@ const EditDiet = () => {
       if (foundDiet) {
         setDiet(foundDiet)
         setTmbData({
-          tmb: foundDiet.tmb,
-          clientName: foundDiet.clientName
+          tmb: foundDiet.tmb || 0,
+          clientName: foundDiet.clientName || ''
         })
         setDietName(foundDiet.name || `Diet for ${foundDiet.clientName}`)
       }
@@ -184,7 +184,7 @@ const EditDiet = () => {
         </Typography>
 
         <Typography variant="body1" sx={{ mb: 3, color: 'text.secondary' }}>
-          Editando la dieta para {diet.clientName} (TMB: {Math.round(diet.tmb)} kcal)
+          Editando la dieta para {diet.clientName} (TMB: {diet.tmb ? Math.round(diet.tmb) : 'N/A'} kcal)
         </Typography>
 
         <Box sx={{ mb: 3, display: 'flex', gap: 2, alignItems: 'center' }}>

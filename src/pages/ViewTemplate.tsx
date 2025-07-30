@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import {
   Box,
@@ -249,7 +249,7 @@ const ViewTemplate = () => {
                 <strong>Última actualización:</strong>
               </Typography>
               <Typography variant="body1">
-                {template.updatedAt.toLocaleDateString()}
+                {template.updatedAt ? template.updatedAt.toLocaleDateString() : 'N/A'}
               </Typography>
             </Box>
             

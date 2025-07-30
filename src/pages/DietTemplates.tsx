@@ -297,7 +297,7 @@ const DietTemplates = () => {
                     </TableCell>
                     <TableCell>
                       <Typography variant="body2">
-                        {template.targetCalories || stats.totalCalories} cal
+                        {stats.totalCalories} cal
                       </Typography>
                     </TableCell>
                     <TableCell>
@@ -307,10 +307,10 @@ const DietTemplates = () => {
                     </TableCell>
                     <TableCell>
                       <Chip
-                        label={`${template.usageCount} usos`}
+                        label={`${template.usageCount || 0} usos`}
                         variant="outlined"
                         size="small"
-                        color={template.usageCount > 0 ? 'success' : 'default'}
+                        color={(template.usageCount || 0) > 0 ? 'success' : 'default'}
                       />
                     </TableCell>
                     <TableCell>
@@ -368,7 +368,7 @@ const DietTemplates = () => {
                     
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
                       <Typography variant="body2">
-                        <strong>Calorías:</strong> {template.targetCalories || stats.totalCalories} cal/día
+                        <strong>Calorías:</strong> {stats.totalCalories} cal/día
                       </Typography>
                       <Typography variant="body2">
                         <strong>Comidas:</strong> {stats.totalMeals}
@@ -377,10 +377,10 @@ const DietTemplates = () => {
                     
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <Chip
-                        label={`${template.usageCount} usos`}
+                        label={`${template.usageCount || 0} usos`}
                         variant="outlined"
                         size="small"
-                        color={template.usageCount > 0 ? 'success' : 'default'}
+                        color={(template.usageCount || 0) > 0 ? 'success' : 'default'}
                       />
                       <Typography variant="caption" color="text.secondary">
                         {new Date(template.createdAt).toLocaleDateString()}

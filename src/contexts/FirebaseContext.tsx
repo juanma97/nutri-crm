@@ -734,7 +734,7 @@ export const FirebaseProvider: React.FC<{ children: ReactNode }> = ({ children }
   }
 
   // En FirebaseContext.tsx - Función para crear dieta desde plantilla
-  const createClientDietFromTemplate = async (templateId: string, clientId: string, clientName: string, tmb: number): Promise<boolean> => {
+  const createClientDietFromTemplate = async (templateId: string, _clientId: string, clientName: string, tmb: number): Promise<boolean> => {
     if (!user) return false
     
     try {

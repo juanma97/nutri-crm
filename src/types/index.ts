@@ -113,7 +113,7 @@ export interface Client {
   age?: number
   weight?: number
   height?: number
-  gender: 'male' | 'female' | ''
+  gender: 'male' | 'female' | 'other' | ''
   activityLevel: 'sedentary' | 'lightly_active' | 'moderately_active' | 'very_active' | 'extremely_active'
   goal: 'lose_weight' | 'maintain' | 'gain_weight' | 'muscle_gain' | 'health'
   medicalConditions: string

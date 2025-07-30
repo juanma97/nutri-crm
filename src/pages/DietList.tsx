@@ -81,7 +81,7 @@ const DietList = () => {
 
   const filteredDiets = diets.filter(diet => {
     const matchesSearch = diet.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      diet.clientName.toLowerCase().includes(searchTerm.toLowerCase())
+      (diet.clientName?.toLowerCase().includes(searchTerm.toLowerCase()) || false)
     const matchesStatus = statusFilter === 'all' || statusFilter === 'active'
     const matchesDate = dateFilter === 'all' || 
       (dateFilter === 'recent' && (new Date().getTime() - diet.createdAt.getTime()) < 7 * 24 * 60 * 60 * 1000) ||
@@ -287,7 +287,7 @@ const DietList = () => {
                         </Box>
                       </TableCell>
                       <TableCell>{diet.clientName}</TableCell>
-                      <TableCell>{Math.round(diet.tmb).toLocaleString()} cal</TableCell>
+                      <TableCell>{diet.tmb ? Math.round(diet.tmb).toLocaleString() : 'N/A'} cal</TableCell>
                       <TableCell>{Math.round(stats.totalCalories)} cal</TableCell>
                       <TableCell>{new Date(diet.createdAt).toLocaleDateString()}</TableCell>
                       <TableCell>
@@ -373,7 +373,7 @@ const DietList = () => {
                     
                     <Box sx={{ mb: 2 }}>
                       <Typography variant="body2" color="text.secondary">
-                        TMB: {Math.round(diet.tmb).toLocaleString()} cal
+                        TMB: {diet.tmb ? Math.round(diet.tmb).toLocaleString() : 'N/A'} cal
                       </Typography>
                       <Typography variant="body2" color="text.secondary">
                         Total: {Math.round(stats.totalCalories)} cal
@@ -460,7 +460,7 @@ const DietList = () => {
                 </Box>
                 <Box sx={{ flex: '1 1 200px', minWidth: '200px' }}>
                   <Typography variant="subtitle2">TMB:</Typography>
-                  <Typography variant="body1">{Math.round(selectedDiet.tmb).toLocaleString()} cal</Typography>
+                  <Typography variant="body1">{selectedDiet.tmb ? Math.round(selectedDiet.tmb).toLocaleString() : 'N/A'} cal</Typography>
                 </Box>
                 <Box sx={{ flex: '1 1 200px', minWidth: '200px' }}>
                   <Typography variant="subtitle2">Created:</Typography>

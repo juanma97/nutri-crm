@@ -192,7 +192,7 @@ const DietViewer = () => {
           </Button>
         </Box>
         <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mb: 2 }}>
-          <Chip label={`TMB: ${Math.round(diet.tmb)} cal`} color="primary" />
+          <Chip label={`TMB: ${diet.tmb ? Math.round(diet.tmb) : 'N/A'} cal`} color="primary" />
           {diet.customGoal && (
             <Chip label={`Objetivo: ${diet.customGoal.calories} cal`} color="secondary" />
           )}
@@ -208,7 +208,7 @@ const DietViewer = () => {
         <Typography variant="h5" gutterBottom>
           Nutrition Analysis
         </Typography>
-        <LazyCharts meals={diet.meals as unknown as Record<DayOfWeek, Record<string, DietMeal[]>>} tmb={diet.tmb} customGoal={diet.customGoal} />
+        <LazyCharts meals={diet.meals as unknown as Record<DayOfWeek, Record<string, DietMeal[]>>} tmb={diet.tmb || 0} customGoal={diet.customGoal} />
       </Paper>
 
       {/* Supplements */}
