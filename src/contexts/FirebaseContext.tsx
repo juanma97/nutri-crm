@@ -14,7 +14,7 @@ import {
 import { db } from '../firebase/config'
 import { useAuth } from './AuthContext'
 import { useNotifications } from '../hooks/useNotifications'
-import type { Diet, Food, Client } from '../types'
+import type { Diet, Food, Client, DietTemplate, DietTemplateCreateData, DietTemplateUpdateData } from '../types'
 
 // Tipos específicos para operaciones de Firestore
 type DietCreateData = Omit<Diet, 'id' | 'createdAt' | 'shareId'>
@@ -38,6 +38,15 @@ interface FirebaseContextType {
   loadDietByShareId: (shareId: string) => Promise<Diet | null>
   loadingDiets: boolean
   
+  // Diet Templates
+  dietTemplates: DietTemplate[]
+  addDietTemplate: (template: DietTemplateCreateData) => Promise<boolean>
+  updateDietTemplate: (id: string, updates: DietTemplateUpdateData) => Promise<boolean>
+  deleteDietTemplate: (id: string) => Promise<boolean>
+  assignTemplateToClient: (templateId: string, clientId: string, clientName: string, tmb: number) => Promise<boolean>
+  createClientDietFromTemplate: (templateId: string, clientId: string, clientName: string, tmb: number) => Promise<boolean>
+  loadingDietTemplates: boolean
+  
   // Clients
   clients: Client[]
   addClient: (client: Omit<Client, 'id' | 'createdAt' | 'updatedAt'>) => Promise<boolean>
@@ -56,9 +65,11 @@ export const FirebaseProvider: React.FC<{ children: ReactNode }> = ({ children }
   
   const [foods, setFoods] = useState<Food[]>([])
   const [diets, setDiets] = useState<Diet[]>([])
+  const [dietTemplates, setDietTemplates] = useState<DietTemplate[]>([])
   const [clients, setClients] = useState<Client[]>([])
   const [loadingFoods, setLoadingFoods] = useState(false)
   const [loadingDiets, setLoadingDiets] = useState(false)
+  const [loadingDietTemplates, setLoadingDietTemplates] = useState(false)
   const [loadingClients, setLoadingClients] = useState(false)
 
   // Generar shareId único
@@ -212,11 +223,11 @@ export const FirebaseProvider: React.FC<{ children: ReactNode }> = ({ children }
         // Si no hay mealDefinitions, crear las por defecto basadas en la estructura existente
         if (!mealDefinitions && meals) {
           const defaultMeals = [
-            { id: 'breakfast', name: 'Breakfast', order: 1 },
-            { id: 'morningSnack', name: 'Morning Snack', order: 2 },
-            { id: 'lunch', name: 'Lunch', order: 3 },
-            { id: 'afternoonSnack', name: 'Afternoon Snack', order: 4 },
-            { id: 'dinner', name: 'Dinner', order: 5 }
+            { id: 'breakfast', name: 'Desayuno', order: 1 },
+            { id: 'morningSnack', name: 'Media mañana', order: 2 },
+            { id: 'lunch', name: 'Comida', order: 3 },
+            { id: 'afternoonSnack', name: 'Merienda', order: 4 },
+            { id: 'dinner', name: 'Cena', order: 5 }
           ]
           
           // Verificar si la dieta usa el formato antiguo
@@ -281,15 +292,58 @@ export const FirebaseProvider: React.FC<{ children: ReactNode }> = ({ children }
     }
   }
 
+  // Cargar plantillas de dietas del usuario
+  const loadDietTemplates = async () => {
+    if (!user) return
+    
+    try {
+      setLoadingDietTemplates(true)
+      const templatesRef = collection(db, 'dietTemplates')
+      const q = query(
+        templatesRef, 
+        where('userId', '==', user.id)
+      )
+      const querySnapshot = await getDocs(q)
+      
+      const templatesData: DietTemplate[] = []
+      querySnapshot.forEach((doc) => {
+        const data = doc.data()
+        templatesData.push({
+          id: doc.id,
+          ...data,
+          createdAt: data.createdAt?.toDate() || new Date(),
+          updatedAt: data.updatedAt?.toDate() || new Date(),
+          usageCount: data.usageCount || 0
+        } as DietTemplate)
+      })
+      
+      setDietTemplates(templatesData)
+    } catch (error: any) {
+      console.error('Error loading diet templates:', error)
+      // Si es un error de permisos, mostrar un mensaje más amigable
+      if (error.code === 'permission-denied') {
+        console.warn('Permisos de Firestore no configurados para dietTemplates. Inicializando con array vacío.')
+        setDietTemplates([])
+      } else {
+        // Para otros errores, también inicializar con array vacío
+        setDietTemplates([])
+      }
+    } finally {
+      setLoadingDietTemplates(false)
+    }
+  }
+
   // Cargar datos cuando el usuario cambie
   useEffect(() => {
     if (user) {
       loadFoods()
       loadDiets()
+      loadDietTemplates()
       loadClients()
     } else {
       setFoods([])
       setDiets([])
+      setDietTemplates([])
       setClients([])
     }
   }, [user])
@@ -439,11 +493,11 @@ export const FirebaseProvider: React.FC<{ children: ReactNode }> = ({ children }
         // Si no hay mealDefinitions, crear las por defecto basadas en la estructura existente
         if (!mealDefinitions && meals) {
           const defaultMeals = [
-            { id: 'breakfast', name: 'Breakfast', order: 1 },
-            { id: 'morningSnack', name: 'Morning Snack', order: 2 },
-            { id: 'lunch', name: 'Lunch', order: 3 },
-            { id: 'afternoonSnack', name: 'Afternoon Snack', order: 4 },
-            { id: 'dinner', name: 'Dinner', order: 5 }
+            { id: 'breakfast', name: 'Desayuno', order: 1 },
+            { id: 'morningSnack', name: 'Media mañana', order: 2 },
+            { id: 'lunch', name: 'Comida', order: 3 },
+            { id: 'afternoonSnack', name: 'Merienda', order: 4 },
+            { id: 'dinner', name: 'Cena', order: 5 }
           ]
           
           // Verificar si la dieta usa el formato antiguo
@@ -469,6 +523,128 @@ export const FirebaseProvider: React.FC<{ children: ReactNode }> = ({ children }
     } catch (error) {
       console.error('Error loading diet by shareId:', error)
       return null
+    }
+  }
+
+  // Funciones para plantillas de dietas
+  const addDietTemplate = async (templateData: DietTemplateCreateData): Promise<boolean> => {
+    if (!user) return false
+    
+    try {
+      const templatesRef = collection(db, 'dietTemplates')
+      
+      const newTemplate = cleanFirestoreData({
+        ...templateData,
+        userId: user.id,
+        usageCount: 0,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      })
+      
+      const docRef = await addDoc(templatesRef, newTemplate)
+      const addedTemplate: DietTemplate = { 
+        id: docRef.id,
+        ...templateData,
+        usageCount: 0,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }
+      setDietTemplates(prev => [addedTemplate, ...prev])
+      showSuccess('Plantilla creada correctamente')
+      return true
+    } catch (error: any) {
+      console.error('Error adding diet template:', error)
+      if (error.code === 'permission-denied') {
+        showError('Error de permisos: No se pueden crear plantillas. Verifica la configuración de Firestore.')
+      } else {
+        showError('Error al crear plantilla')
+      }
+      return false
+    }
+  }
+
+  const updateDietTemplate = async (id: string, updates: DietTemplateUpdateData): Promise<boolean> => {
+    try {
+      const templateRef = doc(db, 'dietTemplates', id)
+      
+      const updateData = cleanFirestoreData({
+        ...updates,
+        updatedAt: serverTimestamp()
+      })
+      await updateDoc(templateRef, updateData)
+      
+      setDietTemplates(prev => prev.map(template => 
+        template.id === id ? { ...template, ...updates, updatedAt: new Date() } : template
+      ))
+      showSuccess('Plantilla actualizada correctamente')
+      return true
+    } catch (error: any) {
+      console.error('Error updating diet template:', error)
+      if (error.code === 'permission-denied') {
+        showError('Error de permisos: No se pueden actualizar plantillas. Verifica la configuración de Firestore.')
+      } else {
+        showError('Error al actualizar plantilla')
+      }
+      return false
+    }
+  }
+
+  const deleteDietTemplate = async (id: string): Promise<boolean> => {
+    try {
+      const templateRef = doc(db, 'dietTemplates', id)
+      await deleteDoc(templateRef)
+      
+      setDietTemplates(prev => prev.filter(template => template.id !== id))
+      showSuccess('Plantilla eliminada correctamente')
+      return true
+    } catch (error: any) {
+      console.error('Error deleting diet template:', error)
+      if (error.code === 'permission-denied') {
+        showError('Error de permisos: No se pueden eliminar plantillas. Verifica la configuración de Firestore.')
+      } else {
+        showError('Error al eliminar plantilla')
+      }
+      return false
+    }
+  }
+
+  const assignTemplateToClient = async (templateId: string, _clientId: string, clientName: string, tmb: number): Promise<boolean> => {
+    if (!user) return false
+    
+    try {
+      const template = dietTemplates.find(t => t.id === templateId)
+      if (!template) {
+        showError('Plantilla no encontrada')
+        return false
+      }
+
+      // Crear nueva dieta basada en la plantilla
+      const newDiet: DietCreateData = {
+        name: `${template.name} - ${clientName}`,
+        clientName,
+        tmb,
+        meals: template.meals,
+        mealDefinitions: template.mealDefinitions,
+        supplements: template.supplements,
+        templateId: templateId,
+        isTemplate: false
+      }
+
+      // Añadir la dieta
+      const success = await addDiet(newDiet)
+      if (success) {
+        // Incrementar contador de uso de la plantilla
+        await updateDietTemplate(templateId, {
+          usageCount: (template.usageCount || 0) + 1
+        })
+        showSuccess('Plantilla asignada correctamente al cliente')
+        return true
+      }
+      return false
+    } catch (error) {
+      console.error('Error assigning template to client:', error)
+      showError('Error al asignar plantilla al cliente')
+      return false
     }
   }
 
@@ -557,6 +733,50 @@ export const FirebaseProvider: React.FC<{ children: ReactNode }> = ({ children }
     return diets.filter(diet => diet.clientName === getClientById(clientId)?.name)
   }
 
+  // En FirebaseContext.tsx - Función para crear dieta desde plantilla
+  const createClientDietFromTemplate = async (templateId: string, _clientId: string, clientName: string, tmb: number): Promise<boolean> => {
+    if (!user) return false
+    
+    try {
+      // 1. Obtener la plantilla
+      const template = dietTemplates.find(t => t.id === templateId)
+      if (!template) {
+        showError('Plantilla no encontrada')
+        return false
+      }
+
+      // 2. Crear nueva dieta basada en la plantilla
+      const newDiet: DietCreateData = {
+        name: `${template.name} - ${clientName}`,
+        clientName,
+        tmb,
+        meals: template.meals, // Copiar estructura completa
+        mealDefinitions: template.mealDefinitions,
+        supplements: template.supplements,
+        templateId: templateId, // Referencia a la plantilla original
+        isTemplate: false
+      }
+
+      // 3. Guardar como nueva dieta
+      const success = await addDiet(newDiet)
+      if (success) {
+        // 4. Incrementar contador de uso de la plantilla
+        await updateDietTemplate(templateId, {
+          usageCount: (template.usageCount || 0) + 1
+        })
+        
+        showSuccess(`Plantilla "${template.name}" asignada correctamente a ${clientName}`)
+        return true
+      }
+      
+      return false
+    } catch (error) {
+      console.error('Error creating diet from template:', error)
+      showError('Error al asignar la plantilla')
+      return false
+    }
+  }
+
   const value: FirebaseContextType = {
     // Foods
     foods,
@@ -575,6 +795,14 @@ export const FirebaseProvider: React.FC<{ children: ReactNode }> = ({ children }
     loadDietByShareId,
     loadingDiets,
     
+    // Diet Templates
+    dietTemplates,
+    addDietTemplate,
+    updateDietTemplate,
+    deleteDietTemplate,
+    assignTemplateToClient,
+    loadingDietTemplates,
+    
     // Clients
     clients,
     addClient,
@@ -582,7 +810,8 @@ export const FirebaseProvider: React.FC<{ children: ReactNode }> = ({ children }
     deleteClient,
     getClientById,
     getClientDiets,
-    loadingClients
+    loadingClients,
+    createClientDietFromTemplate
   }
 
   return (

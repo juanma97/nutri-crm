@@ -19,6 +19,11 @@ const DietList = lazy(() => import('./pages/DietList'))
 const DietViewer = lazy(() => import('./pages/DietViewer'))
 const CreateDiet = lazy(() => import('./pages/CreateDiet'))
 const EditDiet = lazy(() => import('./pages/EditDiet'))
+const DietTemplates = lazy(() => import('./pages/DietTemplates'))
+const CreateTemplate = lazy(() => import('./pages/CreateTemplate'))
+const EditTemplate = lazy(() => import('./pages/EditTemplate'))
+const ViewTemplate = lazy(() => import('./pages/ViewTemplate'))
+const AssignTemplate = lazy(() => import('./pages/AssignTemplate'))
 const ClientList = lazy(() => import('./pages/ClientList'))
 const ClientForm = lazy(() => import('./pages/ClientForm'))
 const FoodList = lazy(() => import('./pages/FoodList'))
@@ -108,7 +113,31 @@ function App() {
                         <DietViewer />
                       </Suspense>
                     } />
-
+                    <Route path="templates" element={
+                      <Suspense fallback={<PageLoader />}>
+                        <DietTemplates />
+                      </Suspense>
+                    } />
+                    <Route path="templates/new" element={
+                      <Suspense fallback={<PageLoader />}>
+                        <CreateTemplate />
+                      </Suspense>
+                    } />
+                    <Route path="templates/edit/:id" element={
+                      <Suspense fallback={<PageLoader />}>
+                        <EditTemplate />
+                      </Suspense>
+                    } />
+                    <Route path="templates/view/:id" element={
+                      <Suspense fallback={<PageLoader />}>
+                        <ViewTemplate />
+                      </Suspense>
+                    } />
+                    <Route path="templates/assign/:templateId" element={
+                      <Suspense fallback={<PageLoader />}>
+                        <AssignTemplate />
+                      </Suspense>
+                    } />
                   </Route>
                   <Route path="/diet/:shareId" element={
                     <Suspense fallback={<PageLoader />}>

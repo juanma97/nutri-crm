@@ -1,15 +1,15 @@
 # React + TypeScript + Vite
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Esta plantilla proporciona una configuración mínima para hacer funcionar React en Vite con HMR y algunas reglas de ESLint.
 
-Currently, two official plugins are available:
+Actualmente, hay dos plugins oficiales disponibles:
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) usa [Babel](https://babeljs.io/) para Fast Refresh
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) usa [SWC](https://swc.rs/) para Fast Refresh
 
-## Expanding the ESLint configuration
+## Expandir la configuración de ESLint
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+Si estás desarrollando una aplicación de producción, recomendamos actualizar la configuración para habilitar reglas de lint con conciencia de tipos:
 
 ```js
 export default tseslint.config([
@@ -39,7 +39,7 @@ export default tseslint.config([
 ])
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+También puedes instalar [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) y [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) para reglas de lint específicas de React:
 
 ```js
 // eslint.config.js
@@ -52,9 +52,9 @@ export default tseslint.config([
     files: ['**/*.{ts,tsx}'],
     extends: [
       // Other configs...
-      // Enable lint rules for React
+      // Habilitar reglas de lint para React
       reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
+      // Habilitar reglas de lint para React DOM
       reactDom.configs.recommended,
     ],
     languageOptions: {

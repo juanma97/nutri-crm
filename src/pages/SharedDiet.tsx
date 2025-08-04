@@ -172,7 +172,7 @@ const SharedDiet = () => {
   }
 
   // Calcular calorías totales
-  const totalCalories = diet.customGoal?.calories || Math.round(diet.tmb)
+  const totalCalories = diet.customGoal?.calories || Math.round(diet.tmb || 0)
   
   // Obtener comidas únicas y días de la semana
   const uniqueMeals = getUniqueMeals(diet)

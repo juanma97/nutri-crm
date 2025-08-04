@@ -14,7 +14,7 @@ import DietBuilder from '../components/DietBuilder'
 import { useFirebase } from '../contexts/FirebaseContext'
 import type { Diet, Client, Supplement, DynamicMeal, CustomGoal } from '../types'
 
-const steps = ['Calculate TMB', 'Build Diet']
+const steps = ['Calcular TMB', 'Construir Dieta']
 
 const CreateDiet = () => {
   const [activeStep, setActiveStep] = useState(0)
@@ -107,7 +107,7 @@ const CreateDiet = () => {
           />
         )
       default:
-        return 'Unknown step'
+        return 'Paso desconocido'
     }
   }
 
@@ -115,7 +115,7 @@ const CreateDiet = () => {
     <Box sx={{ width: '100%' }}>
       <Paper elevation={3} sx={{ p: 4 }}>
         <Typography variant="h4" gutterBottom>
-          Create New Diet
+          Crear Nueva Dieta
         </Typography>
         
         <Stepper activeStep={activeStep} sx={{ mb: 4 }}>
@@ -129,10 +129,10 @@ const CreateDiet = () => {
         {activeStep === steps.length ? (
           <Box sx={{ textAlign: 'center' }}>
             <Typography variant="h6" gutterBottom>
-              All steps completed
+              Todos los pasos completados
             </Typography>
             <Button onClick={() => navigate('/diets')}>
-              Go to Diets
+              Ir a Dietas
             </Button>
           </Box>
         ) : (

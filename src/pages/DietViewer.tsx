@@ -14,36 +14,54 @@ import {
   TableRow,
   Alert,
   CircularProgress,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from '@mui/material'
 import { useFirebase } from '../contexts/FirebaseContext'
+import { useNotifications } from '../hooks/useNotifications'
+import { convertDietToTemplate } from '../utils/templateUtils'
 import LazyCharts from '../components/LazyCharts'
 import type { DayOfWeek, MealType, Diet, DietMeal } from '../types'
 
 const daysOfWeek: { key: DayOfWeek; label: string }[] = [
-  { key: 'monday', label: 'Monday' },
-  { key: 'tuesday', label: 'Tuesday' },
-  { key: 'wednesday', label: 'Wednesday' },
-  { key: 'thursday', label: 'Thursday' },
-  { key: 'friday', label: 'Friday' },
-  { key: 'saturday', label: 'Saturday' },
-  { key: 'sunday', label: 'Sunday' }
+  { key: 'monday', label: 'Lunes' },
+  { key: 'tuesday', label: 'Martes' },
+  { key: 'wednesday', label: 'Miércoles' },
+  { key: 'thursday', label: 'Jueves' },
+  { key: 'friday', label: 'Viernes' },
+  { key: 'saturday', label: 'Sábado' },
+  { key: 'sunday', label: 'Domingo' }
 ]
 
 const mealTypes: { key: MealType; label: string }[] = [
-  { key: 'breakfast', label: 'Breakfast' },
-  { key: 'morningSnack', label: 'Morning Snack' },
-  { key: 'lunch', label: 'Lunch' },
-  { key: 'afternoonSnack', label: 'Afternoon Snack' },
-  { key: 'dinner', label: 'Dinner' }
+  { key: 'breakfast', label: 'Desayuno' },
+  { key: 'morningSnack', label: 'Media mañana' },
+  { key: 'lunch', label: 'Comida' },
+  { key: 'afternoonSnack', label: 'Merienda' },
+  { key: 'dinner', label: 'Cena' }
 ]
 
 const DietViewer = () => {
   const { shareId } = useParams<{ shareId: string }>()
-  const { loadDietByShareId } = useFirebase()
+  const { loadDietByShareId, addDietTemplate } = useFirebase()
   const navigate = useNavigate()
+  const { showSuccess, showError } = useNotifications()
   const [diet, setDiet] = useState<Diet | null>(null)
   const [notFound, setNotFound] = useState(false)
   const [loading, setLoading] = useState(true)
+  
+  // Estados para el diálogo de guardar como plantilla
+  const [saveAsTemplateDialog, setSaveAsTemplateDialog] = useState(false)
+  const [templateName, setTemplateName] = useState('')
+  const [templateDescription, setTemplateDescription] = useState('')
+  const [templateCategory, setTemplateCategory] = useState('custom')
 
   useEffect(() => {
     const loadDiet = async () => {
@@ -85,6 +103,41 @@ const DietViewer = () => {
     return total
   }
 
+  const handleSaveAsTemplate = () => {
+    if (diet) {
+      setTemplateName(`${diet.name} - Plantilla`)
+      setTemplateDescription(`Plantilla basada en la dieta de ${diet.clientName}`)
+      setSaveAsTemplateDialog(true)
+    }
+  }
+
+  const confirmSaveAsTemplate = async () => {
+    if (!diet || !templateName.trim()) {
+      showError('Por favor ingresa un nombre para la plantilla')
+      return
+    }
+
+    try {
+      const templateData = convertDietToTemplate(
+        diet, 
+        templateName, 
+        templateDescription, 
+        templateCategory
+      )
+
+      const success = await addDietTemplate(templateData)
+      if (success) {
+        showSuccess('Dieta guardada como plantilla correctamente')
+        setSaveAsTemplateDialog(false)
+        setTemplateName('')
+        setTemplateDescription('')
+        setTemplateCategory('custom')
+      }
+    } catch (error) {
+      showError('Error al guardar la plantilla')
+    }
+  }
+
   if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
@@ -99,18 +152,18 @@ const DietViewer = () => {
         <Paper elevation={3} sx={{ p: 4, textAlign: 'center' }}>
           <Alert severity="error" sx={{ mb: 3 }}>
             <Typography variant="h6" gutterBottom>
-              Diet not found
+              Dieta no encontrada
             </Typography>
             <Typography variant="body2">
-              The diet you're looking for doesn't exist or the link is invalid.
+              La dieta que buscas no existe o el enlace es inválido.
             </Typography>
           </Alert>
           <Button 
             variant="contained" 
-            onClick={() => navigate('/')}
+            onClick={() => navigate('/')} 
             sx={{ backgroundColor: '#2e7d32' }}
           >
-            Go Home
+            Ir al inicio
           </Button>
         </Paper>
       </Box>
@@ -125,27 +178,37 @@ const DietViewer = () => {
     <Box sx={{ width: '100%' }}>
       {/* Header */}
       <Paper elevation={3} sx={{ p: 4, mb: 3 }}>
-        <Typography variant="h3" gutterBottom sx={{ color: '#2e7d32' }}>
-          {diet.clientName}'s Diet Plan
-        </Typography>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+          <Typography variant="h3" sx={{ color: '#2e7d32' }}>
+            Plan de dieta de {diet.clientName}
+          </Typography>
+          <Button
+            variant="outlined"
+            color="secondary"
+            onClick={handleSaveAsTemplate}
+            sx={{ whiteSpace: 'nowrap' }}
+          >
+            Guardar como Plantilla
+          </Button>
+        </Box>
         <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mb: 2 }}>
-          <Chip label={`TMB: ${Math.round(diet.tmb)} cal`} color="primary" />
+          <Chip label={`TMB: ${diet.tmb ? Math.round(diet.tmb) : 'N/A'} cal`} color="primary" />
           {diet.customGoal && (
             <Chip label={`Objetivo: ${diet.customGoal.calories} cal`} color="secondary" />
           )}
-          <Chip label={`Total Calories: ${Math.round(calculateTotalCalories())} cal`} color="secondary" />
+          <Chip label={`Calorías Totales: ${Math.round(calculateTotalCalories())} cal`} color="secondary" />
         </Box>
         <Typography variant="body1" color="text.secondary">
-          This is your personalized nutrition plan. Follow it daily for optimal results.
+          Este es tu plan nutricional personalizado. Síguelo diariamente para obtener resultados óptimos.
         </Typography>
       </Paper>
 
       {/* Charts */}
       <Paper elevation={3} sx={{ p: 4, mb: 3 }}>
         <Typography variant="h5" gutterBottom>
-          Nutrition Analysis
+          Análisis Nutricional
         </Typography>
-        <LazyCharts meals={diet.meals as unknown as Record<DayOfWeek, Record<string, DietMeal[]>>} tmb={diet.tmb} customGoal={diet.customGoal} />
+        <LazyCharts meals={diet.meals as unknown as Record<DayOfWeek, Record<string, DietMeal[]>>} tmb={diet.tmb || 0} customGoal={diet.customGoal} />
       </Paper>
 
       {/* Supplements */}
@@ -191,14 +254,14 @@ const DietViewer = () => {
       {/* Weekly Plan */}
       <Paper elevation={3} sx={{ p: 4 }}>
         <Typography variant="h5" gutterBottom>
-          Weekly Meal Plan
+          Plan Semanal de Comidas
         </Typography>
         
         <TableContainer>
           <Table>
             <TableHead>
               <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
-                <TableCell>Day</TableCell>
+                <TableCell>Día</TableCell>
                 {mealTypes.map(meal => (
                   <TableCell key={meal.key}>{meal.label}</TableCell>
                 ))}
@@ -231,8 +294,8 @@ const DietViewer = () => {
                           ))}
                         </Box>
                       ) : (
-                        <Typography variant="body2" color="text.secondary">
-                          No foods added
+                        <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 2 }}>
+                          No se han añadido alimentos
                         </Typography>
                       )}
                     </TableCell>
@@ -247,12 +310,64 @@ const DietViewer = () => {
       {/* Footer */}
       <Paper elevation={1} sx={{ p: 3, mt: 3, textAlign: 'center' }}>
         <Typography variant="body2" color="text.secondary">
-          This diet plan was created by your nutritionist using NutriCRM.
+          Este plan de dieta fue creado por tu nutricionista usando NutriCRM.
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-          For questions or modifications, please contact your nutritionist.
+          Para dudas o modificaciones, por favor contacta a tu nutricionista.
         </Typography>
       </Paper>
+
+      {/* Diálogo para guardar como plantilla */}
+      <Dialog open={saveAsTemplateDialog} onClose={() => setSaveAsTemplateDialog(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>Guardar como Plantilla</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+            Esta acción creará una plantilla reutilizable basada en la dieta actual de {diet?.clientName}.
+          </Typography>
+          
+          <TextField
+            fullWidth
+            label="Nombre de la Plantilla"
+            value={templateName}
+            onChange={(e) => setTemplateName(e.target.value)}
+            sx={{ mb: 2 }}
+            required
+          />
+          
+          <TextField
+            fullWidth
+            label="Descripción (opcional)"
+            value={templateDescription}
+            onChange={(e) => setTemplateDescription(e.target.value)}
+            multiline
+            rows={3}
+            sx={{ mb: 2 }}
+          />
+          
+          <FormControl fullWidth>
+            <InputLabel>Categoría</InputLabel>
+            <Select
+              value={templateCategory}
+              label="Categoría"
+              onChange={(e) => setTemplateCategory(e.target.value)}
+            >
+              <MenuItem value="weight_loss">Pérdida de Peso</MenuItem>
+              <MenuItem value="muscle_gain">Ganancia Muscular</MenuItem>
+              <MenuItem value="maintenance">Mantenimiento</MenuItem>
+              <MenuItem value="health">Salud</MenuItem>
+              <MenuItem value="custom">Personalizada</MenuItem>
+            </Select>
+          </FormControl>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setSaveAsTemplateDialog(false)}>
+            Cancelar
+          </Button>
+          <Button onClick={confirmSaveAsTemplate} variant="contained" color="primary">
+            Guardar Plantilla
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   )
 }

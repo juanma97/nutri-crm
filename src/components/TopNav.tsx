@@ -19,6 +19,7 @@ import {
   Dashboard as DashboardIcon,
   Restaurant as FoodIcon,
   Assignment as DietIcon,
+  LibraryBooks as TemplateIcon,
   People as ClientIcon,
   AccountCircle as AccountIcon,
   Logout as LogoutIcon,
@@ -53,9 +54,10 @@ const TopNav = () => {
   }
 
   const navItems = [
-    { path: '/dashboard', label: 'Dashboard', icon: <DashboardIcon /> },
+    { path: '/dashboard', label: 'Panel Principal', icon: <DashboardIcon /> },
     { path: '/foods', label: 'Alimentos', icon: <FoodIcon /> },
     { path: '/diets', label: 'Dietas', icon: <DietIcon /> },
+    { path: '/templates', label: 'Plantillas', icon: <TemplateIcon /> },
     { path: '/clients', label: 'Clientes', icon: <ClientIcon /> }
   ]
 

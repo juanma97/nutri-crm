@@ -339,7 +339,7 @@ const Login = () => {
               
               <TextField
                 fullWidth
-                label="Email"
+                label="Correo electrónico"
                 type="email"
                 variant="outlined"
                 value={email}

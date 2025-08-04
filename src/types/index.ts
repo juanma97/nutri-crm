@@ -114,7 +114,7 @@ export interface Client {
   age?: number
   weight?: number
   height?: number
-  gender: 'male' | 'female' | ''
+  gender: 'male' | 'female' | 'other' | ''
   activityLevel: 'sedentary' | 'lightly_active' | 'moderately_active' | 'very_active' | 'extremely_active'
   goal: 'lose_weight' | 'maintain' | 'gain_weight' | 'muscle_gain' | 'health'
   medicalConditions: string
@@ -212,8 +212,8 @@ export interface CustomGoal {
 export interface Diet {
   id: string
   name: string
-  clientName: string
-  tmb: number
+  clientName?: string // Opcional para plantillas
+  tmb?: number // Opcional para plantillas
   clientData?: Client
   customGoal?: CustomGoal // Objetivo personalizado opcional
   meals: {
@@ -229,7 +229,24 @@ export interface Diet {
   supplements?: Supplement[]
   createdAt: Date
   shareId?: string
+  isTemplate?: boolean // Campo para identificar plantillas
+  templateId?: string // ID de la plantilla original (si es una dieta creada desde plantilla)
+  // Campos específicos de plantillas
+  description?: string
+  category?: string // 'weight_loss', 'muscle_gain', 'maintenance', 'health', 'custom'
+  updatedAt?: Date // Para plantillas
+  usageCount?: number // Para plantillas
+  isPublic?: boolean // Para plantillas
 }
+
+// Alias para compatibilidad - DietTemplate es lo mismo que Diet
+export type DietTemplate = Diet
+
+// Tipo para crear plantillas (igual que Diet pero sin campos de cliente)
+export type DietTemplateCreateData = Omit<Diet, 'id' | 'createdAt' | 'shareId' | 'clientName' | 'tmb' | 'clientData'>
+
+// Tipo para actualizar plantillas
+export type DietTemplateUpdateData = Partial<Omit<Diet, 'id' | 'createdAt' | 'shareId'>>
 
 export type DayOfWeek = 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday' | 'sunday'
 export type MealType = string // Ahora es dinámico, puede ser cualquier string (mealId)

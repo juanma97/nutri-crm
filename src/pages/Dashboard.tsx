@@ -63,7 +63,7 @@ const COLORS = {
 }
 
 const Dashboard = () => {
-  const { diets, clients } = useFirebase()
+  const { diets, foods, clients, dietTemplates } = useFirebase()
   const navigate = useNavigate()
 
   // Obtener nombre del nutricionista (por ahora hardcodeado, después se puede conectar con auth)
@@ -139,6 +139,8 @@ const Dashboard = () => {
     newClients: newClients.length,
     clientsWithoutDiet: clientsWithoutDiet.length,
     totalDiets: diets.length,
+    totalTemplates: dietTemplates.length,
+    totalFoods: foods.length,
     averageDietsPerClient: diets.length / activeClients.length || 0,
     retentionRate: Math.round((activeClients.length / clients.length) * 100) || 0
   }
